@@ -1,0 +1,35 @@
+# --- The freeze fix: never ship these into the build context ---
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local model cache (re-downloaded inside the image)
+models/
+*.TextGrid
+mfa_*
+
+# Audio / uploads
+*.wav
+*.mp3
+*.m4a
+*.webm
+*.ogg
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+
+# Tooling / OS noise
+.git/
+.gitignore
+.vscode/
+.idea/
+*.swp
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,50 @@
+FROM continuumio/miniconda3:latest
+
+WORKDIR /app
+
+# Use the fast libmamba solver so the MFA/Kaldi dependency solve doesn't
+# eat all of WSL2's RAM and appear to "freeze".
+RUN conda config --set solver libmamba
+
+# System deps:
+#  - espeak-ng: required by phonemizer (espeak alone is redundant)
+#  - ffmpeg + libsndfile1: required at runtime by torchaudio/torchcodec/soundfile/librosa
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        espeak-ng \
+        ffmpeg \
+        libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install MFA + download its models. Kept high up so this heavy layer
+# is cached and never re-run when app code changes.
+RUN conda install -c conda-forge montreal-forced-aligner -y && \
+    mfa model download acoustic   english_mfa && \
+    mfa model download dictionary english_mfa && \
+    conda clean --all -y
+
+# Install CPU-only PyTorch FIRST. The container has no GPU wired in, so the
+# default PyPI torch (which bundles CUDA + cuDNN) is several GB of dead weight
+# that was crashing the WSL2 build while unpacking. The CPU wheels are ~5x
+# smaller and unpack without exhausting memory.
+
+# Remaining Python deps. torchcodec/transformers see torch is already
+# Python deps next — only re-runs when requirements.txt changes.
+COPY requirements.txt .
+# Install CPU-only torch to save 3-4 GB of unnecessary CUDA downloads
+RUN pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir -r requirements.txt
+RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger_eng')"
+
+# Pre-download the Wav2Vec2 model BEFORE copying app code, so editing
+# main.py never invalidates this multi-GB layer.
+RUN python -c "from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor; \
+    Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-lv-60-espeak-cv-ft'); \
+    Wav2Vec2ForCTC.from_pretrained('facebook/wav2vec2-lv-60-espeak-cv-ft'); \
+    print('Model downloaded successfully')"
+
+# Application code last (changes most often -> only this cheap layer rebuilds).
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

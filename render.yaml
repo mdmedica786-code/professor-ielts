@@ -1,0 +1,29 @@
+# Render Blueprint — Professor IELTS backend (API only).
+#
+# Deploy: push this repo to GitHub, then on render.com choose
+# "New > Blueprint" and point it at the repo. Render reads this file and
+# creates the service. Set OPENAI_API_KEY in the dashboard (it is marked
+# sync:false so it is NEVER stored in the repo). The installable APK is the
+# frontend — it is not served here.
+services:
+  - type: web
+    name: professor-ielts-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # REQUIRED — paste your key in the Render dashboard, not here.
+      - key: OPENAI_API_KEY
+        sync: false
+      # The installed app calls from https://localhost (Capacitor). Keep this.
+      - key: CORS_ORIGIN
+        value: https://localhost
+      # Abuse/cost guard (generous for a single user).
+      - key: RATE_LIMIT_MAX
+        value: "120"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"

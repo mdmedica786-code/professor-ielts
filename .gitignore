@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+
+# Build output
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+server/uploads/
+*.wav
+*.mp3
+*.m4a
+*.webm
+*.ogg
+
+# Python models cache
+pronunciation/models/*
+!pronunciation/models/.gitkeep
+
+# MFA temp
+mfa_*
+*.TextGrid
+
+# Logs
+*.log
+npm-debug.log*
+
+# Capacitor / Android (native project is generated fresh by CI — not committed)
+client/android/
+client/ios/
+client/.gradle/
+*.keystore
+*.jks

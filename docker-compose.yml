@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  client:
+    restart: unless-stopped
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://server:3001
+    depends_on:
+      - server
+
+  server:
+    restart: unless-stopped
+    build:
+      context: ./server
+      dockerfile: ../Dockerfile.server
+    ports:
+      - "3001:3001"
+    env_file: .env
+    environment:
+      - PYTHON_PRONUNCIATION_URL=http://pronunciation:8000
+
+  pronunciation:
+    restart: unless-stopped
+    build:
+      context: ./pronunciation
+      dockerfile: ../Dockerfile.pronunciation
+    ports:
+      - "8000:8000"
+    volumes:
+      - pronunciation-models:/root/.cache
+    deploy:
+      resources:
+        reservations:
+          memory: 6G
+
+volumes:
+  pronunciation-models:

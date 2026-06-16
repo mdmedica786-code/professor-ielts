@@ -1,0 +1,93 @@
+name: Build Android APK
+
+# Build the installable APK in the cloud (no Android Studio needed).
+# Run it from the GitHub "Actions" tab (Run workflow) and paste your backend
+# URL, OR set a repository variable API_BASE_URL and it runs on every push.
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: "Backend origin WITHOUT /api, e.g. https://professor-ielts-api.onrender.com"
+        required: true
+  push:
+    branches: [main]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve backend API URL
+        id: api
+        run: |
+          URL="${{ github.event.inputs.api_base_url }}"
+          if [ -z "$URL" ]; then URL="${{ vars.API_BASE_URL }}"; fi
+          if [ -z "$URL" ]; then
+            echo "::error::No backend URL provided. Either run this workflow manually and enter api_base_url, or set a repo Variable named API_BASE_URL (Settings → Secrets and variables → Actions → Variables)."
+            exit 1
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Building APK against backend: $URL"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Ensure Android platform 34 + build-tools
+        run: yes | sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" >/dev/null || true
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm install
+
+      - name: Build web app (bakes in the backend URL)
+        working-directory: client
+        env:
+          VITE_API_BASE_URL: ${{ steps.api.outputs.url }}
+        run: npm run build
+
+      - name: Add Android platform
+        working-directory: client
+        run: npx cap add android
+
+      - name: Inject microphone permission + custom MainActivity
+        working-directory: client
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if ! grep -q "RECORD_AUDIO" "$MANIFEST"; then
+            sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n\n    <application#' "$MANIFEST"
+          fi
+          DEST="android/app/src/main/java/com/professorielts/app"
+          mkdir -p "$DEST"
+          cp mobile/MainActivity.java "$DEST/MainActivity.java"
+          echo "----- AndroidManifest permissions -----"
+          grep -n "uses-permission" "$MANIFEST" || true
+
+      - name: Sync Capacitor
+        working-directory: client
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: client/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: professor-ielts-apk
+          path: client/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

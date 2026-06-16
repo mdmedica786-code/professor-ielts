@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Base Styles === */
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+/* === Component Styles === */
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-sm;
+  }
+
+  .card-padded {
+    @apply card p-5;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-4 py-2.5
+           font-medium text-sm transition-all duration-200 
+           active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-slate-50 text-slate-700 rounded-xl px-4 py-2.5
+           font-medium text-sm transition-all duration-200 
+           border border-slate-200 hover:border-slate-300
+           active:scale-[0.97];
+  }
+
+  .btn-ghost {
+    @apply hover:bg-slate-100 text-slate-600 rounded-xl px-3 py-2
+           font-medium text-sm transition-all duration-200;
+  }
+
+  .label-caps {
+    @apply text-[10px] uppercase tracking-widest font-medium text-slate-400;
+  }
+
+  .score-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold
+           border;
+  }
+
+  .score-good {
+    @apply bg-emerald-50 border-emerald-200 text-emerald-700;
+  }
+
+  .score-okay {
+    @apply bg-amber-50 border-amber-200 text-amber-700;
+  }
+
+  .score-poor {
+    @apply bg-rose-50 border-rose-200 text-rose-700;
+  }
+
+  .part-tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold;
+  }
+
+  .part-1 {
+    @apply bg-sky-100 text-sky-700;
+  }
+
+  .part-2 {
+    @apply bg-violet-100 text-violet-700;
+  }
+
+  .part-3 {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .tab-button {
+    @apply px-4 py-2.5 text-sm font-medium text-slate-500 
+           border-b-2 border-transparent transition-all duration-200
+           hover:text-slate-700 hover:border-slate-300;
+  }
+
+  .tab-button.active {
+    @apply text-brand-600 border-brand-500;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border border-slate-200 
+           text-sm text-slate-900 placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-brand-500/20 
+           focus:border-brand-500 transition-all duration-200;
+  }
+
+  .textarea-field {
+    @apply input-field resize-none;
+  }
+}
+
+/* === Score Gauge Ring Animation === */
+.score-ring-bg {
+  stroke: #e2e8f0;
+  fill: none;
+}
+
+.score-ring-fg {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 0.3s ease;
+}
+
+/* === Recording Pulse === */
+@keyframes recordPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+  }
+}
+
+.recording-pulse {
+  animation: recordPulse 2s ease-in-out infinite;
+}
+
+/* === Waveform Animation === */
+@keyframes waveform {
+  0%, 100% { height: 4px; }
+  50% { height: 24px; }
+}
+
+.waveform-bar {
+  animation: waveform 0.8s ease-in-out infinite;
+}
+
+/* === Loading Steps === */
+@keyframes loadingDot {
+  0%, 20% { opacity: 0; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0; }
+}
+
+.loading-dot {
+  animation: loadingDot 1.4s infinite ease-in-out both;
+}
+
+.loading-dot:nth-child(1) { animation-delay: 0s; }
+.loading-dot:nth-child(2) { animation-delay: 0.16s; }
+.loading-dot:nth-child(3) { animation-delay: 0.32s; }
+
+/* === Pronunciation Heatmap === */
+.heatmap-word {
+  @apply inline-block px-1.5 py-0.5 mx-0.5 my-0.5 rounded cursor-pointer
+         text-sm font-medium transition-all duration-200 border;
+}
+
+.heatmap-word:hover {
+  @apply scale-105 shadow-md z-10 relative;
+}
+
+.heatmap-good {
+  @apply bg-emerald-50 border-emerald-200 text-emerald-800;
+}
+
+.heatmap-okay {
+  @apply bg-amber-50 border-amber-200 text-amber-800;
+}
+
+.heatmap-poor {
+  @apply bg-rose-50 border-rose-200 text-rose-800;
+}
+
+/* === Drag & Drop Zone === */
+.dropzone {
+  @apply border-2 border-dashed border-slate-300 rounded-2xl p-8
+         text-center cursor-pointer transition-all duration-200
+         hover:border-brand-400 hover:bg-brand-50/30;
+}
+
+.dropzone.active {
+  @apply border-brand-500 bg-brand-50/50 scale-[1.01];
+}
+
+/* === Print Styles === */
+@media print {
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    break-inside: avoid;
+  }
+
+  .score-ring-fg {
+    transition: none !important;
+  }
+}
+
+/* === Glass Morphism Effect === */
+.glass {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20;
+}
+
+/* === Gradient Text === */
+.gradient-text {
+  @apply bg-gradient-to-r from-brand-600 to-fuchsia-500 bg-clip-text text-transparent;
+}
