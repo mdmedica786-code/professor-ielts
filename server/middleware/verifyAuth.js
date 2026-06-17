@@ -20,7 +20,7 @@ async function verifyAuth(req, res, next) {
     next();
   } catch (error) {
     console.error("Auth verification failed:", error.message);
-    return res.status(401).json({ success: false, error: "Invalid or expired token.", upgradeRequired: false });
+    return res.status(401).json({ success: false, error: `Invalid or expired token. Details: ${error.message}`, upgradeRequired: false });
   }
 }
 
