@@ -14,7 +14,8 @@ try {
   console.error("Failed to initialize Firebase Admin:", error.message);
 }
 
-const auth = admin.apps.length ? admin.auth() : null;
-const db = admin.apps.length ? admin.firestore() : null;
+const apps = admin.apps || [];
+const auth = apps.length ? admin.auth() : null;
+const db = apps.length ? admin.firestore() : null;
 
 module.exports = { admin, auth, db };
