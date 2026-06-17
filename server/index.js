@@ -85,7 +85,7 @@ app.use("/api/chatbot", rateLimit, verifyAuth, chatbotRoute);
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "Professor IELTS Backend",
+    service: "BandLogic Backend",
     timestamp: new Date().toISOString(),
     env: {
       openaiConfigured: !!process.env.OPENAI_API_KEY,
