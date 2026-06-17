@@ -1,110 +1,119 @@
-import { useState } from 'react';
-import { Sparkles, Check, Loader2 } from 'lucide-react';
-import api from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
+import { useApp } from '../../context/AppContext';
+import { CheckCircle2, Sparkles, Shield, Zap, MessageCircle } from 'lucide-react';
+
+const plans = [
+  {
+    id: 'monthly',
+    name: 'BandLogic Pro',
+    price: 'Rs. 500',
+    duration: '/month',
+    description: 'Unlimited access to all AI evaluations and mock tests.',
+    features: [
+      'Unlimited Speaking mock tests',
+      'Unlimited Writing evaluations',
+      'Unlimited Reading & Listening generation',
+      'Detailed examiner feedback',
+      'Priority support'
+    ]
+  }
+];
 
 export default function UpgradeScreen() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleCheckout = async (plan) => {
-    try {
-      setLoading(true);
-      setError('');
-      const { data } = await api.post('/payments/checkout', { plan });
-      if (data.success && data.data.url) {
-        window.location.href = data.data.url;
-      } else {
-        throw new Error('Failed to start checkout');
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Could not start checkout. Please try again later.');
-      setLoading(false);
-    }
-  };
-
-  const plans = [
-    {
-      id: 'monthly',
-      name: 'Monthly Pro',
-      price: '$9.99',
-      interval: '/month',
-      description: 'Unlimited access to all AI evaluations.',
-      features: [
-        'Unlimited Speaking Evaluations',
-        'Unlimited Writing Evaluations',
-        'Unlimited Reading & Listening tests',
-        'Priority AI processing',
-      ]
-    },
-    {
-      id: 'sprint',
-      name: '7-Day Sprint',
-      price: '$4.99',
-      interval: ' / one-time',
-      description: 'Perfect for last-minute exam prep.',
-      features: [
-        '7 days of unlimited access',
-        'All Pro features included',
-        'No recurring billing',
-      ]
-    }
-  ];
+  const { user } = useAuth();
+  const { setCurrentView } = useApp();
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-            Upgrade to BandLogic Pro
-          </h1>
-          <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-            Get unlimited AI evaluations across all four skills and fast-track your IELTS preparation.
-          </p>
+    <div className="max-w-6xl mx-auto p-6 lg:p-10 pb-24">
+      {/* Header */}
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="inline-flex items-center justify-center p-3 bg-brand-100 text-brand-600 rounded-2xl mb-6 shadow-sm">
+          <Sparkles className="w-8 h-8" />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
+          Upgrade to BandLogic Pro
+        </h1>
+        <p className="text-lg text-slate-600 leading-relaxed">
+          Unlock unlimited IELTS evaluations. Pay easily using local payment methods in Pakistan.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8 items-start max-w-4xl mx-auto">
+        {/* Pricing Card */}
+        <div className="bg-white rounded-3xl p-8 border-2 border-brand-500 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+            MOST POPULAR
+          </div>
+          
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{plans[0].name}</h3>
+            <p className="text-slate-500 text-sm mb-6">{plans[0].description}</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-5xl font-extrabold text-slate-900">{plans[0].price}</span>
+              <span className="text-slate-500 font-medium">{plans[0].duration}</span>
+            </div>
+          </div>
+
+          <div className="space-y-4 mb-8">
+            {plans[0].features.map((feature, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
+                <span className="text-slate-600 text-sm leading-relaxed">{feature}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {error && (
-          <div className="mb-8 p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-100 max-w-2xl mx-auto text-center">
-            {error}
-          </div>
-        )}
-
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          {plans.map((plan) => (
-            <div key={plan.id} className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col hover:border-brand-300 hover:shadow-md transition-all">
-              <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-              <p className="text-sm text-slate-500 mt-2">{plan.description}</p>
-              
-              <div className="my-6">
-                <span className="text-4xl font-extrabold text-slate-900">{plan.price}</span>
-                <span className="text-slate-500 font-medium">{plan.interval}</span>
+        {/* Payment Instructions */}
+        <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200">
+          <h3 className="text-xl font-bold text-slate-900 mb-6">How to Upgrade</h3>
+          
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold shrink-0">1</div>
+              <div>
+                <h4 className="font-semibold text-slate-900">Send the Payment</h4>
+                <p className="text-sm text-slate-500 mt-1">Send <strong>Rs. 500</strong> to the following account:</p>
+                <div className="bg-white p-4 rounded-xl mt-3 border border-slate-200 text-sm">
+                  <p><span className="text-slate-500">Easypaisa / JazzCash:</span> <strong className="text-slate-800">[Your Number]</strong></p>
+                  <p className="mt-1"><span className="text-slate-500">Account Title:</span> <strong className="text-slate-800">[Your Name]</strong></p>
+                </div>
               </div>
-
-              <ul className="space-y-4 flex-1 mb-8">
-                {plan.features.map((feat, idx) => (
-                  <li key={idx} className="flex gap-3 text-slate-700">
-                    <Check className="w-5 h-5 text-brand-500 shrink-0" />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => handleCheckout(plan.id)}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-4 px-4 border border-transparent rounded-2xl shadow-sm text-sm font-bold text-white bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 transition-all"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Select {plan.name}
-                  </>
-                )}
-              </button>
             </div>
-          ))}
+
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold shrink-0">2</div>
+              <div>
+                <h4 className="font-semibold text-slate-900">Send Screenshot on WhatsApp</h4>
+                <p className="text-sm text-slate-500 mt-1">
+                  Send a screenshot of the successful transaction along with your email address (<strong>{user?.email}</strong>) to our WhatsApp number.
+                </p>
+                <a 
+                  href={`https://wa.me/923000000000?text=Hi,%20I%20have%20sent%20the%20payment%20for%20BandLogic%20Pro.%20My%20email%20is%20${user?.email}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl font-bold shadow-sm transition-all"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Send Screenshot on WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold shrink-0">3</div>
+              <div>
+                <h4 className="font-semibold text-slate-900">Pro Account Activated</h4>
+                <p className="text-sm text-slate-500 mt-1">
+                  Your account will be upgraded manually within a few hours, and you will get unlimited access!
+                </p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
+
     </div>
   );
 }

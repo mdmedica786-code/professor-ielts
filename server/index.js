@@ -19,6 +19,7 @@ const readingRoute = require("./routes/reading");
 const listeningRoute = require("./routes/listening");
 const paymentsRoute = require("./routes/payments");
 const chatbotRoute = require("./routes/chatbot");
+const adminRouter = require('./routes/adminRoutes');
 
 const app = express();
 // Cloud hosts (Render/Railway/etc.) inject PORT and expect the app to bind it.
@@ -80,6 +81,7 @@ app.use("/api/reading", rateLimit, verifyAuth, readingRoute); // checkUsage is a
 app.use("/api/listening", rateLimit, verifyAuth, checkUsage, listeningRoute);
 
 app.use("/api/chatbot", rateLimit, verifyAuth, chatbotRoute);
+app.use("/api/admin", adminRouter);
 
 // Health check
 app.get("/api/health", (req, res) => {

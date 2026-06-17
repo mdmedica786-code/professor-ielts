@@ -16,6 +16,7 @@ import ListeningRoom from './components/listening/ListeningRoom';
 import HistoryView from './components/history/HistoryView';
 import EvaluationPanel from './components/evaluation/EvaluationPanel';
 import UpgradeScreen from './components/payments/UpgradeScreen';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 export default function App() {
   const { section, currentView, currentEvaluation, setCurrentView } = useApp();
@@ -60,6 +61,7 @@ export default function App() {
 
           {currentView === 'history' && <HistoryView />}
           {currentView === 'upgrade' && <UpgradeScreen />}
+          {currentView === 'admin' && <AdminDashboard />}
         </main>
       </div>
       <ChatWidget />

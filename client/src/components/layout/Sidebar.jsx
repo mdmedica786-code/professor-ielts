@@ -1,6 +1,6 @@
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
-import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User } from 'lucide-react';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 
 export default function Sidebar() {
@@ -132,6 +132,18 @@ export default function Sidebar() {
         {/* User profile & Upgrade (expanded only) */}
         {sidebarOpen && (
           <div className="p-3 border-t border-slate-100 flex-shrink-0 space-y-2">
+            {user?.email === 'mdmedica786@gmail.com' && (
+              <button
+                onClick={() => {
+                  setCurrentView('admin');
+                  if (isMobile()) closeSidebar();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200"
+              >
+                <ShieldCheck className="w-5 h-5" />
+                <span>Admin Panel</span>
+              </button>
+            )}
             <button
               onClick={goUpgrade}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors"
