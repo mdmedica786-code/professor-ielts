@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       api_base_url:
-        description: "Backend origin WITHOUT /api, e.g. https://professor-ielts-api.onrender.com"
+        description: "Backend origin WITHOUT /api, e.g. https://bandlogic-api.onrender.com"
         required: true
   push:
     branches: [main]
@@ -88,6 +88,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: professor-ielts-apk
+          name: bandlogic-apk
           path: client/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { evaluateWriting } from '../../api/client';
-import { PenLine, Sparkles, Send, FileText } from 'lucide-react';
+import { PenLine, Sparkles, Send, FileText, Image as ImageIcon, Upload, X } from 'lucide-react';
 
 const LOADING_STEPS = [
   'Reading your response...',
@@ -15,6 +15,7 @@ const LOADING_STEPS = [
 export default function WritingComposer({ task, onEvaluated }) {
   const { ieltsModule, studentName } = useApp();
   const [essay, setEssay] = useState('');
+  const [imageBase64, setImageBase64] = useState(null);
   const [busy, setBusy] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [error, setError] = useState(null);
@@ -22,6 +23,7 @@ export default function WritingComposer({ task, onEvaluated }) {
   // Reset the draft when the task changes.
   useEffect(() => {
     setEssay('');
+    setImageBase64(null);
     setError(null);
   }, [task?.id]);
 
@@ -38,6 +40,23 @@ export default function WritingComposer({ task, onEvaluated }) {
   const minWords = task?.task === 1 ? 150 : 250;
   const under = wordCount > 0 && wordCount < minWords;
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImageBase64(event.target.result);
+      setError(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async () => {
     if (!task || !essay.trim() || busy) return;
     setBusy(true);
@@ -50,6 +69,7 @@ export default function WritingComposer({ task, onEvaluated }) {
         prompt: task.text,
         essay,
         studentName,
+        imageBase64,
       });
       if (res.success) {
         onEvaluated(res.data, task);
@@ -87,6 +107,47 @@ export default function WritingComposer({ task, onEvaluated }) {
           </span>
         </div>
         <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-line">{task.text}</p>
+        
+        {task.task === 1 && (
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <label className="text-xs font-medium text-slate-600 flex items-center gap-1.5 mb-2">
+              <ImageIcon className="w-3.5 h-3.5 text-slate-400" /> Reference Image (Optional)
+            </label>
+            
+            {imageBase64 ? (
+              <div className="relative inline-block">
+                <img src={imageBase64} alt="Task reference" className="max-h-48 rounded-lg border border-slate-200" />
+                <button
+                  onClick={() => setImageBase64(null)}
+                  className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                  disabled={busy}
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 shadow-sm text-sm font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-50 cursor-pointer transition-colors"
+                >
+                  <Upload className="w-4 h-4 text-slate-400" />
+                  Upload Chart / Graph
+                </label>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  Upload the chart or diagram for this task so the AI can evaluate your data descriptions accurately.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Editor */}

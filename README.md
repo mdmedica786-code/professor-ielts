@@ -1,8 +1,10 @@
-# Professor IELTS AI Coach
+# BandLogic
 
-AI-Powered IELTS Speaking Calibration & Diagnostic Engine.
+> Decode your IELTS. Quantify your progress.
 
-Upload or record an IELTS Speaking response → get phoneme-level pronunciation scoring, grammar/vocabulary/fluency evaluation, and a comprehensive IELTS band diagnostic with actionable feedback.
+AI-powered IELTS coaching across all four skills — Speaking, Writing, Reading, and Listening — with examiner-calibrated band scoring, per-criterion feedback, and an answer-key-backed marker for the objective skills.
+
+Formerly **Professor IELTS**.
 
 ## Architecture
 

@@ -1,6 +1,7 @@
 import { useApp } from '../../context/AppContext';
 import ModuleToggle from '../common/ModuleToggle';
-import { Mic, PenLine, BookOpenText, Headphones, ArrowRight, GraduationCap } from 'lucide-react';
+import { Mic, PenLine, BookOpenText, Headphones, ArrowRight } from 'lucide-react';
+import { BrandWordmark } from '../common/BrandLogo';
 
 const SECTIONS = [
   {
@@ -55,9 +56,10 @@ export default function SectionPicker() {
       <div className="max-w-5xl w-full">
         {/* Hero */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md mx-auto mb-4">
-            <GraduationCap className="w-7 h-7 text-white" />
-          </div>
+          <BrandWordmark height={52} className="mx-auto mb-3" />
+          <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-medium mb-5">
+            Decode your IELTS. Quantify your progress.
+          </p>
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">
             What would you like to practice?
           </h1>

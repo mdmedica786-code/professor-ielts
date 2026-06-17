@@ -1,5 +1,6 @@
 const express = require("express");
 const { generateReading, evaluateReading } = require("../services/readingService");
+const { checkUsage } = require("../middleware/checkUsage");
 
 const router = express.Router();
 
@@ -79,7 +80,7 @@ router.post("/generate", async (req, res, next) => {
  * Body: { token, answers, studentName }
  * Marks the attempt server-side using the key carried in the token.
  */
-router.post("/evaluate", async (req, res, next) => {
+router.post("/evaluate", checkUsage, async (req, res, next) => {
   try {
     const startTime = Date.now();
     const { token, answers, studentName } = req.body;

@@ -6,6 +6,8 @@ const errorHandler = require("./middleware/errorHandler");
 const validateAudio = require("./middleware/validateAudio");
 const { upload } = require("./middleware/upload");
 const rateLimit = require("./middleware/rateLimit");
+const { verifyAuth } = require("./middleware/verifyAuth");
+const { checkUsage } = require("./middleware/checkUsage");
 
 // Route imports
 const transcribeRoute = require("./routes/transcribe");
@@ -15,6 +17,8 @@ const generatePromptsRoute = require("./routes/generatePrompts");
 const evaluateWritingRoute = require("./routes/evaluateWriting");
 const readingRoute = require("./routes/reading");
 const listeningRoute = require("./routes/listening");
+const paymentsRoute = require("./routes/payments");
+const chatbotRoute = require("./routes/chatbot");
 
 const app = express();
 // Cloud hosts (Render/Railway/etc.) inject PORT and expect the app to bind it.
@@ -47,9 +51,13 @@ app.use(
       return callback(null, false);
     },
     methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Mount payments BEFORE global express.json so webhook can receive raw buffers
+app.use("/api/payments", rateLimit, paymentsRoute);
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -59,17 +67,19 @@ app.use(express.urlencoded({ extended: true }));
 // Multer must run BEFORE validateAudio so the multipart body is parsed and
 // req.file exists when validation executes. (Previously validateAudio ran
 // first and always saw req.file === undefined, so it validated nothing.)
-app.use("/api/transcribe", rateLimit, upload.single("audio"), validateAudio, transcribeRoute);
-app.use("/api/evaluate", rateLimit, upload.single("audio"), validateAudio, evaluateRoute);
-app.use("/api/pronunciation", rateLimit, upload.single("audio"), validateAudio, pronunciationRoute);
-app.use("/api/generate-prompts", rateLimit, generatePromptsRoute);
+app.use("/api/transcribe", rateLimit, verifyAuth, upload.single("audio"), validateAudio, transcribeRoute);
+app.use("/api/evaluate", rateLimit, verifyAuth, checkUsage, upload.single("audio"), validateAudio, evaluateRoute);
+app.use("/api/pronunciation", rateLimit, verifyAuth, checkUsage, upload.single("audio"), validateAudio, pronunciationRoute);
+app.use("/api/generate-prompts", rateLimit, verifyAuth, generatePromptsRoute);
 // Writing & Reading are JSON endpoints (no audio), so they skip the multer /
 // validateAudio chain but keep rateLimit to guard OpenAI cost.
-app.use("/api/evaluate-writing", rateLimit, evaluateWritingRoute);
-app.use("/api/reading", rateLimit, readingRoute);
+app.use("/api/evaluate-writing", rateLimit, verifyAuth, checkUsage, evaluateWritingRoute);
+app.use("/api/reading", rateLimit, verifyAuth, readingRoute); // checkUsage is applied inside reading.js for /evaluate
 // Listening: TTS synth on /generate is slow & cost-heavy, so keep it behind
 // the same rateLimit guard as the other paid AI endpoints.
-app.use("/api/listening", rateLimit, listeningRoute);
+app.use("/api/listening", rateLimit, verifyAuth, checkUsage, listeningRoute);
+
+app.use("/api/chatbot", rateLimit, verifyAuth, chatbotRoute);
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -80,6 +90,7 @@ app.get("/api/health", (req, res) => {
     env: {
       openaiConfigured: !!process.env.OPENAI_API_KEY,
       pronunciationUrl: process.env.PYTHON_PRONUNCIATION_URL || "not configured",
+      firebaseConfigured: !!process.env.FIREBASE_SERVICE_ACCOUNT,
     },
   });
 });
@@ -91,7 +102,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`
   ╔════════════════════════════════════════════╗
-  ║   Professor IELTS AI Coach — Backend       ║
+  ║   BandLogic — Backend                      ║
   ║   Running on http://localhost:${PORT}          ║
   ╠════════════════════════════════════════════╣
   ║   OpenAI API:  ${process.env.OPENAI_API_KEY ? "✓ Configured" : "✗ Missing"}              ║

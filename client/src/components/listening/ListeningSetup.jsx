@@ -77,11 +77,11 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
               <div className="text-[11px] text-slate-500 mt-0.5">4 sections, 40 questions</div>
             </button>
           </div>
-          {size === 'full' && (
-            <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mt-2">
-              Full-test audio generation can take 2–4 minutes (TTS synthesis runs server-side).
-            </p>
-          )}
+          <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mt-2">
+            {size === 'full'
+              ? 'Full-test audio generation takes 3–6 minutes (script + TTS for all 4 sections). Keep this tab open.'
+              : 'Single-section generation takes ~45–120 seconds (script + multi-voice TTS). Keep this tab open.'}
+          </p>
         </div>
 
         {/* Section selector — only when single section */}

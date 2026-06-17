@@ -45,7 +45,13 @@ export default function ListeningRoom() {
         setError(res.error || 'Could not generate a listening test.');
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Something went wrong. Please try again.');
+      // axios surfaces timeouts as ECONNABORTED with a generic "timeout of Nms
+      // exceeded" message — rewrite to something the student can act on.
+      const isTimeout = err.code === 'ECONNABORTED' || /timeout/i.test(err.message || '');
+      const friendly = isTimeout
+        ? 'The audio generator is still working but the request took longer than expected. Try again with a single section, or pick a shorter topic. (TTS for a full test can take several minutes — keep the tab open and the server running.)'
+        : err.response?.data?.error || err.message || 'Something went wrong. Please try again.';
+      setError(friendly);
     } finally {
       setGenerating(false);
     }

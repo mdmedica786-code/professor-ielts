@@ -1,5 +1,7 @@
 import { useApp } from '../../context/AppContext';
-import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, GraduationCap } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User } from 'lucide-react';
+import { BrandLogo } from '../common/BrandLogo';
 
 export default function Sidebar() {
   const {
@@ -13,6 +15,7 @@ export default function Sidebar() {
     closeSidebar,
     activeStudent,
   } = useApp();
+  const { user, signOut } = useAuth();
 
   const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
 
@@ -26,6 +29,11 @@ export default function Sidebar() {
 
   const goHistory = () => {
     setCurrentView('history');
+    if (isMobile()) closeSidebar();
+  };
+
+  const goUpgrade = () => {
+    window.dispatchEvent(new CustomEvent('navigate-upgrade'));
     if (isMobile()) closeSidebar();
   };
 
@@ -67,12 +75,13 @@ export default function Sidebar() {
           <button
             onClick={() => goSection(null)}
             title="Sections"
-            className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-sm flex-shrink-0"
+            className="flex-shrink-0"
+            aria-label="Go to sections"
           >
-            <GraduationCap className="w-5 h-5 text-white" />
+            <BrandLogo size={36} />
           </button>
           <span className={`font-bold text-slate-900 text-sm truncate ${labelCls}`}>
-            Professor IELTS
+            BandLogic
           </span>
           {sidebarOpen && (
             <button
@@ -120,14 +129,29 @@ export default function Sidebar() {
           )}
         </nav>
 
-        {/* Active student (expanded only) */}
-        {sidebarOpen && activeStudent && (
-          <div className="p-3 border-t border-slate-100 flex-shrink-0">
-            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-medium px-1">
-              Active student
-            </div>
-            <div className="text-sm font-semibold text-slate-800 truncate px-1 mt-0.5">
-              {activeStudent.name}
+        {/* User profile & Upgrade (expanded only) */}
+        {sidebarOpen && (
+          <div className="p-3 border-t border-slate-100 flex-shrink-0 space-y-2">
+            <button
+              onClick={goUpgrade}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors"
+            >
+              <Sparkles className="w-4 h-4" />
+              Upgrade to Pro
+            </button>
+            <div className="flex items-center gap-2 px-2 py-2">
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold text-slate-800 truncate">
+                  {user?.email || user?.phoneNumber || "Student"}
+                </div>
+                <div className="text-[10px] text-slate-500 truncate">Free Plan</div>
+              </div>
+              <button onClick={() => signOut()} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Sign Out">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         )}

@@ -7,7 +7,7 @@
 //   - client .../writing/WritingReport.jsx, WritingCriteria.jsx, WritingMistakes.jsx
 // Do not change key names without updating those files.
 
-const IELTS_WRITING_EXAMINER_PROMPT = `You are Professor IELTS — a certified, master-level IELTS Writing examiner calibrated to the British Council / IDP / Cambridge standard, with 15+ years of live marking experience. You assess ONE written response and return a strict JSON report. You follow every rule below literally.
+const IELTS_WRITING_EXAMINER_PROMPT = `You are BandLogic's AI examiner — a certified, master-level IELTS Writing examiner calibrated to the British Council / IDP / Cambridge standard, with 15+ years of live marking experience. You assess ONE written response and return a strict JSON report. You follow every rule below literally.
 
 ═══════════════════════════════════════════
 WHAT YOU SCORE

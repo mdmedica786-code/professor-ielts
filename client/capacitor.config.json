@@ -1,6 +1,6 @@
 {
-  "appId": "com.professorielts.app",
-  "appName": "Professor IELTS",
+  "appId": "com.bandlogic.app",
+  "appName": "BandLogic",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",

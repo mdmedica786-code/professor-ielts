@@ -110,21 +110,56 @@ function normalizeSection(s, sIdx, testSize) {
 /**
  * Synthesize audio for every utterance in every section using OpenAI TTS.
  * Returns the sections with each utterance carrying `audioBase64` (mp3 data).
- * Runs in small parallel batches to stay under rate limits.
+ *
+ * Optimisations to keep this comfortably under the client timeout:
+ *   1. Coalesce CONSECUTIVE same-speaker utterances into a single TTS call —
+ *      common in monologue sections (S2/S4) where the generator splits a long
+ *      speech into 3–5 short turns for "natural pacing". One TTS call per
+ *      coalesced block is far cheaper than five.
+ *   2. Run in larger parallel batches (6) — tts-1 tolerates this fine for a
+ *      single user; if rate limits bite, batch loop already serialises.
  */
 async function synthesizeAllAudio(script) {
-  const BATCH = 4; // parallel OpenAI TTS calls — small to be polite under rate limits
+  const BATCH = 6;
   const out = [];
   for (const section of script.sections) {
+    const coalesced = coalesceConsecutiveSpeakers(section.utterances);
     const newUtts = [];
-    for (let i = 0; i < section.utterances.length; i += BATCH) {
-      const chunk = section.utterances.slice(i, i + BATCH);
+    const t0 = Date.now();
+    for (let i = 0; i < coalesced.length; i += BATCH) {
+      const chunk = coalesced.slice(i, i + BATCH);
       const synthesized = await Promise.all(chunk.map(synthesizeOne));
       newUtts.push(...synthesized);
     }
+    console.log(
+      `Listening TTS: section ${section.number} synthesised ${coalesced.length} clips ` +
+      `(coalesced from ${section.utterances.length}) in ${((Date.now() - t0) / 1000).toFixed(1)}s`
+    );
     out.push({ ...section, utterances: newUtts });
   }
   return { ...script, sections: out };
+}
+
+/**
+ * Merge consecutive utterances by the same (speaker, voice) into one. Halves
+ * the TTS call count on monologue sections without changing playback content.
+ * IDs of merged children become a "+"-joined string for traceability.
+ */
+function coalesceConsecutiveSpeakers(utterances) {
+  if (!Array.isArray(utterances) || utterances.length === 0) return [];
+  const merged = [];
+  for (const u of utterances) {
+    const last = merged.at(-1);
+    if (last && last.speaker === u.speaker && last.voice === u.voice) {
+      // Join with a space — TTS handles sentence boundaries fine and adds a
+      // tiny natural pause between adjacent clauses.
+      last.text = `${last.text} ${u.text}`.trim();
+      last.id = `${last.id}+${u.id}`;
+    } else {
+      merged.push({ ...u });
+    }
+  }
+  return merged;
 }
 
 async function synthesizeOne(utt) {

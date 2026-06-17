@@ -16,6 +16,7 @@ router.post("/", async (req, res, next) => {
     const taskType = parseInt(req.body.taskType) === 1 ? 1 : 2;
     const module = req.body.module === "general" ? "general" : "academic";
     const studentName = req.body.studentName || "Student";
+    const imageBase64 = req.body.imageBase64 || null;
 
     if (!essay.trim()) {
       return res.status(400).json({
@@ -33,7 +34,7 @@ router.post("/", async (req, res, next) => {
     console.log(
       `Writing evaluation: module=${module}, task=${taskType}, ${essay.trim().split(/\s+/).length} words — gpt-4o-mini...`
     );
-    const result = await evaluateWriting({ essay, prompt, taskType, module });
+    const result = await evaluateWriting({ essay, prompt, taskType, module, imageBase64 });
     result.metadata.studentName = studentName;
     result.metadata.processingTime = (Date.now() - startTime) / 1000;
     result.metadata.timestamp = new Date().toISOString();

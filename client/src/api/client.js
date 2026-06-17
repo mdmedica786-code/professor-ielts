@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { auth } from '../services/firebaseConfig';
 
 // API base resolution:
 //  - Web dev:   VITE_API_BASE_URL is unset -> "/api" (Vite proxies to :3001).
@@ -12,6 +13,30 @@ const api = axios.create({
   baseURL: API_BASE,
   timeout: 180000, // 3 min — evaluation pipeline can take time
 });
+
+api.interceptors.request.use(async (config) => {
+  if (auth.currentUser) {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch (err) {
+      // ignore
+    }
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 402) {
+      window.dispatchEvent(
+        new CustomEvent('show-paywall', { detail: error.response.data })
+      );
+    }
+    return Promise.reject(error);
+  }
+);
 
 /**
  * Transcribe audio via OpenAI Whisper (server-side).
@@ -71,14 +96,16 @@ export async function generatePrompts(topic) {
  * @param {string} params.prompt    the task prompt
  * @param {string} params.essay     the student's written response
  * @param {string} params.studentName
+ * @param {string} [params.imageBase64]
  */
-export async function evaluateWriting({ module, taskType, prompt, essay, studentName }) {
+export async function evaluateWriting({ module, taskType, prompt, essay, studentName, imageBase64 }) {
   const { data } = await api.post('/evaluate-writing', {
     module: module || 'academic',
     taskType: taskType || 2,
     prompt: prompt || '',
     essay: essay || '',
     studentName: studentName || 'Student',
+    imageBase64: imageBase64 || null,
   });
   return data;
 }
@@ -108,12 +135,17 @@ export async function evaluateReading({ token, answers, studentName }) {
 
 /**
  * Generate an IELTS Listening test (full 4-section or single 10-Q section).
- * The server runs TTS for every utterance — expect ~30–90s for a single
- * section and several minutes for a full test, depending on length.
+ * The server runs TTS for every utterance — script generation (gpt-4o-mini) +
+ * 15–40 tts-1 calls per section, hit serially in small parallel batches. The
+ * default 3-minute axios timeout is too short for full-test mode and brittle
+ * even for single-section under heavy rate-limit conditions, so we override:
+ *   - section: 6 min
+ *   - full:    12 min
  * @param {Object} params { size, whichSection, topic, difficulty }
  */
 export async function generateListening(params) {
-  const { data } = await api.post('/listening/generate', params);
+  const timeout = params?.size === 'full' ? 12 * 60 * 1000 : 6 * 60 * 1000;
+  const { data } = await api.post('/listening/generate', params, { timeout });
   return data;
 }
 

@@ -7,7 +7,7 @@
 //   - client .../reading/PassageView.jsx, QuestionList.jsx
 // Do not change key names without updating those files.
 
-const IELTS_READING_GENERATOR_PROMPT = `You are Professor IELTS — a master IELTS Reading item-writer calibrated to the British Council / IDP / Cambridge standard. You produce ONE authentic reading passage and a set of exam-accurate questions with a correct answer key. You follow every rule below literally and return STRICT JSON only.
+const IELTS_READING_GENERATOR_PROMPT = `You are BandLogic's AI item-writer — a master IELTS Reading item-writer calibrated to the British Council / IDP / Cambridge standard. You produce ONE authentic reading passage and a set of exam-accurate questions with a correct answer key. You follow every rule below literally and return STRICT JSON only.
 
 ═══════════════════════════════════════════
 INPUTS (given each request)

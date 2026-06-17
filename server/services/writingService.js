@@ -21,9 +21,10 @@ const MODULE_LABEL = { academic: "Academic", general: "General Training" };
  * @param {string} params.prompt     - the task prompt / question
  * @param {number} params.taskType   - 1 or 2
  * @param {string} params.module     - 'academic' | 'general'
+ * @param {string} [params.imageBase64] - optional base64 image data
  * @returns {Promise<Object>} evaluation result (matches WritingEvaluationPanel contract)
  */
-async function evaluateWriting({ essay, prompt, taskType, module }) {
+async function evaluateWriting({ essay, prompt, taskType, module, imageBase64 }) {
   const wordCount = countWords(essay);
   const minWords = taskType === 1 ? 150 : 250;
   const moduleLabel = MODULE_LABEL[module] || "Academic";
@@ -44,11 +45,27 @@ ${essay}
 
 Assess this response now against the four IELTS Writing criteria. Return ONLY valid JSON matching the contract.`;
 
+  const contentArray = [
+    { type: "text", text: userMessage }
+  ];
+
+  if (imageBase64) {
+    // Determine mime type if possible, or default to png
+    const mime = imageBase64.startsWith('data:image/jpeg') ? 'image/jpeg' : 'image/png';
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    contentArray.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${mime};base64,${base64Data}`,
+      }
+    });
+  }
+
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       { role: "system", content: IELTS_WRITING_EXAMINER_PROMPT },
-      { role: "user", content: userMessage },
+      { role: "user", content: contentArray },
     ],
     response_format: { type: "json_object" },
     temperature: 0.3,
@@ -91,6 +108,7 @@ Assess this response now against the four IELTS Writing criteria. Return ONLY va
       taskType,
       module,
       prompt,
+      imageBase64,
     },
   };
 }

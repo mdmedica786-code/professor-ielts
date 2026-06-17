@@ -66,6 +66,14 @@ export default function WritingReport({ evaluation }) {
         </div>
       )}
 
+      {/* Reference Image */}
+      {meta.imageBase64 && (
+        <div className="card-padded bg-slate-50 border-slate-200">
+          <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Reference Image</p>
+          <img src={meta.imageBase64} alt="Task Reference" className="max-w-full rounded border border-slate-200 shadow-sm" />
+        </div>
+      )}
+
       {/* Metadata */}
       <div className="flex flex-wrap gap-4 text-xs text-slate-400">
         {meta.studentName && (
