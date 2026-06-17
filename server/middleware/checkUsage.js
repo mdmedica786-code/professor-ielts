@@ -7,7 +7,12 @@ async function checkUsage(req, res, next) {
     return next();
   }
 
-  const result = await checkAndIncrementUsage(req.uid);
+  // Admin / Pro User Override
+  if (req.userEmail === 'mdmedica786@gmail.com') {
+    return next();
+  }
+
+  const result = await checkAndIncrementUsage(req.uid, req.isAnonymous);
   
   if (!result.allowed) {
     return res.status(402).json({

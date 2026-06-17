@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { BrandWordmark } from '../common/BrandLogo';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
-export default function SignInScreen() {
+export default function SignInScreen({ onBack }) {
   const { signInWithGoogle, signInWithPhone } = useAuth();
   
   const [method, setMethod] = useState('select'); // 'select', 'phone'
@@ -58,10 +58,20 @@ export default function SignInScreen() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-        <div className="text-center">
-          <BrandWordmark height={40} className="mx-auto" />
+    <div className="min-h-[100dvh] flex flex-col bg-slate-50 relative">
+      {onBack && (
+        <button 
+          onClick={onBack}
+          className="absolute top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to home
+        </button>
+      )}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div className="text-center">
+            <BrandWordmark height={40} className="mx-auto" />
           <h2 className="mt-6 text-2xl font-extrabold text-slate-900">Sign in to BandLogic</h2>
           <p className="mt-2 text-sm text-slate-500">
             Decode your IELTS. Quantify your progress.
@@ -191,6 +201,7 @@ export default function SignInScreen() {
             </div>
           </form>
         )}
+      </div>
       </div>
     </div>
   );

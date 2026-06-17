@@ -6,7 +6,8 @@ import {
   signInWithRedirect,
   signOut as firebaseSignOut,
   RecaptchaVerifier,
-  signInWithPhoneNumber
+  signInWithPhoneNumber,
+  signInAnonymously as firebaseSignInAnonymously
 } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 
@@ -55,11 +56,16 @@ export function AuthProvider({ children }) {
     return firebaseSignOut(auth);
   };
 
+  const signInAnonymously = async () => {
+    return await firebaseSignInAnonymously(auth);
+  };
+
   const value = {
     user,
     loading,
     signInWithGoogle,
     signInWithPhone,
+    signInAnonymously,
     signOut,
   };
 

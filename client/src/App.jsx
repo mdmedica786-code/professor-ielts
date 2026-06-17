@@ -1,7 +1,8 @@
 import { useApp } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SignInScreen from './components/auth/SignInScreen';
+import LandingPage from './components/landing/LandingPage';
 import PaywallModal from './components/common/PaywallModal';
 import ChatWidget from './components/chatbot/ChatWidget';
 import Navbar from './components/layout/Navbar';
@@ -20,6 +21,8 @@ export default function App() {
   const { section, currentView, currentEvaluation, setCurrentView } = useApp();
   const { user } = useAuth();
 
+  const [showSignIn, setShowSignIn] = useState(false);
+
   useEffect(() => {
     const handleUpgrade = () => setCurrentView('upgrade');
     window.addEventListener('navigate-upgrade', handleUpgrade);
@@ -27,7 +30,10 @@ export default function App() {
   }, [setCurrentView]);
 
   if (!user) {
-    return <SignInScreen />;
+    if (showSignIn) {
+      return <SignInScreen onBack={() => setShowSignIn(false)} />;
+    }
+    return <LandingPage onSignInClick={() => setShowSignIn(true)} />;
   }
 
   return (

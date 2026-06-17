@@ -1,6 +1,6 @@
 const { db } = require('./firebaseAdmin');
 
-async function checkAndIncrementUsage(uid) {
+async function checkAndIncrementUsage(uid, isAnonymous = false) {
   if (!db) {
     console.warn("Firestore not configured, bypassing usage check.");
     return { allowed: true };
@@ -42,8 +42,10 @@ async function checkAndIncrementUsage(uid) {
       const freeUsed = data.freeUsed || 0;
       const lastFreeAt = data.lastFreeAt ? data.lastFreeAt.toDate() : new Date(0);
       
-      if (freeUsed < 3) {
-        // Still in 3 free evals window
+      const maxFree = isAnonymous ? 1 : 3;
+
+      if (freeUsed < maxFree) {
+        // Still in free evals window
         transaction.update(userRef, {
           freeUsed: freeUsed + 1,
           lastFreeAt: now
@@ -51,7 +53,16 @@ async function checkAndIncrementUsage(uid) {
         return { allowed: true };
       }
       
-      // Check 48h cooldown
+      // If anonymous and out of quota, they must register (no cooldown reset)
+      if (isAnonymous) {
+        return {
+          allowed: false,
+          retryAfterMs: 0,
+          message: `You've used your 1 free guest evaluation. Please sign in or register to get more free attempts.`
+        };
+      }
+
+      // Check 48h cooldown for registered users
       const msSinceLast = now.getTime() - lastFreeAt.getTime();
       const cooldownMs = 48 * 60 * 60 * 1000;
       

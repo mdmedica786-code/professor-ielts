@@ -16,6 +16,7 @@ async function verifyAuth(req, res, next) {
     const decodedToken = await auth.verifyIdToken(token);
     req.uid = decodedToken.uid;
     req.userEmail = decodedToken.email;
+    req.isAnonymous = decodedToken.firebase && decodedToken.firebase.sign_in_provider === 'anonymous';
     next();
   } catch (error) {
     console.error("Auth verification failed:", error.message);
