@@ -1,6 +1,6 @@
 import { useApp } from '../../context/AppContext';
 import ModuleToggle from '../common/ModuleToggle';
-import { Mic, PenLine, BookOpenText, ArrowRight, GraduationCap } from 'lucide-react';
+import { Mic, PenLine, BookOpenText, Headphones, ArrowRight, GraduationCap } from 'lucide-react';
 
 const SECTIONS = [
   {
@@ -29,6 +29,15 @@ const SECTIONS = [
     criteria: ['T/F/NG', 'MCQ', 'Gap', 'Headings'],
     accent: 'from-emerald-500 to-teal-700',
     chip: 'bg-emerald-100 text-emerald-700',
+  },
+  {
+    id: 'listening',
+    icon: Headphones,
+    title: 'Listening',
+    blurb: 'Real-test format: 4 sections, 40 questions, multi-voice AI audio. Heard once, auto-marked on the official band scale.',
+    criteria: ['Section 1–4', 'Gap', 'MCQ', 'Matching'],
+    accent: 'from-amber-500 to-orange-700',
+    chip: 'bg-amber-100 text-amber-700',
   },
 ];
 

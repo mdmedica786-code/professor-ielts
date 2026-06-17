@@ -55,4 +55,40 @@ function readingBand(correct, total, module = "academic") {
   return 2.0;
 }
 
-module.exports = { normalizeBand, meanBand, readingBand };
+// IELTS Listening raw-score (/40) → band conversion. Same scale for Academic and
+// GT. Expressed as fractions so single-section practice (10 Qs) maps the same
+// curve as the full test (40 Qs). Each entry is [minFractionCorrect, band],
+// highest first. Derived from the official Cambridge raw-score conversion.
+const LISTENING_BANDS = [
+  [0.975, 9.0], // 39–40
+  [0.925, 8.5], // 37–38
+  [0.875, 8.0], // 35–36
+  [0.800, 7.5], // 32–34
+  [0.750, 7.0], // 30–31
+  [0.650, 6.5], // 26–29
+  [0.575, 6.0], // 23–25
+  [0.450, 5.5], // 18–22
+  [0.400, 5.0], // 16–17
+  [0.325, 4.5], // 13–15
+  [0.275, 4.0], // 11–12
+  [0.200, 3.5], // 8–10
+  [0.150, 3.0], // 6–7
+  [0.100, 2.5], // 4–5
+];
+
+/**
+ * Convert a listening raw score to an estimated band.
+ * @param {number} correct - number of correct answers
+ * @param {number} total - number of questions
+ * @returns {number} band 0–9 (0.5 steps)
+ */
+function listeningBand(correct, total) {
+  if (!total || total <= 0) return 0;
+  const frac = Math.max(0, Math.min(1, correct / total));
+  for (const [minFrac, band] of LISTENING_BANDS) {
+    if (frac >= minFrac) return band;
+  }
+  return 2.0;
+}
+
+module.exports = { normalizeBand, meanBand, readingBand, listeningBand };

@@ -2,12 +2,13 @@ import MiniScoreCard from '../evaluation/MiniScoreCard';
 import { formatDateTime, truncate } from '../../utils/formatters';
 import { getCriteriaShort } from '../../utils/scoring';
 import { useApp } from '../../context/AppContext';
-import { ChevronRight, Trash2, Calendar, Mic, PenLine, BookOpenText } from 'lucide-react';
+import { ChevronRight, Trash2, Calendar, Mic, PenLine, BookOpenText, Headphones } from 'lucide-react';
 
 const KIND_BADGE = {
   speaking: { label: 'Speaking', icon: Mic, cls: 'bg-violet-100 text-violet-700' },
   writing: { label: 'Writing', icon: PenLine, cls: 'bg-sky-100 text-sky-700' },
   reading: { label: 'Reading', icon: BookOpenText, cls: 'bg-emerald-100 text-emerald-700' },
+  listening: { label: 'Listening', icon: Headphones, cls: 'bg-amber-100 text-amber-700' },
 };
 
 export default function RecordCard({ record, onClick }) {
@@ -21,6 +22,7 @@ export default function RecordCard({ record, onClick }) {
   let label = q?.topic || 'General';
   if (kind === 'writing' && q) label = `Task ${q.task} · ${q.title || q.topic}`;
   if (kind === 'reading' && q) label = q.topic || 'Reading passage';
+  if (kind === 'listening' && q) label = q.topic || 'Listening test';
 
   const preview =
     kind === 'speaking'
@@ -64,7 +66,7 @@ export default function RecordCard({ record, onClick }) {
 
           {/* Per-criterion chips (speaking & writing) or reading accuracy */}
           <div className="flex flex-wrap gap-1.5 mt-2">
-            {kind === 'reading'
+            {kind === 'reading' || kind === 'listening'
               ? ev?.total != null && (
                   <span className="score-badge score-okay">
                     {ev.correctCount}/{ev.total} correct

@@ -3,7 +3,8 @@
   "appName": "Professor IELTS",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "url": "https://professor-ielts-1.onrender.com"
   },
   "android": {
     "allowMixedContent": false

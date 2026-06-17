@@ -107,6 +107,31 @@ export async function evaluateReading({ token, answers, studentName }) {
 }
 
 /**
+ * Generate an IELTS Listening test (full 4-section or single 10-Q section).
+ * The server runs TTS for every utterance — expect ~30–90s for a single
+ * section and several minutes for a full test, depending on length.
+ * @param {Object} params { size, whichSection, topic, difficulty }
+ */
+export async function generateListening(params) {
+  const { data } = await api.post('/listening/generate', params);
+  return data;
+}
+
+/**
+ * Mark a listening attempt. Send back the opaque token from generateListening
+ * plus a { questionId: answer } map.
+ * @param {Object} params { token, answers, studentName }
+ */
+export async function evaluateListening({ token, answers, studentName }) {
+  const { data } = await api.post('/listening/evaluate', {
+    token,
+    answers: answers || {},
+    studentName: studentName || 'Student',
+  });
+  return data;
+}
+
+/**
  * Health check.
  */
 export async function healthCheck() {

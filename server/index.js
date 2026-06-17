@@ -14,6 +14,7 @@ const pronunciationRoute = require("./routes/pronunciation");
 const generatePromptsRoute = require("./routes/generatePrompts");
 const evaluateWritingRoute = require("./routes/evaluateWriting");
 const readingRoute = require("./routes/reading");
+const listeningRoute = require("./routes/listening");
 
 const app = express();
 // Cloud hosts (Render/Railway/etc.) inject PORT and expect the app to bind it.
@@ -27,7 +28,12 @@ app.set("trust proxy", 1);
 // Allowed origins: the Capacitor app (installed APK is served from
 // https://localhost) plus any comma-separated origins in CORS_ORIGIN (e.g. the
 // web dev server). Requests with no Origin header (native/mobile/curl) pass.
-const APP_ORIGINS = ["capacitor://localhost", "https://localhost", "http://localhost"];
+const APP_ORIGINS = [
+  "capacitor://localhost",
+  "https://localhost",
+  "http://localhost",
+  "https://professor-ielts-1.onrender.com", // hosted UI (Render static site)
+];
 const configuredOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .split(",")
   .map((s) => s.trim())
@@ -61,6 +67,9 @@ app.use("/api/generate-prompts", rateLimit, generatePromptsRoute);
 // validateAudio chain but keep rateLimit to guard OpenAI cost.
 app.use("/api/evaluate-writing", rateLimit, evaluateWritingRoute);
 app.use("/api/reading", rateLimit, readingRoute);
+// Listening: TTS synth on /generate is slow & cost-heavy, so keep it behind
+// the same rateLimit guard as the other paid AI endpoints.
+app.use("/api/listening", rateLimit, listeningRoute);
 
 // Health check
 app.get("/api/health", (req, res) => {

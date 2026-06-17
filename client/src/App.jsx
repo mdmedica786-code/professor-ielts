@@ -5,6 +5,7 @@ import SectionPicker from './components/layout/SectionPicker';
 import PracticeRoom from './components/practice/PracticeRoom';
 import WritingRoom from './components/writing/WritingRoom';
 import ReadingRoom from './components/reading/ReadingRoom';
+import ListeningRoom from './components/listening/ListeningRoom';
 import HistoryView from './components/history/HistoryView';
 import EvaluationPanel from './components/evaluation/EvaluationPanel';
 
@@ -28,6 +29,8 @@ export default function App() {
               {section === 'writing' && <WritingRoom />}
 
               {section === 'reading' && <ReadingRoom />}
+
+              {section === 'listening' && <ListeningRoom />}
             </div>
           )}
           {currentView === 'history' && <HistoryView />}

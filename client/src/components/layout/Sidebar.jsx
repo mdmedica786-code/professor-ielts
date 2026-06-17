@@ -1,5 +1,5 @@
 import { useApp } from '../../context/AppContext';
-import { Home, Mic, PenLine, BookOpenText, History, ArrowLeft, X, GraduationCap } from 'lucide-react';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, GraduationCap } from 'lucide-react';
 
 export default function Sidebar() {
   const {
@@ -35,6 +35,7 @@ export default function Sidebar() {
     { id: 'speaking', icon: Mic, label: 'Speaking', active: onPractice && section === 'speaking', onClick: () => goSection('speaking') },
     { id: 'writing', icon: PenLine, label: 'Writing', active: onPractice && section === 'writing', onClick: () => goSection('writing') },
     { id: 'reading', icon: BookOpenText, label: 'Reading', active: onPractice && section === 'reading', onClick: () => goSection('reading') },
+    { id: 'listening', icon: Headphones, label: 'Listening', active: onPractice && section === 'listening', onClick: () => goSection('listening') },
     { id: 'history', icon: History, label: 'History', active: currentView === 'history', onClick: goHistory },
   ];
 
