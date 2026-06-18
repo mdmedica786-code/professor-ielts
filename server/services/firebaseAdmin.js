@@ -1,6 +1,11 @@
-const admin = require("firebase-admin");
+const { initializeApp, cert, getApps } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
+const { getFirestore } = require("firebase-admin/firestore");
 
+let auth = null;
+let db = null;
 let firebaseInitError = null;
+
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -8,9 +13,14 @@ try {
     if (serviceAccount.private_key && serviceAccount.private_key.includes('\\n')) {
       serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
     }
-    admin.initializeApp({
-      credential: admin.cert(serviceAccount)
+    
+    // In v14, we use the modular API
+    const app = initializeApp({
+      credential: cert(serviceAccount)
     });
+    
+    auth = getAuth(app);
+    db = getFirestore(app);
     console.log("Firebase Admin initialized successfully.");
   } else {
     console.warn("FIREBASE_SERVICE_ACCOUNT env var missing. Auth operations will fail.");
@@ -20,8 +30,9 @@ try {
   console.error("Failed to initialize Firebase Admin:", error.message);
 }
 
-const apps = admin.apps || [];
-const auth = apps.length ? admin.auth() : null;
-const db = apps.length ? admin.firestore() : null;
-
-module.exports = { admin, auth, db, getFirebaseInitError: () => firebaseInitError };
+module.exports = { 
+  auth, 
+  db, 
+  getFirebaseInitError: () => firebaseInitError,
+  getAppsLength: () => getApps().length
+};

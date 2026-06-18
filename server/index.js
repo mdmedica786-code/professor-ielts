@@ -115,7 +115,7 @@ app.get("/api/health/debug", (req, res) => {
     envPrefix: envRaw ? envRaw.substring(0, 30) + '...' : null,
     parseSuccess,
     parseError,
-    appsLength: require("./services/firebaseAdmin").admin.apps?.length || 0,
+    appsLength: require("./services/firebaseAdmin").getAppsLength(),
     initError: require("./services/firebaseAdmin").getFirebaseInitError()
   });
 });
