@@ -97,6 +97,28 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.get("/api/health/debug", (req, res) => {
+  const envRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
+  let parseSuccess = false;
+  let parseError = null;
+  if (envRaw) {
+    try {
+      JSON.parse(envRaw);
+      parseSuccess = true;
+    } catch (e) {
+      parseError = e.message;
+    }
+  }
+  
+  res.json({
+    hasEnv: !!envRaw,
+    envPrefix: envRaw ? envRaw.substring(0, 30) + '...' : null,
+    parseSuccess,
+    parseError,
+    appsLength: require("firebase-admin").apps?.length || 0
+  });
+});
+
 // === Error Handler (must be last) ===
 app.use(errorHandler);
 
