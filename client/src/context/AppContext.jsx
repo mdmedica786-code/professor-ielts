@@ -17,6 +17,8 @@ export function AppProvider({ children }) {
   const [settings, setSettings] = useLocalStorage('ielts:settings', {
     darkMode: false,
     autoPlayback: true,
+    noiseSuppression: true,
+    echoCancellation: true,
   });
   // IELTS module choice (Academic vs General Training) — affects Writing & Reading.
   const [ieltsModule, setIeltsModule] = useLocalStorage('ielts:module', 'academic');

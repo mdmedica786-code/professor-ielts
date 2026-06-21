@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
  * Custom hook for audio recording using Web Audio API + MediaRecorder.
  * Provides start/stop controls, timer, audio blob output, and waveform data.
  */
-export default function useAudioRecorder() {
+export default function useAudioRecorder(customOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -40,10 +40,10 @@ export default function useAudioRecorder() {
 
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
           channelCount: 1,
           sampleRate: 16000,
+          echoCancellation: customOptions.echoCancellation ?? true,
+          noiseSuppression: customOptions.noiseSuppression ?? true,
         },
       });
       streamRef.current = stream;

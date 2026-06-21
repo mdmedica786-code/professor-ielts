@@ -1,8 +1,7 @@
 const express = require('express');
-const { OpenAI } = require('openai');
+const { OpenAI, toFile } = require('openai');
 const { verifyAuth } = require('../middleware/verifyAuth');
-const { upload } = require('../middleware/upload'); // Use multer instance
-const fs = require('fs');
+const { upload } = require('../middleware/upload'); // Uses multer memoryStorage
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -31,16 +30,13 @@ router.post('/message', verifyAuth, upload.single('image'), async (req, res, nex
     }
 
     if (req.file) {
-      // Read file to base64
-      const fileBuffer = fs.readFileSync(req.file.path);
-      const base64Image = fileBuffer.toString('base64');
+      // multer memoryStorage: file data is in req.file.buffer (no .path)
+      const base64Image = req.file.buffer.toString('base64');
       const mimeType = req.file.mimetype;
       userContent.push({
         type: "image_url",
         image_url: { url: `data:${mimeType};base64,${base64Image}` }
       });
-      // Cleanup temp file
-      fs.unlinkSync(req.file.path);
     }
 
     messages.push({
@@ -62,9 +58,6 @@ router.post('/message', verifyAuth, upload.single('image'), async (req, res, nex
       }
     });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     next(error);
   }
 });
@@ -82,8 +75,14 @@ router.post('/voice', verifyAuth, upload.single('audio'), async (req, res, next)
     } catch (e) {}
 
     // 1. Transcribe the audio using Whisper
+    //    multer memoryStorage: req.file.buffer exists, req.file.path does NOT.
+    //    Use openai's toFile() helper to create a File-like object from the buffer.
+    const audioFile = await toFile(req.file.buffer, req.file.originalname || 'voice.webm', {
+      type: req.file.mimetype || 'audio/webm',
+    });
+
     const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(req.file.path),
+      file: audioFile,
       model: "whisper-1",
       language: "en",
     });
@@ -112,14 +111,11 @@ router.post('/voice', verifyAuth, upload.single('audio'), async (req, res, next)
     // 3. Generate Audio using Text-to-Speech (TTS)
     const ttsResponse = await openai.audio.speech.create({
       model: "tts-1",
-      voice: "alloy", // "alloy", "echo", "fable", "onyx", "nova", and "shimmer"
+      voice: "alloy",
       input: replyText,
     });
 
     const audioBuffer = Buffer.from(await ttsResponse.arrayBuffer());
-
-    // Clean up uploaded audio file
-    fs.unlinkSync(req.file.path);
 
     // Send both the text reply and the TTS audio as a base64 string
     res.json({
@@ -132,9 +128,6 @@ router.post('/voice', verifyAuth, upload.single('audio'), async (req, res, next)
     });
 
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     next(error);
   }
 });

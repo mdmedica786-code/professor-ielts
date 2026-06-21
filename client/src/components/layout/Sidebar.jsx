@@ -1,6 +1,6 @@
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
-import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck } from 'lucide-react';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, BarChart3 } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 
 export default function Sidebar() {
@@ -45,6 +45,7 @@ export default function Sidebar() {
     { id: 'reading', icon: BookOpenText, label: 'Reading', active: onPractice && section === 'reading', onClick: () => goSection('reading') },
     { id: 'listening', icon: Headphones, label: 'Listening', active: onPractice && section === 'listening', onClick: () => goSection('listening') },
     { id: 'history', icon: History, label: 'History', active: currentView === 'history', onClick: goHistory },
+    { id: 'charts', icon: BarChart3, label: 'Charts', active: currentView === 'charts', onClick: () => { setCurrentView('charts'); if (isMobile()) closeSidebar(); } },
   ];
 
   // Mobile: full-width drawer that slides in/out.

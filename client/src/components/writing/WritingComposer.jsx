@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { evaluateWriting } from '../../api/client';
 import { PenLine, Sparkles, Send, FileText, Image as ImageIcon, Upload, X } from 'lucide-react';
@@ -19,6 +19,7 @@ export default function WritingComposer({ task, onEvaluated }) {
   const [busy, setBusy] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [error, setError] = useState(null);
+  const imageInputRef = useRef(null);
 
   // Reset the draft when the task changes.
   useEffect(() => {
@@ -42,7 +43,11 @@ export default function WritingComposer({ task, onEvaluated }) {
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
+    // Always reset the input so re-selecting the same file triggers onChange
+    if (imageInputRef.current) imageInputRef.current.value = '';
     if (!file) return;
+
+    setError(null); // Clear any previous error immediately
     
     if (file.size > 5 * 1024 * 1024) {
       setError('Image must be less than 5MB');
@@ -52,7 +57,9 @@ export default function WritingComposer({ task, onEvaluated }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       setImageBase64(event.target.result);
-      setError(null);
+    };
+    reader.onerror = () => {
+      setError('Failed to read the image file. Please try again.');
     };
     reader.readAsDataURL(file);
   };
@@ -118,7 +125,10 @@ export default function WritingComposer({ task, onEvaluated }) {
               <div className="relative inline-block">
                 <img src={imageBase64} alt="Task reference" className="max-h-48 rounded-lg border border-slate-200" />
                 <button
-                  onClick={() => setImageBase64(null)}
+                  onClick={() => {
+                    setImageBase64(null);
+                    if (imageInputRef.current) imageInputRef.current.value = '';
+                  }}
                   className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50"
                 >
                   <X className="w-4 h-4" />
@@ -127,6 +137,7 @@ export default function WritingComposer({ task, onEvaluated }) {
             ) : (
               <div>
                 <input
+                  ref={imageInputRef}
                   type="file"
                   accept="image/png, image/jpeg, image/webp"
                   onChange={handleImageUpload}
