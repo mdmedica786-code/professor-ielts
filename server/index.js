@@ -85,6 +85,30 @@ app.use("/api/chatbot", rateLimit, verifyAuth, chatbotRoute);
 app.use("/api/admin", adminRouter);
 app.use("/api/realtime", rateLimit, realtimeRoutes);
 
+// Endpoint for frontend to fetch the user's plan
+app.get("/api/user/me", verifyAuth, async (req, res) => {
+  try {
+    const { db } = require('./services/firebaseAdmin');
+    if (!db) return res.json({ success: true, plan: 'free' });
+    
+    const userDoc = await db.collection('users').doc(req.uid).get();
+    const data = userDoc.exists ? userDoc.data() : {};
+    
+    const now = new Date();
+    let plan = 'free';
+    
+    if (data.premiumUntil && data.premiumUntil.toDate() > now) {
+      plan = data.plan || 'pro';
+    } else if (data.plan === 'premium' || data.plan === 'ultra' || data.plan === 'pro') {
+      plan = data.plan === 'premium' ? 'pro' : data.plan; // Legacy fallback
+    }
+    
+    res.json({ success: true, plan });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({

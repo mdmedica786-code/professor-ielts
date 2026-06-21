@@ -1,6 +1,8 @@
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
-import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, BarChart3 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import api from '../../api/client';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, BarChart3, Crown } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 
 export default function Sidebar() {
@@ -13,9 +15,24 @@ export default function Sidebar() {
     setCurrentEvaluation,
     sidebarOpen,
     closeSidebar,
-    activeStudent,
   } = useApp();
   const { user, signOut } = useAuth();
+
+  const [userPlan, setUserPlan] = useState('free');
+
+  useEffect(() => {
+    if (user) {
+      api.get('/user/me')
+        .then(res => {
+          if (res.data?.success) {
+            setUserPlan(res.data.plan);
+          }
+        })
+        .catch(err => console.error("Failed to fetch plan:", err));
+    } else {
+      setUserPlan('free');
+    }
+  }, [user]);
 
   const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
 
@@ -145,22 +162,26 @@ export default function Sidebar() {
                 <span>Admin Panel</span>
               </button>
             )}
-            <button
-              onClick={goUpgrade}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors"
-            >
-              <Sparkles className="w-4 h-4" />
-              Upgrade to Pro
-            </button>
+            {userPlan !== 'ultra' && (
+              <button
+                onClick={goUpgrade}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors"
+              >
+                <Sparkles className="w-4 h-4" />
+                Upgrade to Pro
+              </button>
+            )}
             <div className="flex items-center gap-2 px-2 py-2">
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-                <User className="w-4 h-4" />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${userPlan !== 'free' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'}`}>
+                {userPlan !== 'free' ? <Crown className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-semibold text-slate-800 truncate">
                   {user?.email || user?.phoneNumber || "Student"}
                 </div>
-                <div className="text-[10px] text-slate-500 truncate">Free Plan</div>
+                <div className={`text-[10px] font-bold uppercase tracking-wider truncate ${userPlan === 'ultra' ? 'text-amber-600' : userPlan === 'pro' ? 'text-brand-600' : 'text-slate-500'}`}>
+                  {userPlan === 'ultra' ? 'Ultra Plan' : userPlan === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                </div>
               </div>
               <button onClick={() => signOut()} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Sign Out">
                 <LogOut className="w-4 h-4" />
