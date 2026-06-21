@@ -4,25 +4,25 @@ import { CheckCircle2, Sparkles, Shield, Zap, MessageCircle } from 'lucide-react
 
 const plans = [
   {
-    id: 'pro-weekly',
-    name: 'BandLogic Pro (Weekly)',
-    price: '150,000',
+    id: 'pro-daily',
+    name: 'BandLogic Pro (Daily)',
+    price: '30,000',
     currency: 'UZS',
-    duration: '/week',
-    description: '10 requests daily. Great for short-term practice.',
+    duration: '/day',
+    description: '10 requests. Great for a quick intensive practice session.',
     features: [
-      '10 daily evaluations',
+      '10 evaluations for 24 hours',
       'Detailed examiner feedback',
       'Access to all sections'
     ]
   },
   {
-    id: 'pro-monthly',
-    name: 'BandLogic Pro (Monthly)',
-    price: '150,000',
+    id: 'pro-weekly',
+    name: 'BandLogic Pro (Weekly)',
+    price: '100,000',
     currency: 'UZS',
-    duration: '/month',
-    description: '10 requests daily. Perfect for consistent prep.',
+    duration: '/week',
+    description: '10 requests daily. Perfect for short-term consistent prep.',
     features: [
       '10 daily evaluations',
       'Detailed examiner feedback',

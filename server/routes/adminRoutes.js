@@ -47,7 +47,7 @@ router.post('/grant-pro', verifyAuth, requireAdmin, async (req, res) => {
     if (err.code === 'auth/user-not-found') {
       return res.status(404).json({ success: false, error: 'User not found in Firebase Authentication. Tell them to sign up first.' });
     }
-    return res.status(500).json({ success: false, error: 'Failed to grant Pro access.' });
+    return res.status(500).json({ success: false, error: `Failed to grant access: ${err.message}` });
   }
 });
 
