@@ -12,23 +12,17 @@
  * anchor — robust across browsers (no <img> transform tricks) and avoids
  * shipping a separate cropped asset.
  */
+import markImg from '../../assets/bandlogic-mark.png';
+import wordmarkImg from '../../assets/bandlogic-logo-transparent.png';
+
 export function BrandLogo({ size = 36, className = '' }) {
   return (
-    <div
-      className={`rounded-xl shadow-sm bg-white border border-slate-200/50 ${className}`}
-      style={{
-        width: size,
-        height: size,
-        backgroundImage: 'url(/bandlogic-logo.png)',
-        // The wordmark is 1024×559. The "BL" mark spans ~27% of the width on
-        // the left. To make the mark fill the chip: scale image width so its
-        // 27% maps to 100% of the chip → ~370%, then anchor left-center.
-        backgroundSize: '370% auto',
-        backgroundPosition: '0% 50%',
-        backgroundRepeat: 'no-repeat',
-      }}
-      aria-label="BandLogic"
-      role="img"
+    <img
+      src={markImg}
+      alt="BandLogic"
+      className={`block object-contain flex-shrink-0 ${className}`}
+      style={{ width: size, height: 'auto' }}
+      draggable={false}
     />
   );
 }
@@ -36,9 +30,9 @@ export function BrandLogo({ size = 36, className = '' }) {
 export function BrandWordmark({ height = 28, className = '' }) {
   return (
     <img
-      src="/bandlogic-logo.png"
+      src={wordmarkImg}
       alt="BandLogic"
-      className={`block ${className}`}
+      className={`block object-contain ${className}`}
       style={{ height, width: 'auto' }}
       draggable={false}
     />

@@ -1,7 +1,7 @@
 import { useApp } from '../../context/AppContext';
 import ModuleToggle from '../common/ModuleToggle';
 import { Mic, PenLine, BookOpenText, Headphones, ArrowRight } from 'lucide-react';
-import { BrandWordmark } from '../common/BrandLogo';
+import { BrandLogo } from '../common/BrandLogo';
 
 const SECTIONS = [
   {
@@ -56,7 +56,7 @@ export default function SectionPicker() {
       <div className="max-w-5xl w-full">
         {/* Hero */}
         <div className="text-center mb-8">
-          <BrandWordmark height={52} className="mx-auto mb-3" />
+          <BrandLogo size={52} className="mx-auto mb-3" />
           <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-medium mb-5">
             Decode your IELTS. Quantify your progress.
           </p>

@@ -2,13 +2,21 @@ import { useApp } from '../../context/AppContext';
 import ProgressChart from './ProgressChart';
 import RecordCard from './RecordCard';
 import RecordDetail from './RecordDetail';
-import { useState } from 'react';
-import { History, Trash2, TrendingUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { History, Trash2, TrendingUp, Filter } from 'lucide-react';
 
 export default function HistoryView() {
   const { studentHistory, clearStudentHistory, activeStudent } = useApp();
   const history = studentHistory;
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [activeTab, setActiveTab] = useState('All');
+
+  const tabs = ['All', 'speaking', 'writing', 'reading', 'listening'];
+
+  const filteredHistory = useMemo(() => {
+    if (activeTab === 'All') return history;
+    return history.filter(record => record.kind === activeTab || record.section === activeTab);
+  }, [history, activeTab]);
 
   if (selectedRecord) {
     return (
@@ -52,6 +60,25 @@ export default function HistoryView() {
         )}
       </div>
 
+      {/* Tabs */}
+      {history.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+                activeTab === tab
+                  ? 'bg-brand-100 text-brand-700 shadow-sm'
+                  : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+              }`}
+            >
+              {tab === 'All' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
       {history.length === 0 ? (
         <div className="card-padded text-center py-16">
           <TrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-4" />
@@ -75,13 +102,19 @@ export default function HistoryView() {
 
           {/* History Records */}
           <div className="space-y-3">
-            {history.map((record) => (
-              <RecordCard
-                key={record.id}
-                record={record}
-                onClick={() => setSelectedRecord(record)}
-              />
-            ))}
+            {filteredHistory.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-sm font-medium text-slate-500">No {activeTab} evaluations yet</p>
+              </div>
+            ) : (
+              filteredHistory.map((record) => (
+                <RecordCard
+                  key={record.id}
+                  record={record}
+                  onClick={() => setSelectedRecord(record)}
+                />
+              ))
+            )}
           </div>
         </>
       )}
