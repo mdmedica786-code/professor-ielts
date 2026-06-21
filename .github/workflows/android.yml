@@ -82,6 +82,14 @@ jobs:
       - name: Copy google-services.json
         run: cp client/google-services.json client/android/app/google-services.json
 
+      - name: Inject server_client_id
+        working-directory: client
+        run: |
+          STRINGS="android/app/src/main/res/values/strings.xml"
+          CLIENT_ID="238060239349-ghcabf4q1gpl3q1frf78144k3k77s3a8.apps.googleusercontent.com"
+          sed -i "s#</resources>#    <string name=\"server_client_id\">$CLIENT_ID</string>\n</resources>#" "$STRINGS"
+          echo "Injected server_client_id into $STRINGS"
+
       - name: Build debug APK
         working-directory: client/android
         run: |
