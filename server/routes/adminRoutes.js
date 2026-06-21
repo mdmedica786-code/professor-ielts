@@ -16,7 +16,7 @@ function requireAdmin(req, res, next) {
 
 // POST /api/admin/grant-pro
 router.post('/grant-pro', verifyAuth, requireAdmin, async (req, res) => {
-  const { email, days = 30 } = req.body;
+  const { email, days = 30, tier = 'pro' } = req.body;
 
   if (!email) {
     return res.status(400).json({ success: false, error: 'Student email is required.' });
@@ -33,13 +33,13 @@ router.post('/grant-pro', verifyAuth, requireAdmin, async (req, res) => {
 
     // 3. Update the Firestore user document
     await db.collection('users').doc(uid).set({
-      plan: 'premium',
+      plan: tier, // 'pro' or 'ultra'
       premiumUntil: premiumUntil
     }, { merge: true });
 
     return res.json({ 
       success: true, 
-      message: `Successfully granted Pro to ${email} for ${days} days.` 
+      message: `Successfully granted ${tier.toUpperCase()} to ${email} for ${days} days.` 
     });
     
   } catch (err) {

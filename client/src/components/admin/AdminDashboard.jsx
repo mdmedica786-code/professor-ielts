@@ -7,6 +7,7 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [days, setDays] = useState('30');
+  const [tier, setTier] = useState('pro');
   const [status, setStatus] = useState(null); // { type: 'success' | 'error', message: string }
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +29,8 @@ export default function AdminDashboard() {
       setStatus(null);
       const { data } = await api.post('/admin/grant-pro', {
         email,
-        days: parseInt(days, 10)
+        days: parseInt(days, 10),
+        tier
       });
       setStatus({ type: 'success', message: data.message });
       setEmail('');
@@ -77,6 +79,18 @@ export default function AdminDashboard() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Plan Tier</label>
+            <select
+              value={tier}
+              onChange={(e) => setTier(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all mb-6"
+            >
+              <option value="pro">Pro (10/day)</option>
+              <option value="ultra">Ultra (30/day)</option>
+            </select>
           </div>
 
           <div>

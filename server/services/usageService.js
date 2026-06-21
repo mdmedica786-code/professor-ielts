@@ -27,15 +27,46 @@ async function checkAndIncrementUsage(uid, isAnonymous = false) {
       
       const data = doc.data();
       
-      if (data.plan === 'premium') {
+      if (data.plan === 'pro' || data.plan === 'ultra' || data.plan === 'premium') {
         const premiumUntil = data.premiumUntil ? data.premiumUntil.toDate() : null;
         if (!premiumUntil || premiumUntil > now) {
-          // Add usage analytics counter if needed
-          transaction.update(userRef, {
-            totalPremiumUsed: (data.totalPremiumUsed || 0) + 1,
-            lastPremiumAt: now
-          });
-          return { allowed: true };
+          
+          // Determine the daily limit based on the plan
+          let dailyLimit = 10; // Default for 'pro' and legacy 'premium'
+          if (data.plan === 'ultra') {
+            dailyLimit = 30;
+          }
+
+          const lastPremiumAt = data.lastPremiumAt ? data.lastPremiumAt.toDate() : new Date(0);
+          
+          // Check if the last usage was on the same calendar day
+          const isSameDay = lastPremiumAt.getFullYear() === now.getFullYear() &&
+                            lastPremiumAt.getMonth() === now.getMonth() &&
+                            lastPremiumAt.getDate() === now.getDate();
+
+          // Reset daily count if it's a new day
+          const currentDailyUsed = isSameDay ? (data.premiumDailyUsed || 0) : 0;
+
+          if (currentDailyUsed < dailyLimit) {
+            // Allow the request
+            transaction.update(userRef, {
+              totalPremiumUsed: (data.totalPremiumUsed || 0) + 1,
+              premiumDailyUsed: currentDailyUsed + 1,
+              lastPremiumAt: now
+            });
+            return { allowed: true };
+          } else {
+            // Deny the request - daily limit reached
+            // Calculate ms until midnight for the retryAfter
+            const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const retryAfterMs = tomorrow.getTime() - now.getTime();
+            
+            return {
+              allowed: false,
+              retryAfterMs,
+              message: `You've reached your daily limit of ${dailyLimit} requests for your ${data.plan.toUpperCase()} plan. Your limit resets at midnight.`
+            };
+          }
         }
       }
       
