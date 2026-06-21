@@ -79,16 +79,17 @@ jobs:
         working-directory: client
         run: npx cap sync android
 
-      - name: Print Debug Keystore SHA-1
-        run: |
-          keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep "SHA1:" || true
-          echo "Add the above SHA1 fingerprint to your Firebase Console -> Project Settings -> General -> Android app -> Add Fingerprint"
-
       - name: Build debug APK
         working-directory: client/android
         run: |
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
+
+      - name: Print Debug Keystore SHA-1
+        working-directory: client/android
+        run: |
+          ./gradlew signingReport | grep "SHA1" || true
+          echo "Add the above SHA1 fingerprint to your Firebase Console -> Project Settings -> General -> Android app -> Add Fingerprint"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
