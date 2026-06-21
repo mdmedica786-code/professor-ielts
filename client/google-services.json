@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "238060239349",
+    "project_id": "bands-logic",
+    "storage_bucket": "bands-logic.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:238060239349:android:223e1aa054bdb5212288bc",
+        "android_client_info": {
+          "package_name": "com.bandlogic.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "238060239349-ghcabf4q1gpl3q1frf78144k3k77s3a8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlnIvEI3_3dCEVe0uU5HUjDLBZ0KYTEM4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "238060239349-ghcabf4q1gpl3q1frf78144k3k77s3a8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

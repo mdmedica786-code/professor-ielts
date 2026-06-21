@@ -79,6 +79,9 @@ jobs:
         working-directory: client
         run: npx cap sync android
 
+      - name: Copy google-services.json
+        run: cp client/google-services.json client/android/app/google-services.json
+
       - name: Build debug APK
         working-directory: client/android
         run: |
