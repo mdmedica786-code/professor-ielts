@@ -47,6 +47,11 @@ function SectionBlock({ section, answers, onAnswer, locked }) {
                 {g.context}
               </div>
             )}
+            {g.image && (
+              <div className="my-4 flex justify-center">
+                <img src={g.image} alt="Test Diagram" className="max-w-full rounded-xl border border-slate-200 shadow-sm" />
+              </div>
+            )}
             {g.questions.map((q) => (
               <QuestionRow
                 key={q.id}
@@ -69,8 +74,9 @@ function groupByContext(questions) {
     const last = groups.at(-1);
     if (last && last.context === (q.context || '')) {
       last.questions.push(q);
+      if (q.image && !last.image) last.image = q.image;
     } else {
-      groups.push({ context: q.context || '', questions: [q] });
+      groups.push({ context: q.context || '', image: q.image || null, questions: [q] });
     }
   }
   return groups;
