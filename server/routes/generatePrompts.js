@@ -25,4 +25,18 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/generate-prompts/writing-task1
+ * Generates an IELTS Academic Task 1 graph and description.
+ */
+router.post("/writing-task1", async (req, res, next) => {
+  try {
+    const { generateWritingTask1 } = require("../services/openaiService");
+    const taskData = await generateWritingTask1();
+    res.json({ success: true, data: taskData });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

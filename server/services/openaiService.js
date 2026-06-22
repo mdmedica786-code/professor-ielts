@@ -347,6 +347,39 @@ Each object must have these keys:
   return questions;
 }
 
+const IELTS_WRITING_GRAPH_PROMPT = require("../prompts/ieltsWritingGraphGenerator");
+
+/**
+ * Generate an IELTS Writing Task 1 chart using OpenAI.
+ *
+ * @returns {Promise<Object>} The generated task 1 object
+ */
+async function generateWritingTask1() {
+  console.log(`Question generation: Generating new Writing Task 1 chart...`);
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: IELTS_WRITING_GRAPH_PROMPT }
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.8,
+  });
+
+  const raw = response.choices[0].message.content;
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (parseErr) {
+    console.error("Question generation: Failed to parse OpenAI Task 1 response.");
+    const cleaned = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+    parsed = JSON.parse(cleaned);
+  }
+
+  return parsed;
+}
+
 module.exports = {
   transcribeAudio,
   evaluateTranscript,
@@ -354,4 +387,5 @@ module.exports = {
   analyzeDisfluencies,
   detectPauses,
   estimatePronunciation,
+  generateWritingTask1,
 };

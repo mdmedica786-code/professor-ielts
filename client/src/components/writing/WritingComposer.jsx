@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { evaluateWriting } from '../../api/client';
 import { PenLine, Sparkles, Send, FileText, Image as ImageIcon, Upload, X } from 'lucide-react';
+import DynamicChartViewer from './DynamicChartViewer';
 
 const LOADING_STEPS = [
   'Reading your response...',
@@ -113,7 +114,9 @@ export default function WritingComposer({ task, onEvaluated }) {
             {task.module === 'general' ? 'General Training' : 'Academic'} · {task.topic}
           </span>
         </div>
-        <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-line">{task.text}</p>
+        <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-line mb-4">{task.text}</p>
+        
+        {task.chartData && <DynamicChartViewer chartData={task.chartData} />}
         
         {task.task === 1 && (
           <div className="mt-4 pt-4 border-t border-slate-100">
