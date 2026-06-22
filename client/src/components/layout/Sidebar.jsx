@@ -2,7 +2,7 @@ import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import api from '../../api/client';
-import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, BarChart3, Crown } from 'lucide-react';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, BarChart3, Crown, BookOpen } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 
 export default function Sidebar() {
@@ -62,6 +62,7 @@ export default function Sidebar() {
     { id: 'reading', icon: BookOpenText, label: 'Reading', active: onPractice && section === 'reading', onClick: () => goSection('reading') },
     { id: 'listening', icon: Headphones, label: 'Listening', active: onPractice && section === 'listening', onClick: () => goSection('listening') },
     { id: 'history', icon: History, label: 'History', active: currentView === 'history', onClick: goHistory },
+    { id: 'vocab', icon: BookOpen, label: 'Vocab', active: currentView === 'vocab', onClick: () => { setCurrentView('vocab'); if (isMobile()) closeSidebar(); } },
     { id: 'charts', icon: BarChart3, label: 'Charts', active: currentView === 'charts', onClick: () => { setCurrentView('charts'); if (isMobile()) closeSidebar(); } },
   ];
 

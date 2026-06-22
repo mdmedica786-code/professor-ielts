@@ -109,6 +109,85 @@ app.get("/api/user/me", verifyAuth, async (req, res) => {
   }
 });
 
+// Gamification stats (streak, XP, badges)
+app.get("/api/user/stats", verifyAuth, async (req, res) => {
+  try {
+    const { getStats } = require('./services/streakService');
+    const stats = await getStats(req.uid);
+    res.json({ success: true, data: stats });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── Vocabulary CRUD ───
+app.get("/api/vocab", verifyAuth, async (req, res) => {
+  try {
+    const { db } = require('./services/firebaseAdmin');
+    if (!db) return res.json({ success: true, data: [] });
+    const snap = await db.collection('users').doc(req.uid).collection('vocab')
+      .orderBy('createdAt', 'desc').limit(200).get();
+    const cards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, data: cards });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/vocab", verifyAuth, async (req, res) => {
+  try {
+    const { db } = require('./services/firebaseAdmin');
+    if (!db) return res.status(503).json({ success: false, error: "DB not configured" });
+    const { wrong, correct, context, section } = req.body;
+    if (!wrong || !correct) return res.status(400).json({ success: false, error: "wrong and correct are required" });
+    const card = {
+      wrong, correct, context: context || '',
+      section: section || 'general',
+      interval: 1,        // days until next review
+      easeFactor: 2.5,    // SM-2 ease factor
+      nextReview: new Date(),
+      createdAt: new Date(),
+    };
+    const ref = await db.collection('users').doc(req.uid).collection('vocab').add(card);
+    res.json({ success: true, data: { id: ref.id, ...card } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/vocab/:id/review", verifyAuth, async (req, res) => {
+  try {
+    const { db } = require('./services/firebaseAdmin');
+    if (!db) return res.status(503).json({ success: false, error: "DB not configured" });
+    const { quality } = req.body; // 0-5 (SM-2 scale), 3+ = pass
+    const cardRef = db.collection('users').doc(req.uid).collection('vocab').doc(req.params.id);
+    const doc = await cardRef.get();
+    if (!doc.exists) return res.status(404).json({ success: false, error: "Card not found" });
+    
+    const data = doc.data();
+    let { interval, easeFactor } = data;
+    const q = Math.max(0, Math.min(5, quality || 0));
+    
+    // SM-2 algorithm
+    if (q >= 3) {
+      if (interval <= 1) interval = 1;
+      else if (interval === 1) interval = 6;
+      else interval = Math.round(interval * easeFactor);
+      easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+    } else {
+      interval = 1;
+    }
+    
+    const nextReview = new Date();
+    nextReview.setDate(nextReview.getDate() + interval);
+    
+    await cardRef.update({ interval, easeFactor, nextReview, lastReviewed: new Date() });
+    res.json({ success: true, data: { interval, easeFactor, nextReview } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({

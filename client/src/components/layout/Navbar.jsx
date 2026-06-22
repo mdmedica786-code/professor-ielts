@@ -3,6 +3,7 @@ import { Sparkles, Menu } from 'lucide-react';
 import MiniScoreCard from '../evaluation/MiniScoreCard';
 import StudentMenu from './StudentMenu';
 import { BrandLogo } from '../common/BrandLogo';
+import StreakBar from '../common/StreakBar';
 
 const SUBTITLE = {
   speaking: 'AI Speaking Coach',
@@ -41,6 +42,7 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+        <StreakBar />
         {section === 'speaking' && currentEvaluation && (
           <div className="hidden sm:flex items-center gap-2 animate-fade-in">
             <Sparkles className="w-4 h-4 text-brand-500" />

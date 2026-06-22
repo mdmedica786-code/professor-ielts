@@ -18,6 +18,7 @@ import EvaluationPanel from './components/evaluation/EvaluationPanel';
 import UpgradeScreen from './components/payments/UpgradeScreen';
 import AdminDashboard from './components/admin/AdminDashboard';
 import ChartGenerator from './components/common/ChartGenerator';
+import VocabDeck from './components/vocab/VocabDeck';
 
 export default function App() {
   const { section, currentView, currentEvaluation, setCurrentView } = useApp();
@@ -64,6 +65,7 @@ export default function App() {
           {currentView === 'upgrade' && <UpgradeScreen />}
           {currentView === 'admin' && <AdminDashboard />}
           {currentView === 'charts' && <ChartGenerator />}
+          {currentView === 'vocab' && <VocabDeck />}
         </main>
       </div>
       <ChatWidget />

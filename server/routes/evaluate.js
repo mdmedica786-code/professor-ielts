@@ -258,6 +258,10 @@ router.post("/", async (req, res, next) => {
       `pauses=${pauseData.count}, disfluencies=${disfluencyData?.summary?.total_disfluencies ?? "N/A"}, ` +
       `time=${result.metadata.processingTime}s`
     );
+    // Record gamification activity (fire-and-forget — don't block the response)
+    const { recordActivity } = require('../services/streakService');
+    recordActivity(req.uid, 'speaking').catch(e => console.error('Streak error:', e));
+
     res.json({ success: true, data: result });
   } catch (err) {
     next(err);

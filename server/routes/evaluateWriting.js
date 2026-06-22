@@ -42,6 +42,11 @@ router.post("/", async (req, res, next) => {
     console.log(
       `Writing evaluation complete: overall=${result.overallBand}, tr=${result.scores.tr}, cc=${result.scores.cc}, lr=${result.scores.lr}, gra=${result.scores.gra}, time=${result.metadata.processingTime}s`
     );
+
+    // Record gamification activity (fire-and-forget)
+    const { recordActivity } = require('../services/streakService');
+    recordActivity(req.uid, 'writing').catch(e => console.error('Streak error:', e));
+
     res.json({ success: true, data: result });
   } catch (err) {
     next(err);
