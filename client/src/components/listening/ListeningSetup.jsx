@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Headphones, Loader2, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Headphones, Loader2, Sparkles, BookOpen } from 'lucide-react';
+import { getOfficialListeningTests, getOfficialListeningTest } from '../../api/client';
 
 const DIFFICULTIES = [
   { id: 'easy', label: 'Easy (5.0–6.0)', value: '5.0–6.0' },
@@ -20,7 +21,21 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
   const [topic, setTopic] = useState('');
   const [difficulty, setDifficulty] = useState('6.0–7.0');
 
-  const submit = (e) => {
+  const [mode, setMode] = useState('official'); // 'official' | 'ai'
+  const [officialTests, setOfficialTests] = useState([]);
+  const [loadingTests, setLoadingTests] = useState(false);
+
+  useEffect(() => {
+    if (mode === 'official' && officialTests.length === 0) {
+      setLoadingTests(true);
+      getOfficialListeningTests()
+        .then(res => setOfficialTests(res.data || []))
+        .catch(console.error)
+        .finally(() => setLoadingTests(false));
+    }
+  }, [mode]);
+
+  const submit = async (e) => {
     e?.preventDefault?.();
     if (busy) return;
     onGenerate({
@@ -29,6 +44,21 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
       topic: topic.trim() || undefined,
       difficulty,
     });
+  };
+
+  const handleSelectOfficial = async (id) => {
+    if (busy) return;
+    try {
+      const res = await getOfficialListeningTest(id);
+      if (res.success) {
+        // Bypass typical 'onGenerate' logic by mimicking a successful generation
+        // But since onGenerate currently wraps the generation API, we should pass it back.
+        // Wait, onGenerate takes config. Let's pass { isOfficial: true, testId: id }
+        onGenerate({ isOfficial: true, testId: id });
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -45,7 +75,52 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
         </div>
       </div>
 
-      <form onSubmit={submit} className="card-padded space-y-6">
+      <div className="flex bg-slate-200/60 p-1 rounded-xl mb-6 w-full max-w-sm mx-auto">
+        <button
+          onClick={() => setMode('official')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-semibold rounded-lg transition-all ${
+            mode === 'official' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" /> Official Tests
+        </button>
+        <button
+          onClick={() => setMode('ai')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-semibold rounded-lg transition-all ${
+            mode === 'ai' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" /> AI Generator
+        </button>
+      </div>
+
+      {mode === 'official' ? (
+        <div className="card-padded">
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Select a Test</h2>
+          {loadingTests ? (
+            <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+          ) : officialTests.length === 0 ? (
+            <div className="text-center p-8 text-slate-500 text-sm bg-slate-50 rounded-xl border border-dashed">
+              No official tests have been processed yet.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {officialTests.map(t => (
+                <button
+                  key={t.id}
+                  disabled={busy}
+                  onClick={() => onGenerate({ isOfficial: true, testId: t.id })}
+                  className="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-xl hover:border-brand-400 hover:bg-brand-50 transition-colors disabled:opacity-50"
+                >
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Test</span>
+                  <span className="text-2xl font-black text-slate-800">{t.id}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <form onSubmit={submit} className="card-padded space-y-6">
         {/* Test size */}
         <div>
           <div className="text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wide">
@@ -180,7 +255,8 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
             </>
           )}
         </button>
-      </form>
+        </form>
+      )}
     </div>
   );
 }

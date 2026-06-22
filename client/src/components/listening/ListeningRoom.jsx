@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { generateListening, evaluateListening } from '../../api/client';
+import { generateListening, evaluateListening, getOfficialListeningTest } from '../../api/client';
 import ListeningSetup from './ListeningSetup';
 import ListeningPlayer from './ListeningPlayer';
 import AnswerSheet from './AnswerSheet';
@@ -34,7 +34,13 @@ export default function ListeningRoom() {
     setGenerating(true);
     setError(null);
     try {
-      const res = await generateListening(config);
+      let res;
+      if (config.isOfficial) {
+        res = await getOfficialListeningTest(config.testId);
+      } else {
+        res = await generateListening(config);
+      }
+
       if (res.success) {
         setTest(res.data);
         setAnswers({});

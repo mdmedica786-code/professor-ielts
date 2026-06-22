@@ -149,6 +149,16 @@ export async function generateListening(params) {
   return data;
 }
 
+export async function getOfficialListeningTests() {
+  const { data } = await api.get('/listening/tests');
+  return data;
+}
+
+export async function getOfficialListeningTest(id) {
+  const { data } = await api.get(`/listening/test/${id}`);
+  return data;
+}
+
 /**
  * Mark a listening attempt. Send back the opaque token from generateListening
  * plus a { questionId: answer } map.

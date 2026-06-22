@@ -5,8 +5,12 @@ const {
   evaluateListening,
   toPublicSection,
 } = require("../services/listeningService");
+const fs = require('fs');
+const path = require('path');
 
 const router = express.Router();
+
+const TESTS_DIR = path.join(__dirname, '../data/extracted_tests');
 
 // We carry the answer key + section metadata through the session via an opaque
 // base64 token (same pattern as reading.js). It is NOT security — just keeps
@@ -27,7 +31,45 @@ function decodeToken(token) {
  *   - difficulty: target band range, e.g. '6.0–7.0'
  *
  * Returns: { title, size, sections (public, with audioBase64 per utterance), token }
+ * Returns: { title, size, sections (public, with audioBase64 per utterance), token }
  */
+router.get("/tests", async (req, res, next) => {
+  try {
+    if (!fs.existsSync(TESTS_DIR)) return res.json({ tests: [] });
+    
+    const files = fs.readdirSync(TESTS_DIR).filter(f => f.endsWith('.json'));
+    const tests = files.map(f => {
+      const data = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, f)));
+      return { id: data.test_id, name: `IELTS Listening Test ${data.test_id}`, totalSections: data.sections?.length || 4 };
+    });
+    res.json({ success: true, data: tests.sort((a, b) => a.id - b.id) });
+  } catch (err) { next(err); }
+});
+
+router.get("/test/:id", async (req, res, next) => {
+  try {
+    const filePath = path.join(TESTS_DIR, `test_${req.params.id}.json`);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, error: "Test not found" });
+    
+    const testData = JSON.parse(fs.readFileSync(filePath));
+    // Provide the GitHub Raw URL for the audio (since GitHub is handling the 480MB hosting for free)
+    // We create a dummy section layout for the existing Player
+    const sections = testData.sections.map(s => ({
+      section_number: s.section_number,
+      instructions: s.instructions,
+      questions: s.questions,
+      audioUrl: `https://raw.githubusercontent.com/mdmedica786-code/ielts-audios/main/TEST%20${testData.test_id}.mp3`,
+      // Provide dummy utterances for the player to work
+      utterances: [{ speaker: "Examiner", transcript: "Listen to the audio.", audioUrl: `https://raw.githubusercontent.com/mdmedica786-code/ielts-audios/main/TEST%20${testData.test_id}.mp3` }]
+    }));
+
+    const tokenPayload = { title: `Official Test ${testData.test_id}`, size: 'full', sections, isOfficial: true };
+    const token = encodeToken(tokenPayload);
+
+    res.json({ success: true, data: { title: `Official Test ${testData.test_id}`, size: 'full', sections, token } });
+  } catch (err) { next(err); }
+});
+
 router.post("/generate", async (req, res, next) => {
   try {
     const { size, whichSection, topic, difficulty } = req.body || {};
