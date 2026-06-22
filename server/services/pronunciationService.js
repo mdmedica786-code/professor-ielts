@@ -18,6 +18,45 @@ try {
 const SPEECH_KEY = process.env.AZURE_SPEECH_KEY;
 const SPEECH_REGION = process.env.AZURE_SPEECH_REGION || 'eastus';
 
+const ffmpegPath = require('ffmpeg-static');
+const { spawn } = require('child_process');
+
+/**
+ * Convert any audio buffer (WebM/MP4/Ogg) to 16kHz 16-bit PCM WAV.
+ * This matches Azure Speech SDK's native requirements.
+ */
+async function convertToWav(inputBuffer) {
+  return new Promise((resolve, reject) => {
+    const ffmpeg = spawn(ffmpegPath, [
+      '-i', 'pipe:0',
+      '-f', 'wav',
+      '-ar', '16000',
+      '-ac', '1',
+      '-c:a', 'pcm_s16le',
+      'pipe:1'
+    ]);
+
+    const chunks = [];
+    ffmpeg.stdout.on('data', (chunk) => chunks.push(chunk));
+    
+    let errorLog = '';
+    ffmpeg.stderr.on('data', (chunk) => errorLog += chunk.toString());
+
+    ffmpeg.on('close', (code) => {
+      if (code !== 0) {
+        console.error('FFmpeg error:', errorLog);
+        return reject(new Error(`FFmpeg exited with code ${code}`));
+      }
+      resolve(Buffer.concat(chunks));
+    });
+
+    ffmpeg.on('error', reject);
+
+    ffmpeg.stdin.write(inputBuffer);
+    ffmpeg.stdin.end();
+  });
+}
+
 /**
  * Map Azure's 0–100 pronunciation accuracy to an IELTS 0–9 band.
  */
@@ -66,14 +105,14 @@ async function scorePronunciation(audioBuffer, transcript, filename) {
     );
     pronunciationConfig.enableProsodyAssessment = true;
 
-    // By default, Azure expects raw 16kHz PCM audio. Since we are passing
-    // WebM buffers from the browser, we must tell Azure to handle the container.
-    const format = sdk.AudioStreamFormat.getCompressedFormat(
-      sdk.AudioStreamContainerFormat.ANY
-    );
-    const pushStream = sdk.AudioInputStream.createPushStream(format);
+    // Convert the incoming audio (usually WebM from browser) to raw 16kHz WAV
+    // because Node.js Azure Speech SDK doesn't natively support WebM unpacking.
+    const wavBuffer = await convertToWav(audioBuffer);
+
+    // Create audio config from buffer (default format is 16kHz 16bit PCM)
+    const pushStream = sdk.AudioInputStream.createPushStream();
     
-    pushStream.write(audioBuffer);
+    pushStream.write(wavBuffer);
     pushStream.close();
     const audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
 
