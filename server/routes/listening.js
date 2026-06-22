@@ -40,9 +40,9 @@ router.get("/tests", async (req, res, next) => {
     const files = fs.readdirSync(TESTS_DIR).filter(f => f.endsWith('.json'));
     const tests = files.map(f => {
       const data = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, f)));
-      return { id: data.test_id, name: `IELTS Listening Test ${data.test_id}`, totalSections: data.sections?.length || 4 };
+      return { id: data.test_id, name: data.title || `IELTS Listening Test ${data.test_id}`, totalSections: data.sections?.length || 4 };
     });
-    res.json({ success: true, data: tests.sort((a, b) => a.id - b.id) });
+    res.json({ success: true, data: tests.sort((a, b) => String(a.id).localeCompare(String(b.id))) });
   } catch (err) { next(err); }
 });
 
