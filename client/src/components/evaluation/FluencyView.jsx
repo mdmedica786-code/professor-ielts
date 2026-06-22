@@ -17,6 +17,7 @@ export default function FluencyView({ evaluation }) {
   const { count: pauseCount = 0, totalPauseDuration = 0 } = pauseAnalysis || {};
   const { fillers = [], repetitions = [], false_starts = [], summary = {} } = disfluencyAnalysis || {};
   const metrics = evaluation.criteria?.p?.metrics;
+  const mispronunciations = evaluation.criteria?.p?.mispronunciations || [];
 
   return (
     <div className="space-y-4 animate-slide-up">
@@ -38,6 +39,27 @@ export default function FluencyView({ evaluation }) {
           <div className="card-padded bg-purple-50 border-purple-100 text-center">
             <div className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-1">Prosody</div>
             <div className="text-2xl font-black text-purple-900">{Math.round(metrics.prosody)}%</div>
+          </div>
+        </div>
+      )}
+
+      {/* Mispronunciations Section */}
+      {mispronunciations.length > 0 && (
+        <div className="card-padded bg-rose-50 border-rose-100 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle className="w-5 h-5 text-rose-500" />
+            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Pronunciation Practice</h4>
+          </div>
+          <p className="text-xs text-slate-600 mb-3">The AI detected low accuracy on these specific words:</p>
+          <div className="flex flex-wrap gap-2">
+            {mispronunciations.map((m, i) => (
+              <div key={i} className="bg-white border border-rose-200 rounded-md px-3 py-2 flex flex-col items-center shadow-sm min-w-[80px]">
+                <span className="font-bold text-slate-800 mb-1">"{m.word}"</span>
+                <span className="text-[10px] font-black text-rose-600 tracking-wider px-2 py-0.5 bg-rose-100 rounded-full">
+                  {Math.round(m.accuracy)}% ACC
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
