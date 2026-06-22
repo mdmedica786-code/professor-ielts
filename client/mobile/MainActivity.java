@@ -1,4 +1,4 @@
-package com.professorielts.app;
+package com.bandlogic.app;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

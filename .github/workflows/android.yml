@@ -69,7 +69,7 @@ jobs:
           if ! grep -q "RECORD_AUDIO" "$MANIFEST"; then
             sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n\n    <application#' "$MANIFEST"
           fi
-          DEST="android/app/src/main/java/com/professorielts/app"
+          DEST="android/app/src/main/java/com/bandlogic/app"
           mkdir -p "$DEST"
           cp mobile/MainActivity.java "$DEST/MainActivity.java"
           echo "----- AndroidManifest permissions -----"
@@ -78,6 +78,10 @@ jobs:
       - name: Sync Capacitor
         working-directory: client
         run: npx cap sync android
+
+      - name: Generate Android Assets (Icons and Splash Screen)
+        working-directory: client
+        run: npx @capacitor/assets generate --android
 
       - name: Copy google-services.json
         run: cp client/google-services.json client/android/app/google-services.json

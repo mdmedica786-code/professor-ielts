@@ -254,3 +254,47 @@
   transform: rotateY(180deg);
 }
 
+/* === Splash Screen Animations === */
+@keyframes logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.7));
+  }
+}
+
+@keyframes shimmer-custom {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-logo-pulse {
+  animation: logo-pulse 2.2s infinite ease-in-out;
+}
+
+.animate-shimmer-custom {
+  animation: shimmer-custom 1.6s infinite linear;
+}
+
+.scale-up {
+  animation: scaleUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
