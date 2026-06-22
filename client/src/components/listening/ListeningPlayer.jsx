@@ -24,6 +24,7 @@ export default function ListeningPlayer({ sections, onComplete }) {
   const audioUrls = useMemo(() => {
     return sections.map((section) =>
       section.utterances.map((u) => {
+        if (u.audioUrl) return u.audioUrl;
         if (!u.audioBase64) return null;
         try {
           const bin = atob(u.audioBase64);
