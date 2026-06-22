@@ -62,6 +62,7 @@ app.use("/api/payments", rateLimit, paymentsRoute);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use('/snippets', express.static('d:/NERD speaking/audios/snippets'));
 
 // === Routes ===
 // rateLimit guards every paid AI endpoint against abuse / runaway cost (applied

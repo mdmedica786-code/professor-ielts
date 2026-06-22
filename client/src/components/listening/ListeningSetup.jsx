@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Headphones, Loader2, Sparkles, BookOpen } from 'lucide-react';
 import { getOfficialListeningTests, getOfficialListeningTest } from '../../api/client';
+import ListeningFocusMode from './ListeningFocusMode';
 
 const DIFFICULTIES = [
   { id: 'easy', label: 'Easy (5.0–6.0)', value: '5.0–6.0' },
@@ -82,7 +83,15 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
             mode === 'official' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <BookOpen className="w-4 h-4" /> Official Tests
+          <BookOpen className="w-4 h-4" /> Official 
+        </button>
+        <button
+          onClick={() => setMode('focus')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-semibold rounded-lg transition-all ${
+            mode === 'focus' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Headphones className="w-4 h-4" /> Focus Mode 
         </button>
         <button
           onClick={() => setMode('ai')}
@@ -90,11 +99,13 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
             mode === 'ai' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Sparkles className="w-4 h-4" /> AI Generator
+          <Sparkles className="w-4 h-4" /> AI 
         </button>
       </div>
 
-      {mode === 'official' ? (
+      {mode === 'focus' ? (
+        <ListeningFocusMode onComplete={(answers) => alert(JSON.stringify(answers))} />
+      ) : mode === 'official' ? (
         <div className="card-padded">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Select a Test</h2>
           {loadingTests ? (
