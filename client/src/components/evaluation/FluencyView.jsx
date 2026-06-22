@@ -16,9 +16,32 @@ export default function FluencyView({ evaluation }) {
 
   const { count: pauseCount = 0, totalPauseDuration = 0 } = pauseAnalysis || {};
   const { fillers = [], repetitions = [], false_starts = [], summary = {} } = disfluencyAnalysis || {};
+  const metrics = evaluation.criteria?.p?.metrics;
 
   return (
     <div className="space-y-4 animate-slide-up">
+      {/* Azure Pronunciation Metrics */}
+      {metrics && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="card-padded bg-brand-50 border-brand-100 text-center">
+            <div className="text-xs font-bold text-brand-700 uppercase tracking-wider mb-1">Accuracy</div>
+            <div className="text-2xl font-black text-brand-900">{Math.round(metrics.accuracy)}%</div>
+          </div>
+          <div className="card-padded bg-emerald-50 border-emerald-100 text-center">
+            <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Fluency</div>
+            <div className="text-2xl font-black text-emerald-900">{Math.round(metrics.fluency)}%</div>
+          </div>
+          <div className="card-padded bg-blue-50 border-blue-100 text-center">
+            <div className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">Completeness</div>
+            <div className="text-2xl font-black text-blue-900">{Math.round(metrics.completeness)}%</div>
+          </div>
+          <div className="card-padded bg-purple-50 border-purple-100 text-center">
+            <div className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-1">Prosody</div>
+            <div className="text-2xl font-black text-purple-900">{Math.round(metrics.prosody)}%</div>
+          </div>
+        </div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card-padded bg-amber-50 border-amber-100">

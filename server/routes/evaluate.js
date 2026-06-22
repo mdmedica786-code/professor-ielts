@@ -146,13 +146,11 @@ router.post("/", async (req, res, next) => {
 
     let pScore;
     if (pronunciationData) {
-      pScore = pronunciationData.pronunciation_band;            // acoustic engine (disabled)
+      pScore = pronunciationData.band || pronunciationData.pronunciation_band;
     } else if (intelligibilityPron) {
-      pScore = intelligibilityPron.band;                        // transcription intelligibility
+      pScore = intelligibilityPron.band;
       pronunciationSource = "intelligibility";
     } else {
-      // No audio signal at all (text-only): estimate pronunciation as tracking
-      // the other criteria so it neither inflates nor drags the overall band.
       pScore = Math.round(coreMean * 2) / 2;
       if (pronunciationSource === "none") {
         pronunciationSource = req.file ? "estimated" : "text_only";
@@ -166,55 +164,48 @@ router.post("/", async (req, res, next) => {
       p: pScore,
     };
 
-    // Overall band, rounded to nearest 0.5. Include pronunciation in the
-    // standard 4-criteria IELTS mean when we have a real signal (acoustic or
-    // intelligibility-based). For text-only input (pure estimate), base it on
-    // FC/LR/GRA so a placeholder can't distort the result.
     const hasRealPronunciation = !!(pronunciationData || intelligibilityPron);
     const rawMean = hasRealPronunciation
       ? (scores.fc + scores.lr + scores.gra + scores.p) / 4
       : coreMean;
     const overallBand = Math.round(rawMean * 2) / 2;
 
-    // Build pronunciation criteria
-    const pCriteria = pronunciationData
-      ? {
-          good: pronunciationData.feedback?.phone_feedback
-            ?.filter((f) => f.severity !== "high")
-            .map((f) => `Clear production of ${f.phone_name}`)
-            .slice(0, 3) || ["Generally clear pronunciation"],
-          weak: pronunciationData.feedback?.phone_feedback
-            ?.filter((f) => f.severity === "high")
-            .map((f) => f.message)
-            .slice(0, 3) || [],
-          note: `Score based on acoustic GOP analysis. Error rate: ${Math.round(
-            pronunciationData.error_rate * 100
-          )}%`,
-          phonemeScores: pronunciationData.word_scores || [],
-          mispronunciations: pronunciationData.mispronunciations || [],
+    let pCriteria;
+    if (pronunciationData && pronunciationData.method === 'azure-speech-sdk') {
+      pCriteria = {
+        good: [pronunciationData.descriptor],
+        weak: pronunciationData.mispronounced?.slice(0, 3).map(w => `Mispronounced: "${w.word}" (accuracy: ${Math.round(w.accuracy)}%)`) || [],
+        note: `Azure Speech AI — Accuracy: ${Math.round(pronunciationData.accuracy)}%, Fluency: ${Math.round(pronunciationData.fluency)}%, Prosody: ${Math.round(pronunciationData.prosody)}%`,
+        phonemeScores: pronunciationData.words || [],
+        mispronunciations: pronunciationData.mispronounced || [],
+        metrics: {
+          accuracy: pronunciationData.accuracy,
+          fluency: pronunciationData.fluency,
+          completeness: pronunciationData.completeness,
+          prosody: pronunciationData.prosody
         }
-      : intelligibilityPron
-      ? {
-          band: intelligibilityPron.band,
-          method: "intelligibility",
-          good: intelligibilityPron.band >= 7 ? [intelligibilityPron.descriptor] : [],
-          weak: intelligibilityPron.band < 7 ? [intelligibilityPron.descriptor] : [],
-          note: "Pronunciation is scored here as overall intelligibility — how clearly your speech was understood — derived from the speech recognizer's confidence. It reflects clarity and is included in your band, but it is not sound-by-sound phoneme analysis.",
-          phonemeScores: [],
-          mispronunciations: [],
-        }
-      : {
-          good: [],
-          weak: [],
-          note:
-            pronunciationSource === "estimated"
-              ? "Acoustic pronunciation analysis is temporarily disabled while a more accurate engine is integrated. This band is an estimate based on your other criteria — it is not phoneme-level analysis and does not affect your overall band."
-              : pronunciationSource === "unavailable"
-              ? "Pronunciation pipeline was unavailable. Score is estimated."
-              : "No audio provided. Pronunciation not assessed acoustically.",
-          phonemeScores: [],
-          mispronunciations: [],
-        };
+      };
+    } else if (intelligibilityPron) {
+      pCriteria = {
+        good: intelligibilityPron.band >= 7 ? [intelligibilityPron.descriptor] : [],
+        weak: intelligibilityPron.band < 7 ? [intelligibilityPron.descriptor] : [],
+        note: "Pronunciation is scored here as overall intelligibility — how clearly your speech was understood — derived from the speech recognizer's confidence.",
+        phonemeScores: [],
+        mispronunciations: [],
+      };
+    } else {
+      pCriteria = {
+        good: [],
+        weak: [],
+        note: pronunciationSource === "estimated"
+            ? "Acoustic pronunciation analysis is temporarily disabled while a more accurate engine is integrated. This band is an estimate based on your other criteria — it is not phoneme-level analysis and does not affect your overall band."
+            : pronunciationSource === "unavailable"
+            ? "Pronunciation pipeline was unavailable. Score is estimated."
+            : "No audio provided. Pronunciation not assessed acoustically.",
+        phonemeScores: [],
+        mispronunciations: [],
+      };
+    }
 
     const result = {
       overallBand,
