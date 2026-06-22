@@ -55,7 +55,8 @@ router.get("/test/:id", async (req, res, next) => {
     // Provide the GitHub Raw URL for the audio (since GitHub is handling the 480MB hosting for free)
     // We create a dummy section layout for the existing Player
     const sections = testData.sections.map(s => ({
-      section_number: s.section_number,
+      number: s.number,
+      title: s.title,
       instructions: s.instructions,
       questions: s.questions,
       audioUrl: `https://raw.githubusercontent.com/mdmedica786-code/ielts-audios/main/TEST%20${testData.test_id}.mp3`,
