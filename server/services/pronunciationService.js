@@ -66,8 +66,13 @@ async function scorePronunciation(audioBuffer, transcript, filename) {
     );
     pronunciationConfig.enableProsodyAssessment = true;
 
-    // Create audio config from buffer
-    const pushStream = sdk.AudioInputStream.createPushStream();
+    // By default, Azure expects raw 16kHz PCM audio. Since we are passing
+    // WebM buffers from the browser, we must tell Azure to handle the container.
+    const format = sdk.AudioStreamFormat.getCompressedFormat(
+      sdk.AudioStreamContainerFormat.ANY
+    );
+    const pushStream = sdk.AudioInputStream.createPushStream(format);
+    
     pushStream.write(audioBuffer);
     pushStream.close();
     const audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
@@ -83,12 +88,12 @@ async function scorePronunciation(audioBuffer, transcript, filename) {
           if (result.reason === sdk.ResultReason.RecognizedSpeech) {
             const pronunciationResult = sdk.PronunciationAssessmentResult.fromResult(result);
 
-            const accuracy = pronunciationResult.accuracyScore || 0;
-            const fluency = pronunciationResult.fluencyScore || 0;
-            const completeness = pronunciationResult.completenessScore || 0;
-            const prosody = pronunciationResult.prosodyScore || 0;
+            let accuracy = pronunciationResult.accuracyScore || 0;
+            let fluency = pronunciationResult.fluencyScore || 0;
+            let completeness = pronunciationResult.completenessScore || 0;
+            let prosody = pronunciationResult.prosodyScore || 0;
 
-            // Extract per-word details
+            // Extract per-word details and overall scores from JSON for safety
             const words = [];
             try {
               const jsonStr = result.properties.getProperty(
@@ -96,6 +101,16 @@ async function scorePronunciation(audioBuffer, transcript, filename) {
               );
               if (jsonStr) {
                 const json = JSON.parse(jsonStr);
+                
+                // Fallback: extract overall scores directly from JSON if the SDK wrapper failed
+                const overallPron = json?.NBest?.[0]?.PronunciationAssessment;
+                if (overallPron) {
+                  accuracy = accuracy || overallPron.AccuracyScore || 0;
+                  fluency = fluency || overallPron.FluencyScore || 0;
+                  completeness = completeness || overallPron.CompletenessScore || 0;
+                  prosody = prosody || overallPron.ProsodyScore || 0;
+                }
+
                 const nbestWords = json?.NBest?.[0]?.Words || [];
                 for (const w of nbestWords) {
                   const wordDetail = {
