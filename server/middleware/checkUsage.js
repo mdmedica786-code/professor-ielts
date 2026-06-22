@@ -7,8 +7,8 @@ async function checkUsage(req, res, next) {
     return next();
   }
 
-  // Admin / Pro User Override
-  if (req.userEmail === 'mdmedica786@gmail.com') {
+  // Admin override via Firebase custom claims (set via Firebase Admin SDK)
+  if (req.isAdmin) {
     return next();
   }
 

@@ -5,6 +5,18 @@ const { getMimeType } = require("../utils/audioUtils");
 
 const router = express.Router();
 
+// Per-step timeout to prevent a single hung API call from stalling the entire pipeline.
+const STEP_TIMEOUT_MS = 30_000; // 30 seconds per AI call
+
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
+    ),
+  ]);
+}
+
 // Audio upload + validation are handled upstream in index.js
 // (upload.single("audio") -> validateAudio) before this router runs.
 
@@ -48,10 +60,10 @@ router.post("/", async (req, res, next) => {
 
       // Step 1: Verbatim transcription via OpenAI Whisper
       console.log("Transcription: Using OpenAI whisper-1 (verbatim mode)...");
-      const transcriptionResult = await openaiService.transcribeAudio(
-        req.file.buffer,
-        mimeType,
-        req.file.originalname
+      const transcriptionResult = await withTimeout(
+        openaiService.transcribeAudio(req.file.buffer, mimeType, req.file.originalname),
+        STEP_TIMEOUT_MS,
+        "Whisper transcription"
       );
       transcript = transcriptionResult.text;
       transcriptWords = transcriptionResult.words;
@@ -81,7 +93,11 @@ router.post("/", async (req, res, next) => {
       // Step 3: Disfluency analysis (fillers, repetitions, false starts) — non-fatal
       try {
         console.log("Disfluency analysis: Sending to gpt-4o-mini...");
-        disfluencyData = await openaiService.analyzeDisfluencies(transcript, transcriptWords);
+        disfluencyData = await withTimeout(
+          openaiService.analyzeDisfluencies(transcript, transcriptWords),
+          STEP_TIMEOUT_MS,
+          "Disfluency analysis"
+        );
         console.log(
           `Disfluency analysis: Found ${disfluencyData.summary.total_disfluencies} disfluencies ` +
           `(${disfluencyData.summary.filler_count} fillers, ` +
@@ -133,10 +149,10 @@ router.post("/", async (req, res, next) => {
     }
 
     console.log("LLM evaluation: Using OpenAI gpt-4o-mini...");
-    const evaluationResult = await openaiService.evaluateTranscript(
-      transcript,
-      questionText,
-      questionPart
+    const evaluationResult = await withTimeout(
+      openaiService.evaluateTranscript(transcript, questionText, questionPart),
+      STEP_TIMEOUT_MS,
+      "LLM evaluation"
     );
     console.log("LLM evaluation: OpenAI gpt-4o-mini completed successfully.");
 

@@ -63,11 +63,14 @@ export function AuthProvider({ children }) {
   };
 
   const setupRecaptcha = (containerId) => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-        size: 'invisible',
-      });
+    // Clear any previous verifier to prevent memory leaks
+    if (window.recaptchaVerifier) {
+      try { window.recaptchaVerifier.clear(); } catch (_) { /* already cleared */ }
+      window.recaptchaVerifier = null;
     }
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+      size: 'invisible',
+    });
   };
 
   const signInWithPhone = async (phoneNumber, containerId) => {
@@ -77,6 +80,11 @@ export function AuthProvider({ children }) {
   };
 
   const signOut = () => {
+    // Clean up recaptcha verifier on sign out
+    if (window.recaptchaVerifier) {
+      try { window.recaptchaVerifier.clear(); } catch (_) { /* already cleared */ }
+      window.recaptchaVerifier = null;
+    }
     return firebaseSignOut(auth);
   };
 

@@ -97,10 +97,13 @@ app.get("/api/user/me", verifyAuth, async (req, res) => {
     const now = new Date();
     let plan = 'free';
     
+    // Normalize legacy "premium" → "pro"
+    const rawPlan = data.plan === 'premium' ? 'pro' : (data.plan || 'free');
+
     if (data.premiumUntil && data.premiumUntil.toDate() > now) {
-      plan = data.plan || 'pro';
-    } else if (data.plan === 'premium' || data.plan === 'ultra' || data.plan === 'pro') {
-      plan = data.plan === 'premium' ? 'pro' : data.plan; // Legacy fallback
+      plan = rawPlan;
+    } else if (rawPlan === 'ultra' || rawPlan === 'pro') {
+      plan = rawPlan;
     }
     
     res.json({ success: true, plan });
@@ -199,29 +202,6 @@ app.get("/api/health", (req, res) => {
       pronunciationUrl: process.env.PYTHON_PRONUNCIATION_URL || "not configured",
       firebaseConfigured: !!process.env.FIREBASE_SERVICE_ACCOUNT,
     },
-  });
-});
-
-app.get("/api/health/debug", (req, res) => {
-  const envRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
-  let parseSuccess = false;
-  let parseError = null;
-  if (envRaw) {
-    try {
-      JSON.parse(envRaw);
-      parseSuccess = true;
-    } catch (e) {
-      parseError = e.message;
-    }
-  }
-  
-  res.json({
-    hasEnv: !!envRaw,
-    envPrefix: envRaw ? envRaw.substring(0, 30) + '...' : null,
-    parseSuccess,
-    parseError,
-    appsLength: require("./services/firebaseAdmin").getAppsLength(),
-    initError: require("./services/firebaseAdmin").getFirebaseInitError()
   });
 });
 

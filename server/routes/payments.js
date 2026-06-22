@@ -112,7 +112,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
     if (eventName === "subscription_created" || eventName === "subscription_updated" || eventName === "order_created") {
       const attributes = event.data.attributes;
       const status = attributes.status; // e.g. 'active', 'past_due', 'unpaid', 'cancelled', 'expired'
-      
+
       // Compute expiry
       let premiumUntil = null;
       if (attributes.renews_at) {
@@ -127,9 +127,14 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
         premiumUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       }
 
+      // Determine tier from variant. usageService.js checks for "pro"
+      // or "ultra" — never store "premium" (legacy mismatch).
+      // Default to "pro"; add ultra variant detection when an ultra plan exists.
+      const tier = "pro";
+
       if (status === "active" || eventName === "order_created") {
         await userRef.update({
-          plan: "premium",
+          plan: tier,
           premiumUntil: premiumUntil
         });
       } else if (status === "expired" || status === "cancelled" || status === "unpaid") {

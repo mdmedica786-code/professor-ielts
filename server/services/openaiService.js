@@ -1,5 +1,6 @@
 const { OpenAI, toFile } = require("openai");
 const IELTS_EXAMINER_PROMPT = require("../prompts/ieltsExaminer");
+const { normalizeBand } = require("../utils/bands");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -240,21 +241,72 @@ Analyze all disfluencies in this speech. Return ONLY valid JSON.`;
 
 // ─── IELTS evaluation ───────────────────────────────────────────────
 
-/**
- * Coerce a model-provided score into a valid IELTS band: a number clamped to
- * 0–9 and snapped to the nearest 0.5. Returns null when the value is missing or
- * not numeric, so callers can detect a malformed grade instead of propagating
- * NaN into the overall band.
- */
-function normalizeBand(value) {
-  const n = typeof value === "string" ? parseFloat(value) : value;
-  if (typeof n !== "number" || Number.isNaN(n)) return null;
-  const clamped = Math.min(9, Math.max(0, n));
-  return Math.round(clamped * 2) / 2;
-}
+// Few-shot calibration examples anchor the model's scoring range.
+// One high example (Band 8) and one low example (Band 5.5) prevent central-tendency collapse.
+const SPEAKING_FEW_SHOT = [
+  {
+    role: "user",
+    content: `IELTS Speaking Question (Part 1): "Do you enjoy cooking?"
+
+Student's Transcript:
+"Um yeah I like cooking very much. I cook every day because um my mother she teach me when I was young. I like to make the, how to say, the rice and chicken. Sometimes I am cooking with my sister also. It is very enjoy for me."
+
+Evaluate this response now. Return ONLY valid JSON.`
+  },
+  {
+    role: "assistant",
+    content: JSON.stringify({
+      fc: 5.5, lr: 5.5, gra: 5.0,
+      verdict: "A willing but limited response with frequent grammatical errors and basic vocabulary; the speaker communicates meaning but lacks range and accuracy.",
+      criteria: {
+        fc: { good: ["Willing to speak and provides some extension with reasons: \"I cook every day because um my mother she teach me when I was young\""], weak: ["Relies on simple connectives (\"because\", \"and\", \"also\") with no discourse markers beyond fillers"], note: "Speaks willingly but with limited coherence tools — not yet flexible enough for Band 6." },
+        lr: { good: ["Topic-appropriate basic vocabulary: \"cooking\", \"rice and chicken\""], weak: ["Very limited range — cannot paraphrase or use less-common items; \"It is very enjoy for me\" shows word-form confusion"], note: "Adequate for a familiar topic but no flexibility or precision — stays at 5.5." },
+        gra: { good: ["Some simple sentences formed correctly: \"I cook every day\""], weak: ["Frequent errors: \"my mother she teach me\" (pronoun doubling + tense), \"I am cooking\" (progressive misuse), \"It is very enjoy\" (adjective/verb confusion)"], note: "Basic forms attempted but complex structures absent and errors recur — Band 5." }
+      },
+      mistakes: [
+        { cat: "grammar", said: "my mother she teach me", fix: "my mother taught me", why: "Remove pronoun doubling and use past simple for completed past events." },
+        { cat: "grammar", said: "I am cooking with my sister", fix: "I cook with my sister", why: "Use present simple for habitual actions, not present continuous." },
+        { cat: "vocabulary", said: "It is very enjoy for me", fix: "I enjoy it a lot", why: "'Enjoy' is a verb, not an adjective — restructure the sentence." },
+        { cat: "grammar", said: "the, how to say, the rice", fix: "rice and chicken", why: "Unnecessary repetition of article; no article needed before uncountable/general nouns." }
+      ],
+      plan: { target: 6.0, focus: "Eliminate basic tense and word-form errors to unlock Band 6 GRA.", drills: [
+        { area: "gra", task: "Write 10 sentences daily about routines using present simple vs. past simple, then self-check tenses." },
+        { area: "lr", task: "Learn 3 new cooking-related collocations per day (e.g., 'whip up a meal', 'dice the onions') and use each in a sentence." },
+        { area: "fc", task: "Record a 1-minute answer to a Part 1 question and consciously use 'well', 'actually', 'to be honest' as discourse markers." }
+      ]}
+    })
+  },
+  {
+    role: "user",
+    content: `IELTS Speaking Question (Part 3): "How has technology changed the way people communicate?"
+
+Student's Transcript:
+"Well I think technology has fundamentally transformed how we interact with each other. I mean if you compare, say, twenty years ago people relied almost entirely on face-to-face conversations or phone calls, whereas nowadays we have this whole spectrum of digital channels like instant messaging, video conferencing, social media platforms and so on. One significant shift I'd highlight is that communication has become much more asynchronous — you can send a message and the other person responds when it suits them, which is convenient but I think it's also eroded the depth of our conversations to some extent. Having said that, technology has also enabled people to maintain relationships across vast distances, which would have been practically impossible before. So it's a double-edged sword really."
+
+Evaluate this response now. Return ONLY valid JSON.`
+  },
+  {
+    role: "assistant",
+    content: JSON.stringify({
+      fc: 8.5, lr: 8.5, gra: 8.0,
+      verdict: "A fluent, well-developed, and sophisticated response demonstrating wide lexical range and strong grammatical control with only minor imperfections.",
+      criteria: {
+        fc: { good: ["Sustained, effortless flow with idea development that builds logically from comparison to consequence to concession: \"One significant shift I'd highlight is that…Having said that…So it's a double-edged sword\""], weak: [], note: "Fully coherent with natural discourse management; hesitation is content-related only — not 9.0 because the conclusion could be slightly more developed." },
+        lr: { good: ["Precise, less-common vocabulary used naturally: \"asynchronous\", \"eroded the depth\", \"double-edged sword\", \"spectrum of digital channels\""], weak: [], note: "Wide, flexible range with skilful use of idiomatic and less-common items; minor room for even more sophisticated collocations keeps this at 8.5." },
+        gra: { good: ["Range of complex structures: conditionals (\"which would have been practically impossible\"), relative clauses, passive voice, contrast structures (\"whereas nowadays\")"], weak: ["Minor: \"the other person responds when it suits them\" — slightly informal register shift but acceptable in speaking"], note: "Wide range with the majority error-free; the occasional informality is natural in speech — not 8.5 because a slightly wider range of complex forms (e.g., inversion, cleft sentences) would strengthen it." }
+      },
+      mistakes: [],
+      plan: { target: 9.0, focus: "Incorporate more varied complex structures (inversions, cleft sentences) to push GRA to 8.5+.", drills: [
+        { area: "gra", task: "Practise using one inversion ('Not only…but also', 'Rarely do we…') and one cleft sentence ('What I find interesting is…') in each Part 3 answer." },
+        { area: "fc", task: "After each practice answer, add a 2-sentence forward-looking conclusion to fully round off the response." },
+        { area: "lr", task: "For each Part 3 topic, prepare 3 sophisticated collocations (e.g., 'foster meaningful connections', 'precipitate a paradigm shift') and integrate them naturally." }
+      ]}
+    })
+  }
+];
 
 /**
- * Evaluate transcript using OpenAI gpt-4o-mini
+ * Evaluate transcript using OpenAI gpt-4o
  */
 async function evaluateTranscript(transcript, questionText, questionPart) {
   const userMessage = `IELTS Speaking Question (Part ${questionPart}): "${questionText}"
@@ -265,9 +317,10 @@ Student's Transcript:
 Evaluate this response now. Return ONLY valid JSON.`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: [
       { role: "system", content: IELTS_EXAMINER_PROMPT },
+      ...SPEAKING_FEW_SHOT,
       { role: "user", content: userMessage },
     ],
     response_format: { type: "json_object" },

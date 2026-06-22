@@ -26,8 +26,16 @@ export default function LiveTutor({ question, onEndSession }) {
       const tokenRes = await api.post('/realtime/token');
       const EPHEMERAL_KEY = tokenRes.data.client_secret;
 
-      // 2. Setup WebRTC Peer Connection
-      const pc = new RTCPeerConnection();
+      // 2. Setup WebRTC Peer Connection with STUN/TURN for NAT traversal
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          // Add TURN server for symmetric NAT (replace with your own or a
+          // provider like Twilio/Xirsys when scaling to production):
+          // { urls: 'turn:your-turn-server.com:443', username: '...', credential: '...' },
+        ],
+      });
       pcRef.current = pc;
 
       // Setup audio element for remote stream

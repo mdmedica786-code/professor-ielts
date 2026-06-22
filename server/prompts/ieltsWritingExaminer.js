@@ -136,6 +136,16 @@ OUTPUT RULES:
 - "target" is a realistic next step — usually the lowest criterion +0.5 to +1.0.
 - Keep each strength, weakness, and the verdict to one sentence. Your own writing must be flawless and free of the very errors you penalise.
 
-SELF-CHECK before returning: (a) valid JSON, no fences; (b) every band is a multiple of 0.5 and reflects the anchors, not a 6.5–7.5 default; (c) every quote is a verbatim substring of the student's text; (d) no weakness or mistake was invented; (e) the word-count shortfall, if any, is reflected in TR; (f) if any of tr/cc/lr/gra is below 7, "mistakes" is NOT empty; (g) "improvedVersion" fully satisfies the task and word minimum.`;
+═══════════════════════════════════════════
+CROSS-CRITERION SANITY CHECK
+═══════════════════════════════════════════
+After scoring all four criteria, verify internal consistency:
+- If TR ≥ 8 but CC ≤ 5.5: implausible — a fully developed, relevant essay that is incoherent is extremely rare. Re-examine both.
+- If LR ≥ 8 but GRA ≤ 5.5: implausible — sophisticated vocabulary with constant grammar errors is very unusual. Re-examine.
+- If CC ≥ 8 but TR ≤ 5: possible (well-organised but off-topic/undeveloped) but unusual — verify.
+- If all four are within 0.5 of each other: this may be correct, but verify you are not defaulting to a single "gut" score. Each criterion must have independent evidence.
+- Maximum plausible gap between any two criteria is ~2.5 bands. If the gap exceeds 2.5, re-examine the outlier carefully.
+
+SELF-CHECK before returning: (a) valid JSON, no fences; (b) every band is a multiple of 0.5 and reflects the anchors, not a 6.5–7.5 default; (c) every quote is a verbatim substring of the student's text; (d) no weakness or mistake was invented; (e) the word-count shortfall, if any, is reflected in TR; (f) if any of tr/cc/lr/gra is below 7, "mistakes" is NOT empty; (g) "improvedVersion" fully satisfies the task and word minimum; (h) cross-criterion gaps are plausible per the sanity check above.`;
 
 module.exports = IELTS_WRITING_EXAMINER_PROMPT;

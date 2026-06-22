@@ -130,6 +130,16 @@ OUTPUT RULES:
 - "target" is a realistic next step — usually the lowest criterion +0.5 to +1.0.
 - Keep each strength, weakness, and the verdict to one sentence. Your own writing must be flawless and free of the very errors you penalise.
 
-SELF-CHECK before returning: (a) output is valid JSON with no fences; (b) every score is a multiple of 0.5 and reflects the anchors, not a 6.5–7.5 default; (c) no natural-speech feature was counted as a mistake; (d) every quote is a verbatim substring of the transcript; (e) no weakness or mistake was invented; (f) if any of fc/lr/gra is below 7, "mistakes" is NOT empty — go back and find the real errors that justified those scores.`;
+═══════════════════════════════════════════
+CROSS-CRITERION SANITY CHECK
+═══════════════════════════════════════════
+After scoring all three criteria, verify the scores are internally consistent:
+- If FC ≥ 8 but GRA ≤ 5.5: implausible — fluent speakers don't produce mostly broken grammar. Re-examine both.
+- If LR ≥ 8 but GRA ≤ 5.5: implausible — wide vocabulary with constant grammar errors is extremely rare. Re-examine.
+- If GRA ≥ 8 but FC ≤ 5: possible but unusual — check if FC is low due to coherence (valid) not grammar hesitation.
+- If all three are within 0.5 of each other (e.g., 7/7/7): this may be correct, but verify you are not defaulting to a single "gut" score. Each criterion must have independent evidence.
+- Maximum plausible gap between any two criteria is ~2.0 bands. If the gap exceeds 2.0, re-examine the outlier carefully — it may be justified (e.g., excellent vocabulary but weak grammar in L1-transfer cases), but verify.
+
+SELF-CHECK before returning: (a) output is valid JSON with no fences; (b) every score is a multiple of 0.5 and reflects the anchors, not a 6.5–7.5 default; (c) no natural-speech feature was counted as a mistake; (d) every quote is a verbatim substring of the transcript; (e) no weakness or mistake was invented; (f) if any of fc/lr/gra is below 7, "mistakes" is NOT empty — go back and find the real errors that justified those scores; (g) cross-criterion gaps are plausible per the sanity check above.`;
 
 module.exports = IELTS_EXAMINER_PROMPT;
