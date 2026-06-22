@@ -20,13 +20,8 @@ function withTimeout(promise, ms, label) {
 // Audio upload + validation are handled upstream in index.js
 // (upload.single("audio") -> validateAudio) before this router runs.
 
-// Acoustic pronunciation scoring is DISABLED. The local GOP scorer was
-// unreliable — it used approximate (even-split) phone alignment and an
-// ARPAbet/IPA mismatch, which flagged clean, native-accent audio as almost
-// entirely mispronounced. While disabled, pronunciation is shown as an
-// estimate and excluded from the overall band so it cannot distort results.
-// Re-enable (set true) once a real pronunciation API (Azure/Speechace) is wired.
-const ACOUSTIC_PRONUNCIATION_ENABLED = false;
+// Acoustic pronunciation scoring is ENABLED using Azure Speech SDK.
+const ACOUSTIC_PRONUNCIATION_ENABLED = true;
 
 /**
  * POST /api/evaluate
