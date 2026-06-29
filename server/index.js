@@ -29,6 +29,8 @@ const paymentsRouter = require("./routes/payments");
 const chatbotRouter = require("./routes/chatbot");
 const adminRouter = require("./routes/adminRoutes");
 const realtimeRouter = require("./routes/realtimeRoutes");
+const vocabRouter = require("./routes/vocab");
+const userRouter = require("./routes/user");
 
 // ─── Services (imported for the /health endpoint) ───────────────
 const { getFirebaseInitError, getAppsLength } = require("./services/firebaseAdmin");
@@ -162,6 +164,13 @@ app.use("/api/realtime", realtimeRouter);
 // Admin routes (grant-pro, set-admin)
 app.use("/api/admin", adminRouter);
 
+// User profile and plan routes
+app.use("/api/user", verifyAuth, userRouter);
+
+// Vocabulary mini-app (Firestore-backed SRS flashcards). CRUD is auth-only;
+// the AI deck generator inside applies checkUsage since it calls a paid model.
+app.use("/api/vocab", verifyAuth, vocabRouter);
+
 // ─── Gamification / Streak stats ────────────────────────────────
 app.get("/api/stats", verifyAuth, async (req, res) => {
   try {
@@ -221,6 +230,11 @@ app.get("/", (req, res) => {
       "POST /api/payments/webhook    — Lemon Squeezy webhook",
       "POST /api/admin/grant-pro     — Admin: grant premium access",
       "POST /api/admin/set-admin     — Admin: promote user to admin",
+      "GET  /api/vocab               — List vocabulary cards",
+      "POST /api/vocab               — Create card(s)",
+      "PUT  /api/vocab/:id           — Update a card (review/edit)",
+      "DELETE /api/vocab/:id         — Delete a card",
+      "POST /api/vocab/generate      — AI-generate a themed deck",
       "GET  /api/stats               — Gamification stats",
       "GET  /api/health              — Server health check",
     ],
