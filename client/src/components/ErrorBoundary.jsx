@@ -27,6 +27,14 @@ export default class ErrorBoundary extends React.Component {
           <p className="text-gray-600 mb-6 max-w-md">
             We encountered an unexpected error. Please refresh the page or try again later.
           </p>
+          {this.state.error && (
+            <div className="text-left w-full max-w-2xl bg-gray-100 p-4 rounded-md overflow-auto mb-6 text-xs text-red-800 font-mono">
+              <strong>Error:</strong> {this.state.error.toString()}
+              <br /><br />
+              <strong>Stack Trace:</strong><br />
+              {this.state.error.stack}
+            </div>
+          )}
           <button
             onClick={() => window.location.reload()}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"

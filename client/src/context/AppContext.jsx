@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { generateId } from '../utils/formatters';
+import { addCardsFromEvaluation } from '../api/vocab';
 
 const AppContext = createContext(null);
 
@@ -128,6 +129,11 @@ export function AppProvider({ children }) {
       evaluation,
     };
     setHistory((prev) => [record, ...prev]);
+    // Auto-add any vocabulary corrections from this evaluation into the
+    // Vocabulary SRS deck (fire-and-forget; server dedups by word).
+    if (evaluation?.mistakes) {
+      addCardsFromEvaluation(evaluation).catch(() => {});
+    }
     return record;
   }, [activeStudentId, activeStudent, selectedQuestion, setHistory]);
 

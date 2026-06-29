@@ -36,3 +36,28 @@ export async function generateDeck(topic, count = 10) {
   const { data } = await api.post('/vocab/generate', { topic, count });
   return data?.data || [];
 }
+
+/**
+ * Extract vocabulary-correction flashcards from a completed evaluation result.
+ * Speaking/Writing evaluations return `mistakes: [{ cat, said, fix, why }]`;
+ * we turn the vocabulary ones into cards (front = what you said, back = the fix).
+ */
+export function vocabCardsFromEvaluation(evaluation) {
+  const mistakes = Array.isArray(evaluation?.mistakes) ? evaluation.mistakes : [];
+  return mistakes
+    .filter((m) => String(m?.cat || '').toLowerCase() === 'vocabulary' && m?.said && m?.fix)
+    .map((m) => ({
+      front: String(m.said).trim(),
+      back: String(m.fix).trim(),
+      example: String(m.why || '').trim(),
+      tags: ['from-evaluation'],
+      source: 'correction',
+    }));
+}
+
+/** Fire-and-forget: push an evaluation's vocabulary corrections into the deck. */
+export async function addCardsFromEvaluation(evaluation) {
+  const cards = vocabCardsFromEvaluation(evaluation);
+  if (cards.length === 0) return { success: true, data: [] };
+  return createCards(cards);
+}
