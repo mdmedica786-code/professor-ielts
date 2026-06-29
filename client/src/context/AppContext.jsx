@@ -144,7 +144,7 @@ export function AppProvider({ children }) {
   const toggleSidebar = useCallback(() => setSidebarOpen((o) => !o), []);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
-  const value = {
+  const value = useMemo(() => ({
     // Persisted
     history,
     studentHistory,
@@ -194,7 +194,46 @@ export function AppProvider({ children }) {
     // Sidebar actions
     toggleSidebar,
     closeSidebar,
-  };
+  }), [
+    history,
+    studentHistory,
+    students,
+    activeStudentId,
+    activeStudent,
+    studentName,
+    settings,
+    ieltsModule,
+    bankCollapsed,
+    section,
+    currentView,
+    currentEvaluation,
+    isEvaluating,
+    evaluationStep,
+    selectedQuestion,
+    selectedWritingTask,
+    sidebarOpen,
+    setSettings,
+    setIeltsModule,
+    setBankCollapsed,
+    toggleBankCollapsed,
+    setSection,
+    setCurrentView,
+    setCurrentEvaluation,
+    setIsEvaluating,
+    setEvaluationStep,
+    setSelectedQuestion,
+    setSelectedWritingTask,
+    setSidebarOpen,
+    addStudent,
+    renameStudent,
+    deleteStudent,
+    setActiveStudent,
+    saveEvaluation,
+    deleteHistoryRecord,
+    clearStudentHistory,
+    toggleSidebar,
+    closeSidebar,
+  ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

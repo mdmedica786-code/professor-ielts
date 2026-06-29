@@ -14,6 +14,7 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [error, setError] = useState(null);
 
   // Voice call mode state
@@ -39,10 +40,32 @@ export default function ChatWidget() {
     }
   }, [messages, isOpen]);
 
+  // Create a ref for messages so we can clean up object URLs on unmount
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // Manage imageFile preview URL
+  useEffect(() => {
+    if (imageFile) {
+      const url = URL.createObjectURL(imageFile);
+      setImagePreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setImagePreviewUrl(null);
+    }
+  }, [imageFile]);
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
       endCall();
+      messagesRef.current.forEach(msg => {
+        if (msg.imageUrl) {
+          URL.revokeObjectURL(msg.imageUrl);
+        }
+      });
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -498,7 +521,7 @@ export default function ChatWidget() {
           {imageFile && !isInCall && (
             <div className="px-4 py-2 bg-slate-100 border-t border-slate-200 flex items-center gap-3">
               <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-slate-300">
-                <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover" />
+                <img src={imagePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
                 <button 
                   onClick={() => {
                     setImageFile(null);

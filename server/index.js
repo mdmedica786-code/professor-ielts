@@ -14,6 +14,8 @@ const path = require("path");
 const { upload } = require("./middleware/upload");
 const { verifyAuth } = require("./middleware/verifyAuth");
 const { checkUsage } = require("./middleware/checkUsage");
+const rateLimit = require("./middleware/rateLimit");
+const errorHandler = require("./middleware/errorHandler");
 
 // ─── Route modules ──────────────────────────────────────────────
 const evaluateRouter = require("./routes/evaluate");
@@ -36,12 +38,32 @@ const { getStats } = require("./services/streakService");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Global middleware ──────────────────────────────────────────
+// Render/Hostinger sit behind a proxy
+app.set("trust proxy", 1);
+
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || "https://bandlogic.online")
+  .split(",")
+  .map((s) => s.trim());
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "*",
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin) || origin === "http://localhost" || origin === "capacitor://localhost") {
+      cb(null, true);
+    } else {
+      cb(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
+// Apply global rate limiting before body parsers, except for the payments webhook
+app.use((req, res, next) => {
+  if (req.path === "/api/payments/webhook") {
+    return next();
+  }
+  rateLimit(req, res, next);
+});
 
 // JSON body parser (skip for routes that need raw bodies, e.g. webhooks)
 app.use((req, res, next) => {
@@ -100,27 +122,29 @@ app.use(
 app.use("/api/evaluate-writing", verifyAuth, checkUsage, evaluateWritingRouter);
 
 // Generate speaking prompts / writing Task 1 graphs
-app.use("/api/generate-prompts", verifyAuth, generatePromptsRouter);
+app.use("/api/generate-prompts", verifyAuth, checkUsage, generatePromptsRouter);
 
 // Listening module: generate, fetch tests, evaluate
-app.use("/api/listening", verifyAuth, listeningRouter);
+app.use("/api/listening", verifyAuth, checkUsage, listeningRouter);
 
 // Pronunciation standalone scoring
 app.use(
   "/api/pronunciation",
   verifyAuth,
+  checkUsage,
   upload.single("audio"),
   validateAudio,
   pronunciationRouter
 );
 
 // Reading module: generate + evaluate
-app.use("/api/reading", verifyAuth, readingRouter);
+app.use("/api/reading", verifyAuth, checkUsage, readingRouter);
 
 // Standalone transcription
 app.use(
   "/api/transcribe",
   verifyAuth,
+  checkUsage,
   upload.single("audio"),
   validateAudio,
   transcribeRouter
@@ -204,25 +228,7 @@ app.get("/", (req, res) => {
 });
 
 // ─── Global error handler ───────────────────────────────────────
-app.use((err, req, res, _next) => {
-  console.error(`[ERROR] ${req.method} ${req.path}:`, err.message || err);
-
-  // Multer file-size error
-  if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(413).json({
-      success: false,
-      error: "File too large. Maximum size is 25 MB.",
-    });
-  }
-
-  const status = err.status || err.statusCode || 500;
-  res.status(status).json({
-    success: false,
-    error: process.env.NODE_ENV === "production"
-      ? "An internal error occurred. Please try again."
-      : err.message || "Internal server error",
-  });
-});
+app.use(errorHandler);
 
 // ─── Start server ───────────────────────────────────────────────
 app.listen(PORT, "0.0.0.0", () => {
@@ -244,5 +250,8 @@ app.listen(PORT, "0.0.0.0", () => {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });
+
+process.on('unhandledRejection', (reason) => console.error('UnhandledRejection:', reason));
+process.on('uncaughtException',  (err) => console.error('UncaughtException:', err)); // Let the platform restart if needed
 
 module.exports = app;

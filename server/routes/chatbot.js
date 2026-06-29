@@ -1,13 +1,14 @@
 const express = require('express');
 const { OpenAI, toFile } = require('openai');
 const { verifyAuth } = require('../middleware/verifyAuth');
+const { checkUsage } = require('../middleware/checkUsage');
 const { upload } = require('../middleware/upload'); // Uses multer memoryStorage
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // POST /api/chatbot/message (handles text and optional image)
-router.post('/message', verifyAuth, upload.single('image'), async (req, res, next) => {
+router.post('/message', verifyAuth, checkUsage, upload.single('image'), async (req, res, next) => {
   try {
     const message = req.body.message;
     let history = [];
@@ -63,7 +64,7 @@ router.post('/message', verifyAuth, upload.single('image'), async (req, res, nex
 });
 
 // POST /api/chatbot/voice (handles audio -> transcription -> LLM -> TTS audio)
-router.post('/voice', verifyAuth, upload.single('audio'), async (req, res, next) => {
+router.post('/voice', verifyAuth, checkUsage, upload.single('audio'), async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: "No audio file provided" });

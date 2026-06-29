@@ -9,12 +9,11 @@ const router = express.Router();
 const STEP_TIMEOUT_MS = 30_000; // 30 seconds per AI call
 
 function withTimeout(promise, ms, label) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
+  let timer;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
 }
 
 // Audio upload + validation are handled upstream in index.js
@@ -48,6 +47,7 @@ router.post("/", async (req, res, next) => {
     let pauseData = { count: 0, totalPauseDuration: 0, pauses: [] };
     let disfluencyData = null;
     let intelligibilityPron = null;
+    let evaluationResult = null;
 
     // === Branch 1: Audio provided — run full pipeline ===
     if (req.file) {
@@ -86,70 +86,80 @@ router.post("/", async (req, res, next) => {
       );
 
       // Step 3: Disfluency analysis (fillers, repetitions, false starts) — non-fatal
-      try {
-        console.log("Disfluency analysis: Sending to gpt-4o-mini...");
-        disfluencyData = await withTimeout(
-          openaiService.analyzeDisfluencies(transcript, transcriptWords),
-          STEP_TIMEOUT_MS,
-          "Disfluency analysis"
-        );
-        console.log(
-          `Disfluency analysis: Found ${disfluencyData.summary.total_disfluencies} disfluencies ` +
-          `(${disfluencyData.summary.filler_count} fillers, ` +
-          `${disfluencyData.summary.repetition_count} repetitions, ` +
-          `${disfluencyData.summary.false_start_count} false starts)`
-        );
-      } catch (disfErr) {
+      console.log("Disfluency analysis: Sending to gpt-4o-mini...");
+      const disfluencyP = withTimeout(
+        openaiService.analyzeDisfluencies(transcript, transcriptWords),
+        STEP_TIMEOUT_MS,
+        "Disfluency analysis"
+      ).catch((disfErr) => {
         console.warn(`Disfluency analysis: Failed — ${disfErr.message}. Continuing without it.`);
-        disfluencyData = null;
-      }
+        return null;
+      });
 
-      // Step 4: Pronunciation scoring (non-fatal). Disabled while the local
-      // acoustic scorer is unreliable — see ACOUSTIC_PRONUNCIATION_ENABLED.
+      // Step 4: Pronunciation scoring (non-fatal)
+      let pronunciationP;
       if (ACOUSTIC_PRONUNCIATION_ENABLED) {
-        try {
-          pronunciationData = await scorePronunciation(
-            req.file.buffer,
-            transcript,
-            req.file.originalname,
-            transcriptWords
-          );
-          if (pronunciationData) {
-            pronunciationSource = "acoustic_pipeline";
-            console.log("Pronunciation: Acoustic scoring completed successfully.");
-          } else {
-            pronunciationSource = "unavailable";
-            console.warn("Pronunciation: Service returned null — skipping.");
-          }
-        } catch (pronErr) {
+        pronunciationP = scorePronunciation(
+          req.file.buffer,
+          transcript,
+          req.file.originalname,
+          transcriptWords
+        ).catch((pronErr) => {
+          console.warn(`Pronunciation: Caught error, continuing without pronunciation data — ${pronErr.message}`);
+          return null;
+        });
+      } else {
+        pronunciationP = Promise.resolve(null);
+      }
+      
+      // Step 5: OpenAI LLM evaluation
+      console.log("LLM evaluation: Using OpenAI gpt-4o-mini...");
+      const evaluationP = withTimeout(
+        openaiService.evaluateTranscript(transcript, questionText, questionPart),
+        STEP_TIMEOUT_MS,
+        "LLM evaluation"
+      );
+
+      const [disfRes, pronRes, evalRes] = await Promise.all([disfluencyP, pronunciationP, evaluationP]);
+      
+      disfluencyData = disfRes;
+      if (disfluencyData) {
+        console.log(`Disfluency analysis: Found ${disfluencyData.summary.total_disfluencies} disfluencies`);
+      }
+      
+      pronunciationData = pronRes;
+      if (ACOUSTIC_PRONUNCIATION_ENABLED) {
+        if (pronunciationData) {
+          pronunciationSource = "acoustic_pipeline";
+          console.log("Pronunciation: Acoustic scoring completed successfully.");
+        } else {
           pronunciationSource = "unavailable";
-          pronunciationData = null;
-          console.warn(
-            `Pronunciation: Caught error, continuing without pronunciation data — ${pronErr.message}`
-          );
+          console.warn("Pronunciation: Service returned null or failed — skipping.");
         }
       } else {
-        pronunciationData = null;
         pronunciationSource = "estimated";
-        console.log("Pronunciation: Acoustic scoring disabled — using estimate, excluded from overall band.");
+        console.log("Pronunciation: Acoustic scoring disabled — using estimate.");
       }
-    }
+      
+      evaluationResult = evalRes;
+      console.log("LLM evaluation: OpenAI gpt-4o-mini completed successfully.");
+    } else {
+      // === Branch 2: Text-only (No Audio) ===
+      if (!transcript || transcript.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "No transcript available. Please provide audio or text input.",
+        });
+      }
 
-    // === Step 5: OpenAI LLM evaluation (always runs) ===
-    if (!transcript || transcript.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: "No transcript available. Please provide audio or text input.",
-      });
+      console.log("LLM evaluation: Using OpenAI gpt-4o-mini...");
+      evaluationResult = await withTimeout(
+        openaiService.evaluateTranscript(transcript, questionText, questionPart),
+        STEP_TIMEOUT_MS,
+        "LLM evaluation"
+      );
+      console.log("LLM evaluation: OpenAI gpt-4o-mini completed successfully.");
     }
-
-    console.log("LLM evaluation: Using OpenAI gpt-4o-mini...");
-    const evaluationResult = await withTimeout(
-      openaiService.evaluateTranscript(transcript, questionText, questionPart),
-      STEP_TIMEOUT_MS,
-      "LLM evaluation"
-    );
-    console.log("LLM evaluation: OpenAI gpt-4o-mini completed successfully.");
 
     // === Step 6: Merge scores ===
     const coreMean =

@@ -19,14 +19,18 @@ export default function useAudioRecorder(customOptions = {}) {
   const analyserRef = useRef(null);
   const animFrameRef = useRef(null);
   const streamRef = useRef(null);
+  const audioCtxRef = useRef(null);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopRecording();
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      setAudioUrl((currentUrl) => {
+        if (currentUrl) URL.revokeObjectURL(currentUrl);
+        return null;
+      });
     };
-  }, []);
+  }, [stopRecording]);
 
   const startRecording = useCallback(async () => {
     try {
@@ -50,6 +54,7 @@ export default function useAudioRecorder(customOptions = {}) {
 
       // Set up audio analyser for waveform
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtxRef.current = audioCtx;
       const source = audioCtx.createMediaStreamSource(stream);
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 256;
@@ -129,6 +134,11 @@ export default function useAudioRecorder(customOptions = {}) {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
+    }
+
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
     }
 
     analyserRef.current = null;

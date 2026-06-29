@@ -48,7 +48,14 @@ router.get("/tests", async (req, res, next) => {
 
 router.get("/test/:id", async (req, res, next) => {
   try {
-    const filePath = path.join(TESTS_DIR, `test_${req.params.id}.json`);
+    const id = String(req.params.id);
+    if (!/^[A-Za-z0-9_-]+$/.test(id)) {
+      return res.status(400).json({ success: false, error: "Invalid test id." });
+    }
+    const filePath = path.join(TESTS_DIR, `test_${id}.json`);
+    if (!filePath.startsWith(TESTS_DIR + path.sep)) {
+      return res.status(400).json({ success: false, error: "Invalid test id." });
+    }
     if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, error: "Test not found" });
     
     const testData = JSON.parse(fs.readFileSync(filePath));

@@ -51,6 +51,7 @@ async function convertToWav(inputBuffer) {
     });
 
     ffmpeg.on('error', reject);
+    ffmpeg.stdin.on('error', (e) => reject(new Error(`ffmpeg stdin: ${e.message}`)));
 
     ffmpeg.stdin.write(inputBuffer);
     ffmpeg.stdin.end();
