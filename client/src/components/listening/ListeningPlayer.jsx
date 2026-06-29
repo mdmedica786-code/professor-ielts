@@ -103,6 +103,13 @@ export default function ListeningPlayer({ sections, onComplete }) {
     }
   };
 
+  const skipTime = (amount) => {
+    const el = audioRef.current;
+    if (el) {
+      el.currentTime = Math.max(0, Math.min(el.duration || 0, el.currentTime + amount));
+    }
+  };
+
   const totalUtts = section?.utterances?.length || 0;
   const sectionProgress = totalUtts ? Math.round(((uttIdx + 1) / totalUtts) * 100) : 0;
 
@@ -200,6 +207,25 @@ export default function ListeningPlayer({ sections, onComplete }) {
             </>
           )}
         </button>
+
+        {started && (
+          <div className="flex items-center gap-1 ml-2">
+            <button
+              onClick={() => skipTime(-15)}
+              className="px-2 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
+              title="Skip back 15 seconds"
+            >
+              -15s
+            </button>
+            <button
+              onClick={() => skipTime(15)}
+              className="px-2 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
+              title="Skip forward 15 seconds"
+            >
+              +15s
+            </button>
+          </div>
+        )}
 
         <button
           onClick={() => onComplete?.()}

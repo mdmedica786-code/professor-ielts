@@ -13,7 +13,11 @@
           "type": "gap",
           "context": "PRESTON PARK RUN",
           "prompt": "Start of run: in front of the ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "café",
+          "acceptableAnswers": [
+            "cafe"
+          ]
         },
         {
           "id": "2",
@@ -21,7 +25,13 @@
           "type": "gap",
           "context": "PRESTON PARK RUN",
           "prompt": "Time of start: ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "9 am",
+          "acceptableAnswers": [
+            "nine am",
+            "9 o'clock",
+            "nine o'clock"
+          ]
         },
         {
           "id": "3",
@@ -29,7 +39,15 @@
           "type": "gap",
           "context": "PRESTON PARK RUN",
           "prompt": "Length of run: ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "5 km",
+          "acceptableAnswers": [
+            "five km",
+            "5 kilometers",
+            "five kilometers",
+            "5 kilometres",
+            "five kilometres"
+          ]
         },
         {
           "id": "4",
@@ -37,7 +55,15 @@
           "type": "gap",
           "context": "PRESTON PARK RUN",
           "prompt": "At end of run: volunteer scans ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "a barcode",
+          "acceptableAnswers": [
+            "barcode",
+            "a bar code",
+            "bar code",
+            "a bar-code",
+            "bar-code"
+          ]
         },
         {
           "id": "5",
@@ -45,7 +71,11 @@
           "type": "gap",
           "context": "PRESTON PARK RUN",
           "prompt": "Best way to register: on the ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "website",
+          "acceptableAnswers": [
+            "web site"
+          ]
         },
         {
           "id": "6",
@@ -53,7 +83,11 @@
           "type": "gap",
           "context": "PRESTON PARK RUN",
           "prompt": "Cost of run: £ ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "1.50",
+          "acceptableAnswers": [
+            "1.5"
+          ]
         },
         {
           "id": "7",
@@ -61,7 +95,9 @@
           "type": "gap",
           "context": "Volunteering",
           "prompt": "Contact name: Pete ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "MAUGHAN",
+          "acceptableAnswers": []
         },
         {
           "id": "8",
@@ -69,7 +105,9 @@
           "type": "gap",
           "context": "Volunteering",
           "prompt": "Phone number: ______",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "01444 732900",
+          "acceptableAnswers": []
         },
         {
           "id": "9",
@@ -77,7 +115,11 @@
           "type": "gap",
           "context": "Volunteering",
           "prompt": "______ the runners",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "guiding",
+          "acceptableAnswers": [
+            "guide"
+          ]
         },
         {
           "id": "10",
@@ -85,7 +127,13 @@
           "type": "gap",
           "context": "Volunteering",
           "prompt": "______ for the weekly report",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "taking photos",
+          "acceptableAnswers": [
+            "take photos",
+            "photographs",
+            "taking photographs"
+          ]
         }
       ]
     },
@@ -100,7 +148,9 @@
           "type": "gap",
           "context": "PACTON-ON-SEA BUS TOUR",
           "prompt": "Bus stop 2 | the aquarium | dolphins and ______",
-          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.",
+          "answer": "sharks",
+          "acceptableAnswers": []
         },
         {
           "id": "12",
@@ -108,7 +158,11 @@
           "type": "gap",
           "context": "PACTON-ON-SEA BUS TOUR",
           "prompt": "Bus stop 3 | ______ | yachts and power boats",
-          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.",
+          "answer": "old fishing village",
+          "acceptableAnswers": [
+            "Old Fishing Village"
+          ]
         },
         {
           "id": "13",
@@ -116,7 +170,9 @@
           "type": "gap",
           "context": "PACTON-ON-SEA BUS TOUR",
           "prompt": "Bus stop 4 | ______ centre | very old",
-          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.",
+          "answer": "shopping",
+          "acceptableAnswers": []
         },
         {
           "id": "14",
@@ -124,7 +180,13 @@
           "type": "gap",
           "context": "PACTON-ON-SEA BUS TOUR",
           "prompt": "Bus stop 4 | centre | very old ______",
-          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.",
+          "answer": "water fountain",
+          "acceptableAnswers": [
+            "fountain",
+            "a fountain",
+            "a water fountain"
+          ]
         },
         {
           "id": "15",
@@ -132,7 +194,11 @@
           "type": "gap",
           "context": "Complete the sentences below.",
           "prompt": "You need to have a ______ to buy a ticket for £10.",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "student card",
+          "acceptableAnswers": [
+            "a student card"
+          ]
         },
         {
           "id": "16",
@@ -140,7 +206,13 @@
           "type": "gap",
           "context": "Complete the sentences below.",
           "prompt": "The bus tour lasts ______ in total.",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "50 minutes",
+          "acceptableAnswers": [
+            "fifty minutes",
+            "50 mins",
+            "fifty mins"
+          ]
         },
         {
           "id": "17",
@@ -148,7 +220,12 @@
           "type": "gap",
           "context": "Complete the sentences below.",
           "prompt": "The cost of the bus ticket includes entrance to the ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "museum",
+          "acceptableAnswers": [
+            "the museum",
+            "a museum"
+          ]
         },
         {
           "id": "18",
@@ -156,7 +233,11 @@
           "type": "gap",
           "context": "Complete the sentences below.",
           "prompt": "You can listen to an audio commentary which has been made by the ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "tourist office",
+          "acceptableAnswers": [
+            "the tourist office"
+          ]
         },
         {
           "id": "19",
@@ -164,7 +245,12 @@
           "type": "gap",
           "context": "Complete the sentences below.",
           "prompt": "If the weather is wet, it is a good idea to bring ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "rainwear",
+          "acceptableAnswers": [
+            "rain wear",
+            "rain-wear"
+          ]
         },
         {
           "id": "20",
@@ -172,7 +258,12 @@
           "type": "gap",
           "context": "Complete the sentences below.",
           "prompt": "Don't forget to bring your ______ when you book online.",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "e-ticket",
+          "acceptableAnswers": [
+            "e ticket",
+            "an e-ticket"
+          ]
         }
       ]
     },
@@ -187,8 +278,14 @@
           "type": "mcq",
           "context": "Choose the correct letter, A, B or C.",
           "prompt": "Dave Hedley says that the computer system has",
-          "options": ["A. too many users.", "B. never worked well.", "C. become outdated."],
-          "instruction": "Choose the correct letter, A, B or C."
+          "options": [
+            "A. too many users.",
+            "B. never worked well.",
+            "C. become outdated."
+          ],
+          "instruction": "Choose the correct letter, A, B or C.",
+          "answer": "C",
+          "acceptableAnswers": []
         },
         {
           "id": "22",
@@ -196,8 +293,14 @@
           "type": "mcq",
           "context": "Choose the correct letter, A, B or C.",
           "prompt": "The main problem with the computer system is that it",
-          "options": ["A. is too slow.", "B. stops working.", "C. displays incorrect data."],
-          "instruction": "Choose the correct letter, A, B or C."
+          "options": [
+            "A. is too slow.",
+            "B. stops working.",
+            "C. displays incorrect data."
+          ],
+          "instruction": "Choose the correct letter, A, B or C.",
+          "answer": "A",
+          "acceptableAnswers": []
         },
         {
           "id": "23",
@@ -205,8 +308,14 @@
           "type": "mcq",
           "context": "Choose the correct letter, A, B or C.",
           "prompt": "Timetabling has become an issue because",
-          "options": ["A. there is not enough time for anyone to do it.", "B. the system does not handle course options.", "C. the courses are constantly changing."],
-          "instruction": "Choose the correct letter, A, B or C."
+          "options": [
+            "A. there is not enough time for anyone to do it.",
+            "B. the system does not handle course options.",
+            "C. the courses are constantly changing."
+          ],
+          "instruction": "Choose the correct letter, A, B or C.",
+          "answer": "B",
+          "acceptableAnswers": []
         },
         {
           "id": "24",
@@ -214,8 +323,14 @@
           "type": "mcq",
           "context": "Choose the correct letter, A, B or C.",
           "prompt": "To solve the timetabling issues, Randhir suggests that",
-          "options": ["A. students should create their own timetables.", "B. Dave should have someone to assist him.", "C. the number of courses should be reduced."],
-          "instruction": "Choose the correct letter, A, B or C."
+          "options": [
+            "A. students should create their own timetables.",
+            "B. Dave should have someone to assist him.",
+            "C. the number of courses should be reduced."
+          ],
+          "instruction": "Choose the correct letter, A, B or C.",
+          "answer": "A",
+          "acceptableAnswers": []
         },
         {
           "id": "25",
@@ -223,8 +338,14 @@
           "type": "mcq",
           "context": "Choose the correct letter, A, B or C.",
           "prompt": "Randhir says that a new system may",
-          "options": ["A. need to be trialled.", "B. still have problems.", "C. be more economical."],
-          "instruction": "Choose the correct letter, A, B or C."
+          "options": [
+            "A. need to be trialled.",
+            "B. still have problems.",
+            "C. be more economical."
+          ],
+          "instruction": "Choose the correct letter, A, B or C.",
+          "answer": "C",
+          "acceptableAnswers": []
         },
         {
           "id": "26",
@@ -232,8 +353,14 @@
           "type": "mcq",
           "context": "Choose the correct letter, A, B or C.",
           "prompt": "Improving the existing system will take",
-          "options": ["A. a few weeks.", "B. four or five months.", "C. nine months."],
-          "instruction": "Choose the correct letter, A, B or C."
+          "options": [
+            "A. a few weeks.",
+            "B. four or five months.",
+            "C. nine months."
+          ],
+          "instruction": "Choose the correct letter, A, B or C.",
+          "answer": "B",
+          "acceptableAnswers": []
         }
       ]
     },
@@ -248,7 +375,11 @@
           "type": "gap",
           "context": "Ceramics",
           "prompt": "Ceramics date back approximately ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "29,000 years",
+          "acceptableAnswers": [
+            "29000 years"
+          ]
         },
         {
           "id": "32",
@@ -256,7 +387,11 @@
           "type": "gap",
           "context": "Ceramics",
           "prompt": "The first figurines were made in the area of ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "southern Europe",
+          "acceptableAnswers": [
+            "south Europe"
+          ]
         },
         {
           "id": "33",
@@ -264,7 +399,9 @@
           "type": "gap",
           "context": "Ceramics",
           "prompt": "Early humans could not use their pots to store ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "water",
+          "acceptableAnswers": []
         },
         {
           "id": "34",
@@ -272,7 +409,9 @@
           "type": "gap",
           "context": "Ceramics",
           "prompt": "The Chinese improved the quality of ceramics by mixing ______ with the clay.",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "minerals",
+          "acceptableAnswers": []
         },
         {
           "id": "35",
@@ -280,7 +419,9 @@
           "type": "gap",
           "context": "Ceramics",
           "prompt": "Chinese porcelain was also called ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "white gold",
+          "acceptableAnswers": []
         },
         {
           "id": "36",
@@ -288,7 +429,9 @@
           "type": "gap",
           "context": "Ceramics",
           "prompt": "Bottger added quartz and ______ to clay to make porcelain.",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "china stone",
+          "acceptableAnswers": []
         },
         {
           "id": "37",
@@ -296,7 +439,11 @@
           "type": "gap",
           "context": "Glass",
           "prompt": "Glass production is similar to clay ceramics apart from the rate of ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "cooling down",
+          "acceptableAnswers": [
+            "cooling"
+          ]
         },
         {
           "id": "38",
@@ -304,7 +451,9 @@
           "type": "gap",
           "context": "Glass",
           "prompt": "The Romans introduced the use of glass to make ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "windows",
+          "acceptableAnswers": []
         },
         {
           "id": "39",
@@ -312,7 +461,9 @@
           "type": "gap",
           "context": "Concrete",
           "prompt": "The discovery of concrete is probably due to observing reactions of water and ______ .",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "volcanic ash",
+          "acceptableAnswers": []
         },
         {
           "id": "40",
@@ -320,7 +471,11 @@
           "type": "gap",
           "context": "Concrete",
           "prompt": "The ability to build large ______ contributed to the success of the Roman Empire",
-          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+          "instruction": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+          "answer": "harbours",
+          "acceptableAnswers": [
+            "harbors"
+          ]
         }
       ]
     }

@@ -39,6 +39,9 @@ const APP_ORIGINS = [
   "https://localhost",
   "http://localhost",
   "https://professor-ielts-1.onrender.com", // hosted UI (Render static site)
+  "https://bandlogic.online",
+  "https://www.bandlogic.online",
+  "https://api.bandlogic.online"
 ];
 const configuredOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .split(",")
