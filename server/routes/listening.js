@@ -59,9 +59,10 @@ router.get("/test/:id", async (req, res, next) => {
       title: s.title,
       instructions: s.instructions,
       questions: s.questions,
-      audioUrl: `https://raw.githubusercontent.com/mdmedica786-code/ielts-audios/main/TEST%20${s.audio_id || testData.test_id}.mp3`,
+      // Fetch audio from the Hostinger domain instead of GitHub
+      audioUrl: `https://bandlogic.online/audio/TEST%20${s.audio_id || testData.test_id}.mp3`,
       // Provide dummy utterances for the player to work
-      utterances: [{ speaker: "Examiner", transcript: "Listen to the audio.", audioUrl: `https://raw.githubusercontent.com/mdmedica786-code/ielts-audios/main/TEST%20${s.audio_id || testData.test_id}.mp3` }]
+      utterances: [{ speaker: "Examiner", transcript: "Listen to the audio.", audioUrl: `https://bandlogic.online/audio/TEST%20${s.audio_id || testData.test_id}.mp3` }]
     }));
 
     const tokenPayload = { title: `Official Test ${testData.test_id}`, size: 'full', sections, isOfficial: true };

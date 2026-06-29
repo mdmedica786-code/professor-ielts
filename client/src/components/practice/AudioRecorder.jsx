@@ -31,6 +31,20 @@ export default function AudioRecorder({ onRecorded }) {
     onRecorded(audioBlob);
   }, [audioBlob, onRecorded]);
 
+  // Pre-prompt for microphone permissions on mount
+  useEffect(() => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          // Immediately stop the stream so we don't leave the recording light on
+          stream.getTracks().forEach(track => track.stop());
+        })
+        .catch(err => {
+          console.warn('Microphone permission pre-prompt failed or denied:', err);
+        });
+    }
+  }, []);
+
   return (
     <div className="space-y-4 relative">
       {/* Settings Header Area */}

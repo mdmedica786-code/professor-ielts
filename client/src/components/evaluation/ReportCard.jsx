@@ -51,7 +51,7 @@ export default function ReportCard({ evaluation }) {
           <div class="desc">Overall Band — ${getBandDescriptor(ev.overallBand)}</div>
         </div>
         <div class="scores">
-          ${Object.entries(ev.scores).filter(([k]) => k !== 'p').map(([k, v]) => `
+          ${Object.entries(ev.scores).map(([k, v]) => `
             <div class="score-box">
               <div class="val ${v >= 7 ? 'good' : v >= 5.5 ? 'okay' : 'poor'}">${v.toFixed(1)}</div>
               <div class="label">${getCriteriaName(k)}</div>
@@ -96,9 +96,9 @@ export default function ReportCard({ evaluation }) {
           Band {ev.overallBand.toFixed(1)} — {getBandDescriptor(ev.overallBand)}
         </p>
 
-        {/* 3 criteria scores */}
-        <div className="grid grid-cols-3 gap-3 mt-6">
-          {Object.entries(ev.scores).filter(([key]) => key !== 'p').map(([key, val]) => (
+        {/* 4 criteria scores */}
+        <div className="grid grid-cols-4 gap-3 mt-6">
+          {Object.entries(ev.scores).map(([key, val]) => (
             <div key={key} className="text-center">
               <div className="text-2xl font-mono font-extrabold" style={{ color: val >= 7 ? '#059669' : val >= 5.5 ? '#d97706' : '#e11d48' }}>
                 {val.toFixed(1)}

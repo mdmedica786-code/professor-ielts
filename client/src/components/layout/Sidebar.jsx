@@ -62,8 +62,7 @@ export default function Sidebar() {
     { id: 'reading', icon: BookOpenText, label: 'Reading', active: onPractice && section === 'reading', onClick: () => goSection('reading') },
     { id: 'listening', icon: Headphones, label: 'Listening', active: onPractice && section === 'listening', onClick: () => goSection('listening') },
     { id: 'history', icon: History, label: 'History', active: currentView === 'history', onClick: goHistory },
-    { id: 'vocab', icon: BookOpen, label: 'Vocab', active: currentView === 'vocab', onClick: () => { setCurrentView('vocab'); if (isMobile()) closeSidebar(); } },
-    { id: 'charts', icon: BarChart3, label: 'Charts', active: currentView === 'charts', onClick: () => { setCurrentView('charts'); if (isMobile()) closeSidebar(); } },
+    { id: 'vocab', icon: BookOpen, label: 'Vocabulary', active: currentView === 'vocab', onClick: () => { setCurrentView('vocab'); if (isMobile()) closeSidebar(); } },
   ];
 
   // Mobile: full-width drawer that slides in/out.
