@@ -2,6 +2,7 @@ import { useApp } from '../../context/AppContext';
 import ProgressChart from './ProgressChart';
 import RecordCard from './RecordCard';
 import RecordDetail from './RecordDetail';
+import RecommendStrip from '../common/RecommendStrip';
 import { useState, useMemo } from 'react';
 import { History, Trash2, TrendingUp, Filter } from 'lucide-react';
 
@@ -116,6 +117,8 @@ export default function HistoryView() {
               ))
             )}
           </div>
+
+          <RecommendStrip />
         </>
       )}
     </div>

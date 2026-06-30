@@ -14,6 +14,7 @@ const VARIANTS = {
   monthly: process.env.LEMONSQUEEZY_VARIANT_MONTHLY,
   annual: process.env.LEMONSQUEEZY_VARIANT_ANNUAL,
   sprint: process.env.LEMONSQUEEZY_VARIANT_SPRINT,
+  removeads: process.env.LEMONSQUEEZY_VARIANT_REMOVEADS,
 };
 
 /**
@@ -50,7 +51,8 @@ router.post("/checkout", express.json(), verifyAuth, async (req, res, next) => {
           attributes: {
             checkout_data: {
               custom: {
-                uid: req.uid
+                uid: req.uid,
+                type: plan === "removeads" ? "removeads" : "plan"
               }
             }
           },
@@ -108,6 +110,14 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
     }
 
     const userRef = db.collection("users").doc(uid);
+
+    // "Remove Ads" one-time purchase — flip the ad flag, don't grant Pro.
+    if (customData.type === "removeads") {
+      if (eventName === "order_created" || eventName === "subscription_created") {
+        await userRef.set({ adsRemoved: true }, { merge: true });
+      }
+      return res.status(200).send("OK");
+    }
 
     if (eventName === "subscription_created" || eventName === "subscription_updated" || eventName === "order_created") {
       const attributes = event.data.attributes;

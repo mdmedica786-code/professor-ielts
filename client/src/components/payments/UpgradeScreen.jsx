@@ -1,6 +1,7 @@
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { CheckCircle2, Sparkles, Shield, Zap, MessageCircle } from 'lucide-react';
+import { createCheckout } from '../../api/payments';
 
 const plans = [
   {
@@ -50,6 +51,15 @@ export default function UpgradeScreen() {
   const { user } = useAuth();
   const { setCurrentView } = useApp();
 
+  const payOnline = async (plan) => {
+    try {
+      const res = await createCheckout(plan);
+      if (res?.data?.url) window.location.href = res.data.url;
+    } catch (e) {
+      alert('Could not start online checkout. Please use the manual method below.');
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 lg:p-10 pb-24">
       {/* Header */}
@@ -94,6 +104,16 @@ export default function UpgradeScreen() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="max-w-3xl mx-auto mb-8 text-center">
+        <button
+          onClick={() => payOnline('monthly')}
+          className="inline-flex items-center justify-center gap-2 py-3 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-sm transition-all"
+        >
+          <Zap className="w-5 h-5" /> Pay online by card (Visa/Mastercard)
+        </button>
+        <p className="text-xs text-slate-400 mt-2">International cards — instant activation. Local users can use the manual method below.</p>
       </div>
 
       <div className="max-w-3xl mx-auto mb-8">
