@@ -60,25 +60,36 @@ def process_apkg(apkg_path):
                     "tags": [base_name]
                 })
 
-        # Generate JS file
-        js_content = f"// Auto-generated from {base_name}.apkg\n\nexport const {base_name.upper().replace(' ', '_')}_DECK = [\n"
-        for card in cards:
-            js_content += "  {\n"
-            js_content += f"    id: `{card['id']}`,\n"
-            # Escape backticks and backslashes
-            front_esc = card['word'].replace('\\', '\\\\').replace('`', '\\`')
-            back_esc = card['definition'].replace('\\', '\\\\').replace('`', '\\`')
-            js_content += f"    word: `{front_esc}`,\n"
-            js_content += f"    definition: `{back_esc}`,\n"
-            js_content += f"    example: ``,\n"
-            js_content += f"    collocations: [],\n"
-            js_content += f"    tags: ['{card['tags'][0]}']\n"
-            js_content += "  },\n"
-        js_content += "];\n"
-
-        output_path = os.path.join('client', 'src', 'data', f"{base_name.replace(' ', '')}Deck.js")
+        # Generate JSON file
+        import json
+        
+        output_filename = f"{base_name.replace(' ', '')}.json"
+        output_path = os.path.join('client', 'public', 'decks', output_filename)
+        
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(js_content)
+            json.dump(cards, f, indent=2)
+            
+        # Update manifest.json
+        manifest_path = os.path.join('client', 'public', 'decks', 'manifest.json')
+        manifest = []
+        if os.path.exists(manifest_path):
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                manifest = json.load(f)
+                
+        deck_id = base_name.lower().replace(' ', '_')
+        
+        # Remove if already exists
+        manifest = [m for m in manifest if m['id'] != deck_id]
+        
+        manifest.append({
+            "id": deck_id,
+            "title": base_name.replace('_', ' '),
+            "count": len(cards),
+            "file": output_filename
+        })
+        
+        with open(manifest_path, 'w', encoding='utf-8') as f:
+            json.dump(manifest, f, indent=2)
             
         print(f"Success! Extracted {len(cards)} cards.")
         print(f"Saved to: {output_path}")
@@ -90,4 +101,7 @@ if __name__ == '__main__':
         print("Please place your Anki decks in 'd:\\NERD speaking\\bandlogic-real\\decks\\' and run this script again.")
     else:
         for f in apkg_files:
-            process_apkg(f)
+            try:
+                process_apkg(f)
+            except Exception as e:
+                print(f"Error processing {f}: {e}")

@@ -10,9 +10,12 @@ import {
   schedule, previewIntervals, deckStats, isDue,
   RATING, RATING_LABELS, DEFAULT_SETTINGS,
 } from '../../utils/srs';
-import { IELTS_STARTER_DECK } from '../../data/ieltsVocab';
-import { COLLOCATIONS_DECK } from '../../data/collocationsDeck';
-import { CAMBRIDGE_VOCABULARY_FOR_IELTS_ADVANCED_DECK } from '../../data/Cambridge_Vocabulary_for_IELTS_AdvancedDeck';
+
+const fetchDeck = async (filename) => {
+  const res = await fetch(`/decks/${filename}`);
+  if (!res.ok) throw new Error('Failed to load deck file');
+  return res.json();
+};
 
 const shuffle = (arr) => {
   const a = [...arr];
@@ -183,11 +186,17 @@ export default function VocabDeck() {
             Start with a curated deck, generate one with AI, or add your own.
           </p>
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
-            <button onClick={() => seedDeck(IELTS_STARTER_DECK, 'starter')} disabled={busy} className="btn-primary inline-flex items-center justify-center gap-2 py-3">
+            <button onClick={async () => {
+              const data = await fetchDeck('starter.json');
+              seedDeck(data, 'starter');
+            }} disabled={busy} className="btn-primary inline-flex items-center justify-center gap-2 py-3">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Add IELTS deck
             </button>
-            <button onClick={() => seedDeck(COLLOCATIONS_DECK, 'collocations')} disabled={busy} className="btn-primary inline-flex items-center justify-center gap-2 py-3">
+            <button onClick={async () => {
+              const data = await fetchDeck('collocations.json');
+              seedDeck(data, 'collocations');
+            }} disabled={busy} className="btn-primary inline-flex items-center justify-center gap-2 py-3">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Layers className="w-4 h-4" />}
               Add collocations deck
             </button>
@@ -617,12 +626,35 @@ function Field({ label, children }) {
 }
 
 // ─── Browse Pre-made Decks ─────────────────────────────────────────
-function DecksView({ cards, onBack, onAdd, busy }) {
-  const builtInDecks = [
-    { title: "IELTS Starter", count: IELTS_STARTER_DECK.length, data: IELTS_STARTER_DECK, id: 'starter' },
-    { title: "Collocations", count: COLLOCATIONS_DECK.length, data: COLLOCATIONS_DECK, id: 'collocations' },
-    { title: "Cambridge Advanced", count: CAMBRIDGE_VOCABULARY_FOR_IELTS_ADVANCED_DECK.length, data: CAMBRIDGE_VOCABULARY_FOR_IELTS_ADVANCED_DECK, id: 'cambridge_advanced' }
-  ];
+function DecksView({ onBack, onAdd, busy }) {
+  const [manifest, setManifest] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [addingId, setAddingId] = useState(null);
+
+  useEffect(() => {
+    fetch('/decks/manifest.json')
+      .then(res => res.json())
+      .then(data => {
+        setManifest(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load decks manifest', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleAdd = async (deck) => {
+    setAddingId(deck.id);
+    try {
+      const data = await fetchDeck(deck.file);
+      await onAdd(data, deck.id);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAddingId(null);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -633,17 +665,23 @@ function DecksView({ cards, onBack, onAdd, busy }) {
         <h3 className="text-sm font-bold text-slate-800 inline-flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-violet-600" /> Browse Decks</h3>
       </div>
       <div className="space-y-2">
-        {builtInDecks.map(deck => (
-          <div key={deck.id} className="card-padded flex items-center justify-between">
-            <div>
-              <div className="font-bold text-slate-800">{deck.title}</div>
-              <div className="text-xs text-slate-500">{deck.count} cards</div>
+        {loading ? (
+          <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-300" /></div>
+        ) : manifest.length === 0 ? (
+          <p className="text-center text-slate-500 text-sm py-8">No decks available.</p>
+        ) : (
+          manifest.map(deck => (
+            <div key={deck.id} className="card-padded flex items-center justify-between">
+              <div>
+                <div className="font-bold text-slate-800">{deck.title}</div>
+                <div className="text-xs text-slate-500">{deck.count} cards</div>
+              </div>
+              <button onClick={() => handleAdd(deck)} disabled={busy || addingId === deck.id} className="btn-primary py-1.5 px-3 text-xs min-w-[70px]">
+                {(busy || addingId) && addingId === deck.id ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Add all'}
+              </button>
             </div>
-            <button onClick={() => onAdd(deck.data, deck.id)} disabled={busy} className="btn-primary py-1.5 px-3 text-xs">
-              {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Add all'}
-            </button>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

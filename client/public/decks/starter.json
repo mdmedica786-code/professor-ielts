@@ -1,0 +1,362 @@
+[
+  {
+    "front": "sustainable",
+    "back": "able to continue over time without depleting resources",
+    "example": "Governments are investing in sustainable energy sources like wind and solar.",
+    "tags": [
+      "environment",
+      "B2"
+    ]
+  },
+  {
+    "front": "detrimental",
+    "back": "tending to cause harm or damage",
+    "example": "Plastic waste is detrimental to marine ecosystems.",
+    "tags": [
+      "environment",
+      "C1"
+    ]
+  },
+  {
+    "front": "mitigate",
+    "back": "to make something less severe or harmful",
+    "example": "Planting trees can help mitigate the effects of climate change.",
+    "tags": [
+      "environment",
+      "C1"
+    ]
+  },
+  {
+    "front": "depletion",
+    "back": "the reduction of something to a critically low level",
+    "example": "The depletion of natural resources is a pressing global concern.",
+    "tags": [
+      "environment",
+      "C1"
+    ]
+  },
+  {
+    "front": "conservation",
+    "back": "the protection and careful management of nature",
+    "example": "Wildlife conservation requires international cooperation.",
+    "tags": [
+      "environment",
+      "B2"
+    ]
+  },
+  {
+    "front": "ubiquitous",
+    "back": "present, appearing, or found everywhere",
+    "example": "Smartphones have become ubiquitous in modern life.",
+    "tags": [
+      "technology",
+      "C1"
+    ]
+  },
+  {
+    "front": "innovation",
+    "back": "a new method, idea, or product",
+    "example": "Technological innovation has transformed how we communicate.",
+    "tags": [
+      "technology",
+      "B2"
+    ]
+  },
+  {
+    "front": "automation",
+    "back": "the use of machines to do work previously done by people",
+    "example": "Automation may displace many manual jobs in the coming decades.",
+    "tags": [
+      "technology",
+      "C1"
+    ]
+  },
+  {
+    "front": "cutting-edge",
+    "back": "the most advanced; at the forefront of development",
+    "example": "The lab uses cutting-edge equipment for its research.",
+    "tags": [
+      "technology",
+      "B2"
+    ]
+  },
+  {
+    "front": "obsolete",
+    "back": "no longer produced or used; out of date",
+    "example": "Older devices quickly become obsolete as technology advances.",
+    "tags": [
+      "technology",
+      "C1"
+    ]
+  },
+  {
+    "front": "curriculum",
+    "back": "the subjects that make up a course of study",
+    "example": "Critical thinking should be embedded in the school curriculum.",
+    "tags": [
+      "education",
+      "B2"
+    ]
+  },
+  {
+    "front": "rote learning",
+    "back": "memorization through repetition rather than understanding",
+    "example": "Rote learning is less effective than active engagement with material.",
+    "tags": [
+      "education",
+      "C1"
+    ]
+  },
+  {
+    "front": "holistic",
+    "back": "considering the whole rather than separate parts",
+    "example": "A holistic approach to education nurtures both intellect and character.",
+    "tags": [
+      "education",
+      "C1"
+    ]
+  },
+  {
+    "front": "tuition",
+    "back": "teaching, or the fee charged for it",
+    "example": "University tuition has risen sharply over the past decade.",
+    "tags": [
+      "education",
+      "B2"
+    ]
+  },
+  {
+    "front": "vocational",
+    "back": "relating to skills for a particular job or trade",
+    "example": "Vocational training prepares students for specific careers.",
+    "tags": [
+      "education",
+      "B2"
+    ]
+  },
+  {
+    "front": "sedentary",
+    "back": "involving little physical activity",
+    "example": "A sedentary lifestyle increases the risk of heart disease.",
+    "tags": [
+      "health",
+      "C1"
+    ]
+  },
+  {
+    "front": "well-being",
+    "back": "the state of being comfortable, healthy, or happy",
+    "example": "Regular exercise contributes to mental well-being.",
+    "tags": [
+      "health",
+      "B2"
+    ]
+  },
+  {
+    "front": "epidemic",
+    "back": "a widespread occurrence of a disease in a community",
+    "example": "Obesity has reached epidemic proportions in some countries.",
+    "tags": [
+      "health",
+      "C1"
+    ]
+  },
+  {
+    "front": "preventive",
+    "back": "designed to keep something undesirable from occurring",
+    "example": "Preventive healthcare reduces long-term medical costs.",
+    "tags": [
+      "health",
+      "B2"
+    ]
+  },
+  {
+    "front": "nutritious",
+    "back": "containing substances needed for health and growth",
+    "example": "Schools should provide nutritious meals for children.",
+    "tags": [
+      "health",
+      "B1"
+    ]
+  },
+  {
+    "front": "inequality",
+    "back": "an unfair difference in status or opportunity",
+    "example": "Income inequality has widened in many developed nations.",
+    "tags": [
+      "society",
+      "B2"
+    ]
+  },
+  {
+    "front": "urbanization",
+    "back": "the increasing movement of people into cities",
+    "example": "Rapid urbanization has strained public infrastructure.",
+    "tags": [
+      "society",
+      "C1"
+    ]
+  },
+  {
+    "front": "diverse",
+    "back": "showing a great deal of variety",
+    "example": "Cosmopolitan cities are home to diverse cultures.",
+    "tags": [
+      "society",
+      "B1"
+    ]
+  },
+  {
+    "front": "remote work",
+    "back": "working from a location outside the office",
+    "example": "Remote work has reshaped the modern employment landscape.",
+    "tags": [
+      "work",
+      "B2"
+    ]
+  },
+  {
+    "front": "productivity",
+    "back": "the effectiveness of effort, measured by output",
+    "example": "Flexible hours can boost employee productivity.",
+    "tags": [
+      "work",
+      "B2"
+    ]
+  },
+  {
+    "front": "redundant",
+    "back": "no longer needed; (of a worker) dismissed as surplus",
+    "example": "Hundreds were made redundant when the factory closed.",
+    "tags": [
+      "work",
+      "C1"
+    ]
+  },
+  {
+    "front": "albeit",
+    "back": "although; even though",
+    "example": "The plan succeeded, albeit at a significant cost.",
+    "tags": [
+      "linking",
+      "C1"
+    ]
+  },
+  {
+    "front": "notwithstanding",
+    "back": "in spite of; despite",
+    "example": "Notwithstanding the risks, the company expanded overseas.",
+    "tags": [
+      "linking",
+      "C2"
+    ]
+  },
+  {
+    "front": "consequently",
+    "back": "as a result",
+    "example": "Demand fell sharply; consequently, prices dropped.",
+    "tags": [
+      "linking",
+      "B2"
+    ]
+  },
+  {
+    "front": "undermine",
+    "back": "to weaken or damage gradually",
+    "example": "Corruption undermines public trust in institutions.",
+    "tags": [
+      "verb",
+      "C1"
+    ]
+  },
+  {
+    "front": "advocate",
+    "back": "to publicly recommend or support",
+    "example": "Many experts advocate investing in renewable energy.",
+    "tags": [
+      "verb",
+      "C1"
+    ]
+  },
+  {
+    "front": "exacerbate",
+    "back": "to make a problem worse",
+    "example": "Cutting funding would only exacerbate the crisis.",
+    "tags": [
+      "verb",
+      "C2"
+    ]
+  },
+  {
+    "front": "facilitate",
+    "back": "to make an action or process easier",
+    "example": "Good infrastructure facilitates economic growth.",
+    "tags": [
+      "verb",
+      "C1"
+    ]
+  },
+  {
+    "front": "prevalent",
+    "back": "widespread in a particular area or time",
+    "example": "Smartphone addiction is increasingly prevalent among teenagers.",
+    "tags": [
+      "adjective",
+      "C1"
+    ]
+  },
+  {
+    "front": "compelling",
+    "back": "evoking strong interest or conviction",
+    "example": "She made a compelling argument for reform.",
+    "tags": [
+      "adjective",
+      "C1"
+    ]
+  },
+  {
+    "front": "feasible",
+    "back": "possible to do easily or conveniently",
+    "example": "It is not financially feasible to build the bridge this year.",
+    "tags": [
+      "adjective",
+      "B2"
+    ]
+  },
+  {
+    "front": "inevitable",
+    "back": "certain to happen; unavoidable",
+    "example": "Some degree of automation in industry seems inevitable.",
+    "tags": [
+      "adjective",
+      "B2"
+    ]
+  },
+  {
+    "front": "paramount",
+    "back": "more important than anything else; supreme",
+    "example": "Safety is of paramount importance on construction sites.",
+    "tags": [
+      "adjective",
+      "C1"
+    ]
+  },
+  {
+    "front": "tangible",
+    "back": "real and able to be shown or felt",
+    "example": "The policy produced tangible improvements in air quality.",
+    "tags": [
+      "adjective",
+      "C1"
+    ]
+  },
+  {
+    "front": "lucrative",
+    "back": "producing a great deal of profit",
+    "example": "Software engineering can be a lucrative career.",
+    "tags": [
+      "adjective",
+      "C1"
+    ]
+  }
+]
