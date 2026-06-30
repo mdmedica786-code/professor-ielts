@@ -9,16 +9,18 @@ import ChatWidget from './components/chatbot/ChatWidget';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 import SectionPicker from './components/layout/SectionPicker';
-import PracticeRoom from './components/practice/PracticeRoom';
-import WritingRoom from './components/writing/WritingRoom';
-import ReadingRoom from './components/reading/ReadingRoom';
-import ListeningRoom from './components/listening/ListeningRoom';
+import { Suspense, lazy } from 'react';
+import { Loader2 } from 'lucide-react';
 
-import HistoryView from './components/history/HistoryView';
-import EvaluationPanel from './components/evaluation/EvaluationPanel';
-import UpgradeScreen from './components/payments/UpgradeScreen';
-import AdminDashboard from './components/admin/AdminDashboard';
-import VocabDeck from './components/vocab/VocabDeck';
+const HistoryView = lazy(() => import('./components/history/HistoryView'));
+const EvaluationPanel = lazy(() => import('./components/evaluation/EvaluationPanel'));
+const UpgradeScreen = lazy(() => import('./components/payments/UpgradeScreen'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const VocabDeck = lazy(() => import('./components/vocab/VocabDeck'));
+const PracticeRoom = lazy(() => import('./components/practice/PracticeRoom'));
+const WritingRoom = lazy(() => import('./components/writing/WritingRoom'));
+const ReadingRoom = lazy(() => import('./components/reading/ReadingRoom'));
+const ListeningRoom = lazy(() => import('./components/listening/ListeningRoom'));
 import logoImg from './assets/bandlogic-logo-transparent.png';
 
 export default function App() {
@@ -47,26 +49,31 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar />
         <main className="flex-1 overflow-y-auto">
-          {currentView === 'practice' && (
-            <div className="h-full">
-              {!section && <SectionPicker />}
-
-              {section === 'speaking' &&
-                (currentEvaluation ? <EvaluationPanel /> : <PracticeRoom />)}
-
-              {section === 'writing' && <WritingRoom />}
-
-              {section === 'reading' && <ReadingRoom />}
-
-              {section === 'listening' && <ListeningRoom />}
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
             </div>
-          )}
+          }>
+            {currentView === 'practice' && (
+              <div className="h-full">
+                {!section && <SectionPicker />}
 
-          {currentView === 'history' && <HistoryView />}
-          {currentView === 'upgrade' && <UpgradeScreen />}
-          {currentView === 'admin' && <AdminDashboard />}
-          {currentView === 'admin' && <AdminDashboard />}
-          {currentView === 'vocab' && <VocabDeck />}
+                {section === 'speaking' &&
+                  (currentEvaluation ? <EvaluationPanel /> : <PracticeRoom />)}
+
+                {section === 'writing' && <WritingRoom />}
+
+                {section === 'reading' && <ReadingRoom />}
+
+                {section === 'listening' && <ListeningRoom />}
+              </div>
+            )}
+
+            {currentView === 'history' && <HistoryView />}
+            {currentView === 'upgrade' && <UpgradeScreen />}
+            {currentView === 'admin' && <AdminDashboard />}
+            {currentView === 'vocab' && <VocabDeck />}
+          </Suspense>
         </main>
       </div>
       <ChatWidget />
