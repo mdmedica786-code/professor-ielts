@@ -308,7 +308,7 @@ Evaluate this response now. Return ONLY valid JSON.`
 /**
  * Evaluate transcript using OpenAI gpt-4o
  */
-async function evaluateTranscript(transcript, questionText, questionPart) {
+async function evaluateTranscript(transcript, questionText, questionPart, model = "gpt-4o") {
   const userMessage = `IELTS Speaking Question (Part ${questionPart}): "${questionText}"
 
 Student's Transcript:
@@ -317,7 +317,7 @@ Student's Transcript:
 Evaluate this response now. Return ONLY valid JSON.`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model,
     messages: [
       { role: "system", content: IELTS_EXAMINER_PROMPT },
       ...SPEAKING_FEW_SHOT,

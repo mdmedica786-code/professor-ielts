@@ -80,4 +80,27 @@ router.post('/set-admin', verifyAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// POST /api/admin/remove-ads — fulfil a "Remove Ads" purchase (set or revoke).
+// Mirrors the manual Telegram/UZS payment flow: admin flips this after payment.
+router.post('/remove-ads', verifyAuth, requireAdmin, async (req, res) => {
+  const { email, revoke = false } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'Student email is required.' });
+  }
+  try {
+    const userRecord = await auth.getUserByEmail(email);
+    await db.collection('users').doc(userRecord.uid).set({ adsRemoved: !revoke }, { merge: true });
+    return res.json({
+      success: true,
+      message: revoke ? `Re-enabled ads for ${email}.` : `Removed ads for ${email}.`,
+    });
+  } catch (err) {
+    console.error('Admin remove-ads error:', err);
+    if (err.code === 'auth/user-not-found') {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

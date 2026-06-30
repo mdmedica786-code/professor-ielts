@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import SignInScreen from './components/auth/SignInScreen';
 import LandingPage from './components/landing/LandingPage';
 import PaywallModal from './components/common/PaywallModal';
+import AdBanner from './components/common/AdBanner';
 import ChatWidget from './components/chatbot/ChatWidget';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
@@ -22,8 +23,7 @@ import logoImg from './assets/bandlogic-logo-transparent.png';
 
 export default function App() {
   const { section, currentView, currentEvaluation, setCurrentView } = useApp();
-  const { user: realUser } = useAuth();
-  const user = { uid: "test", email: "test@test.com" }; // Forced for debugging
+  const { user, profile, loading } = useAuth();
 
   useEffect(() => {
     const handleUpgrade = () => setCurrentView('upgrade');
@@ -71,6 +71,7 @@ export default function App() {
       </div>
       <ChatWidget />
       <PaywallModal />
+      <AdBanner />
     </div>
   );
 }

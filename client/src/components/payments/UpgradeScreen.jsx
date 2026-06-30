@@ -96,6 +96,25 @@ export default function UpgradeScreen() {
         ))}
       </div>
 
+      <div className="max-w-3xl mx-auto mb-8">
+        {/* Remove Ads — cheaper one-time option that keeps full free usage */}
+        <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-3xl p-6 border border-emerald-200 flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Just want to remove ads?</h3>
+            <p className="text-sm text-slate-600">Keep practicing for free, without ads. A one-time upgrade — Pro plans are already ad-free.</p>
+          </div>
+          <a
+            href={`https://t.me/Nerd_medica?text=Hi,%20I%20want%20to%20Remove%20Ads%20on%20BandLogic.%20My%20email%20is%20${user?.email}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center justify-center gap-2 py-3 px-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-sm transition-all"
+          >
+            <Shield className="w-5 h-5" />
+            Remove Ads
+          </a>
+        </div>
+      </div>
+
       <div className="max-w-3xl mx-auto">
         {/* Payment Instructions */}
         <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200">

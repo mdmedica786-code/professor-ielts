@@ -9,7 +9,7 @@ router.get('/me', async (req, res) => {
     const doc = await db.collection('users').doc(req.uid).get();
     
     if (!doc.exists) {
-      return res.json({ success: true, plan: 'free' });
+      return res.json({ success: true, plan: 'free', adsRemoved: false });
     }
     
     const data = doc.data();
@@ -17,13 +17,14 @@ router.get('/me', async (req, res) => {
     
     // Check if premium has expired
     if (premiumUntil && premiumUntil < new Date()) {
-      return res.json({ success: true, plan: 'free', expired: true });
+      return res.json({ success: true, plan: 'free', expired: true, adsRemoved: data.adsRemoved || false });
     }
     
-    return res.json({ 
-      success: true, 
-      plan: data.plan || 'free', 
-      premiumUntil 
+    return res.json({
+      success: true,
+      plan: data.plan || 'free',
+      premiumUntil,
+      adsRemoved: data.adsRemoved || false
     });
   } catch (err) {
     console.error("Fetch user error:", err);

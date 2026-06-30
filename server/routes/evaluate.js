@@ -2,6 +2,8 @@ const express = require("express");
 const openaiService = require("../services/openaiService");
 const { scorePronunciation } = require("../services/pronunciationService");
 const { getMimeType } = require("../utils/audioUtils");
+const { getIsPremium } = require("../services/planService");
+const { evalModel } = require("../utils/models");
 
 const router = express.Router();
 
@@ -38,6 +40,9 @@ router.post("/", async (req, res, next) => {
     const questionText = req.body.questionText || "General speaking question";
     const questionPart = parseInt(req.body.questionPart) || 1;
     const studentName = req.body.studentName || "Student";
+    // Tier the grader: paid users keep the high-accuracy model; free users get
+    // the cheaper one (tunable via env — see utils/models.js).
+    const evalModelName = evalModel(await getIsPremium(req.uid));
 
     let transcript = req.body.transcript || "";
     let transcriptWords = [];
@@ -113,9 +118,9 @@ router.post("/", async (req, res, next) => {
       }
       
       // Step 5: OpenAI LLM evaluation
-      console.log("LLM evaluation: Using OpenAI gpt-4o-mini...");
+      console.log(`LLM evaluation: Using OpenAI ${evalModelName}...`);
       const evaluationP = withTimeout(
-        openaiService.evaluateTranscript(transcript, questionText, questionPart),
+        openaiService.evaluateTranscript(transcript, questionText, questionPart, evalModelName),
         STEP_TIMEOUT_MS,
         "LLM evaluation"
       );
@@ -152,9 +157,9 @@ router.post("/", async (req, res, next) => {
         });
       }
 
-      console.log("LLM evaluation: Using OpenAI gpt-4o-mini...");
+      console.log(`LLM evaluation: Using OpenAI ${evalModelName}...`);
       evaluationResult = await withTimeout(
-        openaiService.evaluateTranscript(transcript, questionText, questionPart),
+        openaiService.evaluateTranscript(transcript, questionText, questionPart, evalModelName),
         STEP_TIMEOUT_MS,
         "LLM evaluation"
       );

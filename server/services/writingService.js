@@ -58,7 +58,7 @@ const MODULE_LABEL = { academic: "Academic", general: "General Training" };
  * @param {string} [params.imageBase64] - optional base64 image data
  * @returns {Promise<Object>} evaluation result (matches WritingEvaluationPanel contract)
  */
-async function evaluateWriting({ essay, prompt, taskType, module, imageBase64 }) {
+async function evaluateWriting({ essay, prompt, taskType, module, imageBase64, model = "gpt-4o" }) {
   const wordCount = countWords(essay);
   const minWords = taskType === 1 ? 150 : 250;
   const moduleLabel = MODULE_LABEL[module] || "Academic";
@@ -96,7 +96,7 @@ Assess this response now against the four IELTS Writing criteria. Return ONLY va
   }
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model,
     messages: [
       { role: "system", content: IELTS_WRITING_EXAMINER_PROMPT },
       ...WRITING_FEW_SHOT,

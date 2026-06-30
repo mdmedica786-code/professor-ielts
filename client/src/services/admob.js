@@ -95,3 +95,65 @@ export async function showRewardedAd() {
     setTimeout(() => finish(earned), 90_000);
   });
 }
+
+// ─── Banner ─────────────────────────────────────────────────────────
+// Google TEST banner/interstitial units — replace with your real ones.
+const BANNER_AD_IDS = {
+  android: 'ca-app-pub-3940256099942544/6300978111',
+  ios: 'ca-app-pub-3940256099942544/2934735716',
+};
+const INTERSTITIAL_AD_IDS = {
+  android: 'ca-app-pub-3940256099942544/1033173712',
+  ios: 'ca-app-pub-3940256099942544/4411468910',
+};
+
+let bannerShown = false;
+
+/** Show a bottom anchor banner (no-op on web / if already shown). */
+export async function showBanner() {
+  if (!adsAvailable() || bannerShown) return;
+  let mod;
+  try { mod = await ensureInit(); } catch { return; }
+  if (!mod) return;
+  const { AdMob, BannerAdSize, BannerAdPosition } = mod;
+  try {
+    await AdMob.showBanner({
+      adId: BANNER_AD_IDS[Capacitor.getPlatform()] || BANNER_AD_IDS.android,
+      adSize: BannerAdSize.ADAPTIVE_BANNER,
+      position: BannerAdPosition.BOTTOM_CENTER,
+      margin: 0,
+      isTesting: USE_TEST_ADS,
+    });
+    bannerShown = true;
+  } catch (e) {
+    console.warn('Banner error:', e?.message || e);
+  }
+}
+
+/** Remove the banner if one is showing. */
+export async function hideBanner() {
+  if (!adsAvailable() || !bannerShown) return;
+  try {
+    const mod = await loadPlugin();
+    await mod.AdMob.removeBanner();
+  } catch { /* noop */ }
+  bannerShown = false;
+}
+
+/** Show a full-screen interstitial (e.g. occasionally between actions). */
+export async function showInterstitial() {
+  if (!adsAvailable()) return false;
+  let mod;
+  try { mod = await ensureInit(); } catch { return false; }
+  if (!mod) return false;
+  const { AdMob } = mod;
+  const adId = INTERSTITIAL_AD_IDS[Capacitor.getPlatform()] || INTERSTITIAL_AD_IDS.android;
+  try {
+    await AdMob.prepareInterstitial({ adId, isTesting: USE_TEST_ADS });
+    await AdMob.showInterstitial();
+    return true;
+  } catch (e) {
+    console.warn('Interstitial error:', e?.message || e);
+    return false;
+  }
+}
