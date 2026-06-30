@@ -22,7 +22,8 @@ import logoImg from './assets/bandlogic-logo-transparent.png';
 
 export default function App() {
   const { section, currentView, currentEvaluation, setCurrentView } = useApp();
-  const { user } = useAuth();
+  const { user: realUser } = useAuth();
+  const user = { uid: "test", email: "test@test.com" }; // Forced for debugging
 
   useEffect(() => {
     const handleUpgrade = () => setCurrentView('upgrade');

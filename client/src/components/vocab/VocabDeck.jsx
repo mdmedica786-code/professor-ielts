@@ -12,6 +12,7 @@ import {
 } from '../../utils/srs';
 import { IELTS_STARTER_DECK } from '../../data/ieltsVocab';
 import { COLLOCATIONS_DECK } from '../../data/collocationsDeck';
+import { CAMBRIDGE_VOCABULARY_FOR_IELTS_ADVANCED_DECK } from '../../data/Cambridge_Vocabulary_for_IELTS_AdvancedDeck';
 
 const shuffle = (arr) => {
   const a = [...arr];
@@ -219,7 +220,8 @@ export default function VocabDeck() {
             <p className="text-center text-xs text-slate-400 -mt-2">Come back later — your next reviews are scheduled.</p>
           )}
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
+            <ActionTile icon={BookOpen} label="Decks" onClick={() => setView('decks')} />
             <ActionTile icon={Layers} label="Manage" onClick={() => setView('manage')} />
             <ActionTile icon={Wand2} label="Generate" onClick={() => setView('generate')} />
             <ActionTile icon={Plus} label="Add card" onClick={() => setView('add')} />
@@ -611,5 +613,38 @@ function Field({ label, children }) {
       <span className="block text-xs font-medium text-slate-600 mb-1">{label}</span>
       {children}
     </label>
+  );
+}
+
+// ─── Browse Pre-made Decks ─────────────────────────────────────────
+function DecksView({ cards, onBack, onAdd, busy }) {
+  const builtInDecks = [
+    { title: "IELTS Starter", count: IELTS_STARTER_DECK.length, data: IELTS_STARTER_DECK, id: 'starter' },
+    { title: "Collocations", count: COLLOCATIONS_DECK.length, data: COLLOCATIONS_DECK, id: 'collocations' },
+    { title: "Cambridge Advanced", count: CAMBRIDGE_VOCABULARY_FOR_IELTS_ADVANCED_DECK.length, data: CAMBRIDGE_VOCABULARY_FOR_IELTS_ADVANCED_DECK, id: 'cambridge_advanced' }
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <button onClick={onBack} className="text-slate-400 hover:text-slate-600 inline-flex items-center gap-1 text-sm">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        <h3 className="text-sm font-bold text-slate-800 inline-flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-violet-600" /> Browse Decks</h3>
+      </div>
+      <div className="space-y-2">
+        {builtInDecks.map(deck => (
+          <div key={deck.id} className="card-padded flex items-center justify-between">
+            <div>
+              <div className="font-bold text-slate-800">{deck.title}</div>
+              <div className="text-xs text-slate-500">{deck.count} cards</div>
+            </div>
+            <button onClick={() => onAdd(deck.data, deck.id)} disabled={busy} className="btn-primary py-1.5 px-3 text-xs">
+              {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Add all'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
