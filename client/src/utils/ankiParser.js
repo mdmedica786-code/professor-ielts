@@ -1,4 +1,4 @@
-import initSqlJs from 'sql.js';
+import initSqlJs from 'sql.js/dist/sql-wasm-browser.js';
 import JSZip from 'jszip';
 
 export async function parseApkg(file) {
@@ -20,7 +20,7 @@ export async function parseApkg(file) {
 
   // 3. Initialize sql.js
   const SQL = await initSqlJs({
-    locateFile: file => `/${file}` // Fetches sql-wasm.wasm from /public
+    locateFile: file => `/${file}` // Looks for sql-wasm-browser.wasm in public folder
   });
   
   const db = new SQL.Database(dbData);
