@@ -6,8 +6,12 @@ import glob
 import re
 
 def strip_html(text):
-    clean = re.compile('<.*?>')
-    return re.sub(clean, '', text).replace('&nbsp;', ' ').strip()
+    # Remove HTML tags
+    clean_html = re.compile('<.*?>')
+    text = re.sub(clean_html, '', text)
+    # Remove Anki sound tags like [sound:xxx.mp3]
+    text = re.sub(r'\[sound:.*?\]', '', text)
+    return text.replace('&nbsp;', ' ').strip()
 
 def process_apkg(apkg_path):
     print(f"\nProcessing {apkg_path}...")
@@ -48,7 +52,7 @@ def process_apkg(apkg_path):
                     if clean_f:
                         extra.append(clean_f)
                 if extra:
-                    back += " | " + " | ".join(extra)
+                    back += "\n\n" + "\n\n".join(extra)
             
             if front and back:
                 cards.append({
