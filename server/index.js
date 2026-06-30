@@ -31,6 +31,7 @@ const adminRouter = require("./routes/adminRoutes");
 const realtimeRouter = require("./routes/realtimeRoutes");
 const vocabRouter = require("./routes/vocab");
 const userRouter = require("./routes/user");
+const adsRouter = require("./routes/ads");
 
 // ─── Services (imported for the /health endpoint) ───────────────
 const { getFirebaseInitError, getAppsLength } = require("./services/firebaseAdmin");
@@ -170,6 +171,9 @@ app.use("/api/user", verifyAuth, userRouter);
 // Vocabulary mini-app (Firestore-backed SRS flashcards). CRUD is auth-only;
 // the AI deck generator inside applies checkUsage since it calls a paid model.
 app.use("/api/vocab", verifyAuth, vocabRouter);
+
+// Rewarded-ad credit (watch a video → earn one evaluation, capped per day)
+app.use("/api/ads", verifyAuth, adsRouter);
 
 // ─── Gamification / Streak stats ────────────────────────────────
 app.get("/api/stats", verifyAuth, async (req, res) => {

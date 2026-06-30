@@ -69,6 +69,13 @@ jobs:
           if ! grep -q "RECORD_AUDIO" "$MANIFEST"; then
             sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n\n    <application#' "$MANIFEST"
           fi
+          # AdMob App ID — REQUIRED or the app crashes on launch. This is Google's
+          # TEST App ID; replace it with your real one (AdMob → App settings).
+          if ! grep -q "com.google.android.gms.ads.APPLICATION_ID" "$MANIFEST"; then
+            ADMOB_APP_ID="ca-app-pub-3940256099942544~3347511713"
+            sed -i "s#\(<application[^>]*>\)#\1\n            <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$ADMOB_APP_ID\"/>#" "$MANIFEST"
+            echo "Injected AdMob App ID into $MANIFEST"
+          fi
           DEST="android/app/src/main/java/com/bandlogic/app"
           mkdir -p "$DEST"
           cp mobile/MainActivity.java "$DEST/MainActivity.java"

@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Lock, Clock, Sparkles, X } from 'lucide-react';
+import { adsAvailable, showRewardedAd } from '../../services/admob';
+import { claimAdReward } from '../../api/ads';
 
 export default function PaywallModal() {
   const [open, setOpen] = useState(false);
   const [details, setDetails] = useState(null);
+  const [rewardBusy, setRewardBusy] = useState(false);
+  const [rewardMsg, setRewardMsg] = useState(null);
 
   useEffect(() => {
     const handlePaywall = (e) => {
       setDetails(e.detail);
+      setRewardMsg(null);
       setOpen(true);
     };
     window.addEventListener('show-paywall', handlePaywall);
@@ -20,6 +25,25 @@ export default function PaywallModal() {
   const formatWaitTime = (ms) => {
     const hours = Math.ceil(ms / (60 * 60 * 1000));
     return `${hours} hour${hours > 1 ? 's' : ''}`;
+  };
+
+  const watchAdForCredit = async () => {
+    setRewardMsg(null);
+    setRewardBusy(true);
+    try {
+      const earned = await showRewardedAd();
+      if (!earned) {
+        setRewardMsg('Ad was not completed — no reward this time.');
+        return;
+      }
+      const res = await claimAdReward();
+      setRewardMsg(res?.data?.message || 'You earned 1 free evaluation! Close this and try again.');
+      setTimeout(() => { setOpen(false); setRewardMsg(null); }, 1600);
+    } catch (err) {
+      setRewardMsg(err?.response?.data?.error || 'Could not grant the reward. Please try again.');
+    } finally {
+      setRewardBusy(false);
+    }
   };
 
   return (
@@ -53,6 +77,19 @@ export default function PaywallModal() {
           )}
           
           <div className="space-y-3">
+            {adsAvailable() && (
+              <button
+                onClick={watchAdForCredit}
+                disabled={rewardBusy}
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 disabled:opacity-60 transition-all"
+              >
+                <Sparkles className="w-4 h-4" />
+                {rewardBusy ? 'Loading ad…' : 'Watch an ad for 1 free evaluation'}
+              </button>
+            )}
+            {rewardMsg && (
+              <p className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg py-2 px-3">{rewardMsg}</p>
+            )}
             <button
               onClick={() => {
                 setOpen(false);

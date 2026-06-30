@@ -71,7 +71,11 @@ export default function VocabDeck() {
   const seedDeck = useCallback(async (deck, source) => {
     setBusy(true); setError(null);
     try {
-      await vocabApi.createCards(deck.map((c) => ({ ...c, source })));
+      const cards = deck.map((c) => ({ ...c, source }));
+      const CHUNK_SIZE = 150;
+      for (let i = 0; i < cards.length; i += CHUNK_SIZE) {
+        await vocabApi.createCards(cards.slice(i, i + CHUNK_SIZE));
+      }
       await reload();
     } catch (err) {
       setError(err.response?.data?.error || 'Could not add the deck.');
