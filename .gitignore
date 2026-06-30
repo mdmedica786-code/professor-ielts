@@ -49,3 +49,5 @@ client/ios/
 client/.gradle/
 *.keystore
 *.jks
+
+decks/*.apkg

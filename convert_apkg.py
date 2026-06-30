@@ -53,8 +53,8 @@ def process_apkg(apkg_path):
             if front and back:
                 cards.append({
                     "id": f"{base_name.lower().replace(' ', '_')}_{index}",
-                    "word": front,
-                    "definition": back,
+                    "front": front,
+                    "back": back,
                     "example": "",
                     "collocations": [],
                     "tags": [base_name]
