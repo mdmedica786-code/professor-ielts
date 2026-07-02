@@ -177,6 +177,9 @@ app.use("/api/user", verifyAuth, userRouter);
 // the AI deck generator inside applies checkUsage since it calls a paid model.
 app.use("/api/vocab", verifyAuth, vocabRouter);
 
+// IELTS Library (Global decks for all users)
+app.use("/api/library", verifyAuth, require("./routes/library"));
+
 // Rewarded-ad credit (watch a video → earn one evaluation, capped per day)
 app.use("/api/ads", verifyAuth, adsRouter);
 
