@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const { verifyAuth } = require('../middleware/verifyAuth');
 const { checkUsage } = require('../middleware/checkUsage');
+const { SPEAKING_BAND_DESCRIPTORS } = require('../prompts/bandDescriptors');
 
 const router = express.Router();
 
@@ -33,12 +34,8 @@ BAND-AWARE FEEDBACK:
 - If the student struggles, simplify your questions slightly and give more encouragement.
 - Periodically (every 3–4 exchanges), give a brief micro-tip: "Quick tip: try using a conditional here, like 'If I had the chance, I would…'"
 
-SCORING REFERENCE (internal, do not quote band numbers aloud):
-- Band 5: Limited range, frequent errors, noticeable hesitation
-- Band 6: Adequate range, some errors, willing to speak at length
-- Band 7: Good range, few errors, speaks fluently with occasional hesitation
-- Band 8: Wide range, rare errors, speaks fluently and coherently
-- Band 9: Full range, near-native accuracy, completely fluent
+SCORING REFERENCE (internal — use to gauge the candidate's level and calibrate how hard you push and what you correct; never read band numbers aloud):
+${SPEAKING_BAND_DESCRIPTORS}
 
 Keep every response under 3–4 sentences unless giving a cue card. Sound warm but professional.`
       },

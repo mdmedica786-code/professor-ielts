@@ -2,6 +2,7 @@ const { OpenAI } = require("openai");
 const IELTS_LISTENING_GENERATOR_PROMPT = require("../prompts/ieltsListeningGenerator");
 const IELTS_LISTENING_EXAMINER_PROMPT = require("../prompts/ieltsListeningExaminer");
 const { listeningBand } = require("../utils/bands");
+const { uploadAudio } = require("./mediaStorage");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -119,7 +120,7 @@ function normalizeSection(s, sIdx, testSize) {
  *   2. Run in larger parallel batches (6) — tts-1 tolerates this fine for a
  *      single user; if rate limits bite, batch loop already serialises.
  */
-async function synthesizeAllAudio(script) {
+async function synthesizeAllAudio(script, testId = Date.now().toString()) {
   const BATCH = 6;
   const out = [];
   for (const section of script.sections) {
@@ -128,7 +129,7 @@ async function synthesizeAllAudio(script) {
     const t0 = Date.now();
     for (let i = 0; i < coalesced.length; i += BATCH) {
       const chunk = coalesced.slice(i, i + BATCH);
-      const synthesized = await Promise.all(chunk.map(synthesizeOne));
+      const synthesized = await Promise.all(chunk.map(u => synthesizeOne(u, testId)));
       newUtts.push(...synthesized);
     }
     console.log(
@@ -162,7 +163,7 @@ function coalesceConsecutiveSpeakers(utterances) {
   return merged;
 }
 
-async function synthesizeOne(utt) {
+async function synthesizeOne(utt, testId) {
   try {
     const speech = await openai.audio.speech.create({
       model: "tts-1",
@@ -171,12 +172,19 @@ async function synthesizeOne(utt) {
       response_format: "mp3",
     });
     const buf = Buffer.from(await speech.arrayBuffer());
-    return { ...utt, audioBase64: buf.toString("base64"), mime: "audio/mpeg" };
+    const publicId = `listening_${testId}_${utt.id.replace(/\+/g, '_')}`;
+    const url = await uploadAudio(buf, publicId);
+
+    if (url) {
+      return { ...utt, audioUrl: url, mime: "audio/mpeg" };
+    } else {
+      return { ...utt, audioBase64: buf.toString("base64"), mime: "audio/mpeg" };
+    }
   } catch (err) {
     console.warn(`TTS failed for utterance ${utt.id}: ${err.message}`);
     // Non-fatal — return the utterance without audio so the player can still
     // surface the script text (graceful degradation).
-    return { ...utt, audioBase64: null, mime: null, audioError: err.message };
+    return { ...utt, audioBase64: null, audioUrl: null, mime: null, audioError: err.message };
   }
 }
 
@@ -363,11 +371,12 @@ function toPublicSection(section) {
       id: u.id,
       speaker: u.speaker,
       voice: u.voice,
-      audioBase64: u.audioBase64,
+      audioUrl: u.audioUrl || null,
+      audioBase64: u.audioBase64 || null,
       mime: u.mime,
       audioError: u.audioError || null,
       // Include the spoken text only if there was an audio error (graceful fallback).
-      text: u.audioBase64 ? undefined : u.text,
+      text: (u.audioUrl || u.audioBase64) ? undefined : u.text,
     })),
     questions: section.questions.map((q) => ({
       id: q.id,

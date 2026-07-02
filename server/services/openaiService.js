@@ -1,5 +1,6 @@
 const { OpenAI, toFile } = require("openai");
 const IELTS_EXAMINER_PROMPT = require("../prompts/ieltsExaminer");
+const { SPEAKING_BAND_DESCRIPTORS } = require("../prompts/bandDescriptors");
 const { normalizeBand } = require("../utils/bands");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -320,6 +321,7 @@ Evaluate this response now. Return ONLY valid JSON.`;
     model,
     messages: [
       { role: "system", content: IELTS_EXAMINER_PROMPT },
+      { role: "system", content: SPEAKING_BAND_DESCRIPTORS },
       ...SPEAKING_FEW_SHOT,
       { role: "user", content: userMessage },
     ],

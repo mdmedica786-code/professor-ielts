@@ -5,11 +5,16 @@ import WritingComposer from './WritingComposer';
 import WritingEvaluationPanel from './WritingEvaluationPanel';
 import BankColumn from '../common/BankColumn';
 import { PenLine, ChevronDown } from 'lucide-react';
+import WritingFullTest from './WritingFullTest';
 
 export default function WritingRoom() {
-  const { ieltsModule, selectedWritingTask, saveEvaluation } = useApp();
+  const { ieltsModule, selectedWritingTask, saveEvaluation, testMode } = useApp();
   const [showBankMobile, setShowBankMobile] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
+
+  if (testMode === 'full') {
+    return <WritingFullTest />;
+  }
 
   const handleEvaluated = (data, task) => {
     setEvaluation(data);

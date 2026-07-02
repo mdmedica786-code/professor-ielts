@@ -44,7 +44,7 @@ export default function App() {
 
   return (
     // 100dvh keeps the shell correct against mobile browser chrome (address bar).
-    <div className="flex h-[100dvh] bg-slate-50 overflow-hidden">
+    <div className="flex h-[100dvh] app-canvas overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar />

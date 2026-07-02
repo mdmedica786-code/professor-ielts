@@ -97,8 +97,10 @@ export async function generatePrompts(topic) {
  * @param {string} params.essay     the student's written response
  * @param {string} params.studentName
  * @param {string} [params.imageBase64]
+ * @param {string} [params.sessionId]
  */
-export async function evaluateWriting({ module, taskType, prompt, essay, studentName, imageBase64 }) {
+export async function evaluateWriting({ module, taskType, prompt, essay, studentName, imageBase64, sessionId }) {
+  const headers = sessionId ? { 'x-test-session-id': sessionId } : {};
   const { data } = await api.post('/evaluate-writing', {
     module: module || 'academic',
     taskType: taskType || 2,
@@ -106,7 +108,16 @@ export async function evaluateWriting({ module, taskType, prompt, essay, student
     essay: essay || '',
     studentName: studentName || 'Student',
     imageBase64: imageBase64 || null,
-  });
+  }, { headers });
+  return data;
+}
+
+/**
+ * Start a pre-paid test session to reserve usage quota.
+ * @param {string} section 'writing' | 'speaking' | 'reading' | 'listening'
+ */
+export async function startTestSession(section) {
+  const { data } = await api.post('/test-session/start', { section });
   return data;
 }
 
@@ -178,6 +189,31 @@ export async function evaluateListening({ token, answers, studentName }) {
  */
 export async function healthCheck() {
   const { data } = await api.get('/health');
+  return data;
+}
+
+/**
+ * Fetch evaluation history from the backend.
+ */
+export async function fetchHistory() {
+  const { data } = await api.get('/history');
+  return data;
+}
+
+/**
+ * Save an evaluation record to the backend history (and analytics rollup).
+ */
+export async function saveHistoryRecord(record) {
+  const { data } = await api.post('/history', record);
+  return data;
+}
+
+/**
+ * Submit user feedback for a generated grade.
+ * @param {Object} params { evaluationId, section, modelBand, expectedBand, note, snippet }
+ */
+export async function submitGradeFeedback(params) {
+  const { data } = await api.post('/feedback/grade', params);
   return data;
 }
 

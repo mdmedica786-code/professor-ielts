@@ -12,7 +12,7 @@ function makeId(prefix) {
 
 export function AppProvider({ children }) {
   // ─── Persisted state (device-local, survives reloads / browser restarts) ───
-  const [history, setHistory] = useLocalStorage('ielts:history', []);
+  const [history, setHistory] = useState([]);
   const [students, setStudents] = useLocalStorage('ielts:students', []);
   const [activeStudentId, setActiveStudentId] = useLocalStorage('ielts:activeStudentId', null);
   const [settings, setSettings] = useLocalStorage('ielts:settings', {
@@ -37,6 +37,7 @@ export function AppProvider({ children }) {
   const [selectedQuestion, setSelectedQuestion] = useState(null); // speaking
   const [selectedWritingTask, setSelectedWritingTask] = useState(null); // writing
   const [sidebarOpen, setSidebarOpen] = useState(false); // drawer (mobile) / expanded (desktop)
+  const [testMode, setTestMode] = useState('practice'); // 'practice' | 'full'
 
   const toggleBankCollapsed = useCallback(() => setBankCollapsed((c) => !c), [setBankCollapsed]);
 
@@ -73,6 +74,19 @@ export function AppProvider({ children }) {
       setActiveStudentId(students[0].id);
     }
   }, [students, activeStudentId, setActiveStudentId]);
+
+  // Fetch history from backend on load
+  useEffect(() => {
+    let mounted = true;
+    import('../api/client').then(({ fetchHistory }) => {
+      fetchHistory().then(res => {
+        if (mounted && res.success && res.data) {
+          setHistory(res.data);
+        }
+      }).catch(err => console.error("Failed to fetch history from backend:", err));
+    });
+    return () => { mounted = false; };
+  }, []);
 
   // ─── Student roster actions ───
   const addStudent = useCallback((name) => {
@@ -128,7 +142,15 @@ export function AppProvider({ children }) {
       question: opts.question !== undefined ? opts.question : selectedQuestion,
       evaluation,
     };
+    
+    // Optimistic UI update
     setHistory((prev) => [record, ...prev]);
+
+    // Save to backend
+    import('../api/client').then(({ saveHistoryRecord }) => {
+      saveHistoryRecord(record).catch(err => console.error("Failed to save history to backend:", err));
+    });
+
     // Auto-add any vocabulary corrections from this evaluation into the
     // Vocabulary SRS deck (fire-and-forget; server dedups by word).
     if (evaluation?.mistakes) {
@@ -171,6 +193,7 @@ export function AppProvider({ children }) {
     selectedQuestion,
     selectedWritingTask,
     sidebarOpen,
+    testMode,
 
     // Setters
     setSettings,
@@ -185,6 +208,7 @@ export function AppProvider({ children }) {
     setSelectedQuestion,
     setSelectedWritingTask,
     setSidebarOpen,
+    setTestMode,
 
     // Student actions
     addStudent,
@@ -218,6 +242,7 @@ export function AppProvider({ children }) {
     selectedQuestion,
     selectedWritingTask,
     sidebarOpen,
+    testMode,
     setSettings,
     setIeltsModule,
     setBankCollapsed,
@@ -230,6 +255,7 @@ export function AppProvider({ children }) {
     setSelectedQuestion,
     setSelectedWritingTask,
     setSidebarOpen,
+    setTestMode,
     addStudent,
     renameStudent,
     deleteStudent,

@@ -17,7 +17,7 @@ export default function Navbar() {
   const subtitle = SUBTITLE[section] || 'Decode your IELTS. Quantify your progress.';
 
   return (
-    <header className="h-14 md:h-16 border-b border-slate-200 bg-white/80 backdrop-blur-sm flex items-center justify-between px-3 md:px-6 flex-shrink-0 z-30 gap-2">
+    <header className="h-14 md:h-16 bg-transparent flex items-center justify-between px-3 md:px-6 flex-shrink-0 z-30 gap-2">
       <div className="flex items-center gap-2 md:gap-3 min-w-0">
         {/* Menu toggle — opens the drawer on mobile, expands/collapses on desktop */}
         <button

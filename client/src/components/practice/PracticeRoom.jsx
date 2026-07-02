@@ -5,11 +5,16 @@ import LiveTutor from './LiveTutor';
 import BankColumn from '../common/BankColumn';
 import { useApp } from '../../context/AppContext';
 import { BookOpen, ChevronDown } from 'lucide-react';
+import SpeakingFullTest from '../speaking/SpeakingFullTest';
 
 export default function PracticeRoom() {
-  const { selectedQuestion } = useApp();
+  const { selectedQuestion, testMode } = useApp();
   const [showBankMobile, setShowBankMobile] = useState(false);
   const [mode, setMode] = useState('classic');
+
+  if (testMode === 'full') {
+    return <SpeakingFullTest />;
+  }
 
   return (
     <div className="h-full flex flex-col md:flex-row">

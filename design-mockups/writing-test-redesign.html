@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BandLogic — Writing Full Test (Redesign)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0b1120; --ink-2:#334155; --muted:#64748b; --faint:#94a3b8;
+    --line:#e6e8ee; --line-2:#eef0f5;
+    --surface:#ffffff; --surface-soft:#f7f8fc; --surface-softer:#fbfcfe;
+    --brand:#6d5efc; --brand-2:#8b5cf6; --brand-ink:#4c2fd6;
+    --amber:#f59e0b; --amber-bg:#fff7ed; --rose:#e11d48;
+    --emerald:#10b981;
+    --radius:16px; --radius-lg:22px;
+    --shadow-sm:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);
+    --shadow:0 6px 24px -8px rgba(16,24,40,.14),0 2px 6px rgba(16,24,40,.05);
+    --shadow-lg:0 24px 60px -20px rgba(76,47,214,.28);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink); -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1100px 500px at 82% -8%, rgba(139,92,246,.10), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, rgba(109,94,252,.08), transparent 55%),
+      #f4f5f9;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  .shell{width:100%;max-width:1180px;margin:0 auto;flex:1;display:flex;flex-direction:column;min-height:0;padding:14px 20px 20px}
+
+  /* ── Glass header ── */
+  .glass{
+    background:rgba(255,255,255,.62);
+    backdrop-filter:saturate(180%) blur(16px);
+    -webkit-backdrop-filter:saturate(180%) blur(16px);
+    border:1px solid rgba(255,255,255,.7);
+    box-shadow:var(--shadow-sm);
+  }
+  .topbar{border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:14px}
+  .exit{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:500;font-size:13.5px;padding:7px 11px;border-radius:10px;border:1px solid transparent;text-decoration:none;transition:.18s}
+  .exit:hover{color:var(--ink);background:#fff;border-color:var(--line)}
+  .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(109,94,252,.4)}
+  .title{font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+  .title span{display:block;font-weight:500;font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+  .spacer{flex:1}
+  .timer{display:inline-flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-weight:700;font-size:19px;letter-spacing:.02em;padding:8px 14px;border-radius:12px;color:var(--ink);background:rgba(255,255,255,.75);border:1px solid var(--line)}
+  .timer .dot{width:8px;height:8px;border-radius:50%;background:var(--emerald)}
+  .timer.low{color:#9a3412;background:var(--amber-bg);border-color:#fed7aa;animation:pulse 1.6s ease-in-out infinite}
+  .timer.low .dot{background:var(--amber)}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.35)}50%{box-shadow:0 0 0 6px rgba(245,158,11,0)}}
+
+  /* ── Progress rail ── */
+  .rail{height:4px;border-radius:99px;background:var(--line-2);margin:12px 4px 0;overflow:hidden}
+  .rail>i{display:block;height:100%;width:33%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+  /* ── Test card ── */
+  .card{flex:1;min-height:0;margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ── Segmented tabs ── */
+  .tabs{padding:12px 14px 0;display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--line-2)}
+  .seg{position:relative;display:inline-flex;background:var(--surface-soft);border:1px solid var(--line);border-radius:12px;padding:4px}
+  .seg button{position:relative;z-index:1;border:0;background:transparent;font:inherit;font-weight:600;font-size:13px;color:var(--muted);padding:8px 18px;border-radius:9px;cursor:pointer;transition:color .2s}
+  .seg button.on{color:var(--brand-ink)}
+  .seg .pill{position:absolute;z-index:0;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:9px;background:#fff;box-shadow:var(--shadow-sm);border:1px solid var(--line);transition:transform .28s cubic-bezier(.5,.1,.2,1)}
+  .seg .pill.two{transform:translateX(100%)}
+  .tab-meta{margin-left:auto;font-size:12px;color:var(--faint);padding-bottom:10px}
+
+  /* ── Split ── */
+  .split{flex:1;min-height:0;display:flex}
+  .pane{min-width:0;min-height:0}
+  .prompt{width:44%;border-right:1px solid var(--line-2);background:var(--surface-softer);overflow-y:auto;padding:26px 28px}
+  .editor{width:56%;display:flex;flex-direction:column;min-height:0;padding:22px 24px 18px}
+
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--brand-ink);background:rgba(109,94,252,.09);border:1px solid rgba(109,94,252,.16);padding:5px 11px;border-radius:99px;letter-spacing:.01em}
+  .q-title{margin:16px 0 8px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+  .q-body{font-size:16.5px;line-height:1.75;color:var(--ink-2)}
+  .q-body b{color:var(--ink);font-weight:600}
+  .figure{margin-top:20px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow-sm);overflow:hidden}
+  .figure .cap{font-size:11.5px;color:var(--muted);padding:9px 12px;border-bottom:1px solid var(--line-2);font-weight:500}
+  .bars{display:flex;align-items:flex-end;gap:14px;height:132px;padding:16px 18px}
+  .bars .b{flex:1;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--brand-2),var(--brand))}
+
+  .field-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .field-label .l{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .field-label .hint{font-size:11.5px;color:var(--faint)}
+  textarea{
+    flex:1;min-height:0;resize:none;width:100%;border:1px solid var(--line);border-radius:14px;
+    background:var(--surface-soft);padding:18px 20px;font:inherit;font-size:15.5px;line-height:1.8;color:var(--ink);
+    transition:.18s;outline:none;
+  }
+  textarea::placeholder{color:var(--faint)}
+  textarea:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 4px rgba(109,94,252,.14)}
+
+  /* ── Footer action bar ── */
+  .foot{display:flex;align-items:center;gap:16px;margin-top:16px}
+  .ring{--p:62;position:relative;width:44px;height:44px;flex:none;border-radius:50%;
+    background:conic-gradient(var(--emerald) calc(var(--p)*1%),var(--line-2) 0);display:grid;place-items:center}
+  .ring::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}
+  .ring i{position:relative;font-style:normal;font-weight:700;font-size:12px;color:var(--emerald)}
+  .wc{font-size:13px;color:var(--muted);line-height:1.35}
+  .wc b{display:block;color:var(--ink);font-size:15px;font-weight:700}
+  .submit{margin-left:auto;display:inline-flex;align-items:center;gap:9px;border:0;cursor:pointer;
+    font:inherit;font-weight:700;font-size:14.5px;color:#fff;padding:13px 26px;border-radius:14px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:var(--shadow-lg);
+    transition:transform .16s cubic-bezier(.2,.7,.2,1),box-shadow .16s}
+  .submit:hover{transform:translateY(-2px);box-shadow:0 28px 64px -18px rgba(76,47,214,.5)}
+  .submit:active{transform:translateY(0)}
+
+  .badge-note{font-family:Fraunces,serif;font-style:italic}
+  @media (max-width:820px){
+    .split{flex-direction:column}.prompt,.editor{width:100%}
+    .prompt{max-height:38vh;border-right:0;border-bottom:1px solid var(--line-2)}
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+
+    <div class="topbar glass">
+      <a class="exit" href="#"><span aria-hidden="true">‹</span> Exit test</a>
+      <div class="mark">BL</div>
+      <div class="title">IELTS Writing<span>Academic · Full test</span></div>
+      <div class="spacer"></div>
+      <div class="timer low"><span class="dot"></span> 04:37</div>
+    </div>
+    <div class="rail"><i style="width:36%"></i></div>
+
+    <div class="card">
+      <div class="tabs">
+        <div class="seg">
+          <span class="pill"></span>
+          <button class="on">Task 1</button>
+          <button>Task 2</button>
+        </div>
+        <div class="tab-meta">Task 1 · aim for 20 min · min. 150 words</div>
+      </div>
+
+      <div class="split">
+        <div class="pane prompt">
+          <span class="chip"><span aria-hidden="true">◆</span> Academic Task 1</span>
+          <div class="q-title">The task</div>
+          <p class="q-body">The chart below shows the number of international students enrolled at three UK universities between 2015 and 2023.</p>
+          <p class="q-body"><b>Summarise the information</b> by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.</p>
+          <div class="figure">
+            <div class="cap">Figure 1 — Enrolments (thousands), 2015–2023</div>
+            <div class="bars">
+              <div class="b" style="height:46%"></div>
+              <div class="b" style="height:63%"></div>
+              <div class="b" style="height:58%"></div>
+              <div class="b" style="height:80%"></div>
+              <div class="b" style="height:71%"></div>
+              <div class="b" style="height:95%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pane editor">
+          <div class="field-label">
+            <span class="l">Your response</span>
+            <span class="hint">Autosaves as you type</span>
+          </div>
+          <textarea placeholder="Start writing your response here…">The chart illustrates how international student enrolments changed at three UK universities over an eight-year period from 2015 to 2023.
+
+Overall, all three institutions experienced growth, though the pace varied considerably. The most striking trend is the steady climb at University A, which more than doubled its intake by the end of the period, overtaking both of its counterparts around 2020…</textarea>
+
+          <div class="foot">
+            <div class="ring" style="--p:62"><i>62%</i></div>
+            <div class="wc"><b>93 words</b>of 150 minimum</div>
+            <button class="submit">Submit test <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const seg=document.querySelector('.seg'), pill=seg.querySelector('.pill'), btns=[...seg.querySelectorAll('button')];
+    btns.forEach((b,i)=>b.addEventListener('click',()=>{btns.forEach(x=>x.classList.remove('on'));b.classList.add('on');pill.classList.toggle('two',i===1)}));
+  </script>
+</body>
+</html>

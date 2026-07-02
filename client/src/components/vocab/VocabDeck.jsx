@@ -15,11 +15,13 @@ const shuffle = (arr) => {
   return a;
 };
 
+// Tactile "game button" grades: vertical gradient + colored ambient shadow +
+// press-down on tap. Reads like physical keys, not flat admin buttons.
 const GRADE_STYLES = {
-  1: 'bg-rose-500 hover:bg-rose-600',
-  2: 'bg-amber-500 hover:bg-amber-600',
-  3: 'bg-emerald-500 hover:bg-emerald-600',
-  4: 'bg-sky-500 hover:bg-sky-600',
+  1: 'bg-gradient-to-b from-rose-400 to-rose-600 shadow-lg shadow-rose-500/30 hover:shadow-rose-500/45',
+  2: 'bg-gradient-to-b from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30 hover:shadow-amber-500/45',
+  3: 'bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/45',
+  4: 'bg-gradient-to-b from-sky-400 to-sky-600 shadow-lg shadow-sky-500/30 hover:shadow-sky-500/45',
 };
 
 export default function VocabDeck() {
@@ -180,15 +182,31 @@ export default function VocabDeck() {
             </div>
             
             {manifest.map(deck => (
-              <div key={deck.id} className="card-padded flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-slate-800">{deck.title}</div>
-                    <div className="text-xs text-slate-500">{deck.count} cards total</div>
+              // Stacked-deck illusion: two offset layers peeking out behind the card.
+              <div key={deck.id} className="relative group">
+                <div aria-hidden="true" className="absolute inset-x-3 -bottom-1.5 h-4 rounded-2xl bg-white border border-slate-200/70 shadow-sm transition-transform duration-300 group-hover:translate-y-0.5" />
+                <div aria-hidden="true" className="absolute inset-x-1.5 -bottom-[3px] h-4 rounded-2xl bg-white border border-slate-200/70 shadow-sm transition-transform duration-300 group-hover:translate-y-[1px]" />
+                <div className="relative card p-5 flex flex-col gap-3 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-card-lg">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 grid place-items-center shadow-lg shadow-violet-500/25 ring-1 ring-white/40 ring-inset shrink-0 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
+                        <Layers className="w-5 h-5 text-white drop-shadow-sm" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-slate-900 tracking-tight truncate">{deck.title}</div>
+                        <div className="text-xs text-slate-500">{deck.count} cards total</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => startStudy(deck.id)}
+                      disabled={busy}
+                      className="py-2 px-4 text-sm rounded-xl font-bold text-white inline-flex items-center gap-2
+                                 bg-gradient-to-r from-brand-600 to-violet-500 shadow-glow-sm hover:shadow-glow
+                                 ring-1 ring-white/20 ring-inset transition-all duration-200 active:scale-[0.96] shrink-0"
+                    >
+                      <Sparkles className="w-4 h-4" /> Study
+                    </button>
                   </div>
-                  <button onClick={() => startStudy(deck.id)} disabled={busy} className="btn-primary py-2 px-4 text-sm inline-flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" /> Study
-                  </button>
                 </div>
               </div>
             ))}
@@ -242,13 +260,19 @@ function StudySession({ deck, settings, onExit, onGraded }) {
 
   if (!current || pos >= queue.length) {
     return (
-      <div className="text-center py-16">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Check className="w-8 h-8 text-emerald-600" />
+      <div className="text-center py-16 animate-pop">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 shadow-lg shadow-emerald-500/30 ring-4 ring-emerald-100 flex items-center justify-center mx-auto mb-5">
+          <Check className="w-9 h-9 text-white drop-shadow-sm" strokeWidth={3} />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-1">Session complete</h3>
-        <p className="text-sm text-slate-500 mb-6">You reviewed {done} card{done !== 1 ? 's' : ''}.</p>
-        <button onClick={onExit} className="btn-primary px-6 py-3">Back to decks</button>
+        <h3 className="text-xl font-extrabold tracking-tight text-slate-900 mb-1">Session complete</h3>
+        <p className="text-sm text-slate-500 mb-6">You reviewed {done} card{done !== 1 ? 's' : ''}. Nice work.</p>
+        <button
+          onClick={onExit}
+          className="px-6 py-3 rounded-xl font-bold text-white text-sm bg-gradient-to-r from-brand-600 to-violet-500
+                     shadow-glow-sm hover:shadow-glow ring-1 ring-white/20 ring-inset transition-all active:scale-[0.97]"
+        >
+          Back to decks
+        </button>
       </div>
     );
   }
@@ -259,25 +283,54 @@ function StudySession({ deck, settings, onExit, onGraded }) {
         <button onClick={onExit} className="text-slate-400 hover:text-slate-600 inline-flex items-center gap-1 text-sm">
           <ArrowLeft className="w-4 h-4" /> Exit
         </button>
-        <span className="text-xs text-slate-400 font-medium">{done} done · {Math.max(0, queue.length - pos)} left</span>
+        <span className="text-xs font-semibold text-slate-500 px-2.5 py-1 rounded-full bg-white/70 border border-slate-200/70 shadow-sm tabular-nums">
+          {done} done · {Math.max(0, queue.length - pos)} left
+        </span>
       </div>
 
-      <div className="flex-1 bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden relative">
-         <AnkiRenderer card={current} model={model} side={flipped ? 'back' : 'front'} />
+      {/* Session progress rail */}
+      <div className="h-1 rounded-full bg-slate-200/70 overflow-hidden flex-shrink-0">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-brand-500 to-violet-500 transition-[width] duration-500"
+          style={{ width: `${queue.length ? Math.round((done / (done + Math.max(0, queue.length - pos))) * 100) : 0}%` }}
+        />
+      </div>
+
+      {/* The card itself — elevated, with stacked layers hinting at the deck */}
+      <div className="flex-1 relative min-h-0">
+        <div aria-hidden="true" className="absolute inset-x-4 -bottom-2 h-6 rounded-2xl bg-white/80 border border-slate-200/60 shadow-sm" />
+        <div aria-hidden="true" className="absolute inset-x-2 -bottom-1 h-6 rounded-2xl bg-white border border-slate-200/70 shadow-sm" />
+        <div
+          key={`${current.id}-${flipped}`}
+          className="absolute inset-0 bg-white border border-slate-200/70 shadow-card-lg rounded-[22px] overflow-hidden animate-pop"
+        >
+          <AnkiRenderer card={current} model={model} side={flipped ? 'back' : 'front'} />
+        </div>
       </div>
 
       <div className="flex-shrink-0">
         {!flipped ? (
-          <button onClick={() => setFlipped(true)} className="w-full btn-primary py-3.5">Show answer</button>
+          <button
+            onClick={() => setFlipped(true)}
+            className="w-full py-3.5 rounded-2xl font-bold text-white text-sm
+                       bg-gradient-to-b from-slate-700 to-slate-900 shadow-lg shadow-slate-900/25
+                       ring-1 ring-white/10 ring-inset transition-all duration-150
+                       hover:shadow-xl hover:shadow-slate-900/30 active:scale-[0.98] active:shadow-pressed"
+          >
+            Show answer
+            <span className="ml-2 text-[10px] font-semibold text-white/50 border border-white/20 rounded-md px-1.5 py-0.5 align-middle">space</span>
+          </button>
         ) : (
           <div className="grid grid-cols-4 gap-2">
             {[RATING.AGAIN, RATING.HARD, RATING.GOOD, RATING.EASY].map((g) => (
               <button
                 key={g}
                 onClick={() => grade(g)}
-                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl py-3 text-white font-bold text-sm min-h-[64px] transition-colors ${GRADE_STYLES[g]}`}
+                className={`flex flex-col items-center justify-center gap-0.5 rounded-2xl py-3 text-white font-bold text-sm min-h-[64px]
+                            ring-1 ring-white/25 ring-inset transition-all duration-150
+                            active:scale-[0.94] active:translate-y-0.5 ${GRADE_STYLES[g]}`}
               >
-                <span>{RATING_LABELS[g]}</span>
+                <span className="drop-shadow-sm">{RATING_LABELS[g]}</span>
                 <span className="text-[10px] font-medium opacity-90">{previews?.[g]}</span>
               </button>
             ))}

@@ -32,6 +32,11 @@ const realtimeRouter = require("./routes/realtimeRoutes");
 const vocabRouter = require("./routes/vocab");
 const userRouter = require("./routes/user");
 const adsRouter = require("./routes/ads");
+const testSessionRouter = require("./routes/testSession");
+const historyRouter = require("./routes/history");
+const feedbackRouter = require("./routes/feedback");
+const cronRouter = require("./routes/cronRoutes");
+const accountRouter = require("./routes/account");
 
 // ─── Services (imported for the /health endpoint) ───────────────
 const { getFirebaseInitError, getAppsLength } = require("./services/firebaseAdmin");
@@ -50,7 +55,7 @@ const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || "https://bandlogic.online")
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin) || origin === "http://localhost" || origin === "capacitor://localhost") {
+    if (!origin || ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost") || origin === "capacitor://localhost") {
       cb(null, true);
     } else {
       cb(new Error("Not allowed by CORS"));
@@ -174,6 +179,13 @@ app.use("/api/vocab", verifyAuth, vocabRouter);
 
 // Rewarded-ad credit (watch a video → earn one evaluation, capped per day)
 app.use("/api/ads", verifyAuth, adsRouter);
+
+// Pre-paid test sessions
+app.use("/api/test-session", testSessionRouter);
+app.use("/api/history", historyRouter);
+app.use("/api/feedback", feedbackRouter);
+app.use("/api/cron", cronRouter);
+app.use("/api/account", accountRouter);
 
 // ─── Gamification / Streak stats ────────────────────────────────
 app.get("/api/stats", verifyAuth, async (req, res) => {

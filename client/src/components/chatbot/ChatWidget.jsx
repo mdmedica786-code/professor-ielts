@@ -16,6 +16,7 @@ export default function ChatWidget() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [error, setError] = useState(null);
+  const [summary, setSummary] = useState('');
 
   // Voice call mode state
   const [isInCall, setIsInCall] = useState(false);
@@ -97,11 +98,12 @@ export default function ChatWidget() {
       if (userMessage) formData.append('message', userMessage);
       if (currentImage) formData.append('image', currentImage);
       
-      const serverHistory = messages.filter(m => m.role !== 'system').map(m => ({
+      const recent = messages.filter(m => m.role !== 'system').slice(-8).map(m => ({
         role: m.role,
         content: m.content
       }));
-      formData.append('history', JSON.stringify(serverHistory));
+      formData.append('recent', JSON.stringify(recent));
+      if (summary) formData.append('summary', summary);
 
       const { data } = await api.post('/chatbot/message', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -109,6 +111,7 @@ export default function ChatWidget() {
       
       if (data.success) {
         setMessages([...newHistory, { role: 'assistant', content: data.data.reply }]);
+        if (data.data.summary) setSummary(data.data.summary);
       }
     } catch (err) {
       console.error(err);
@@ -187,17 +190,19 @@ export default function ChatWidget() {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'voice.webm');
       
-      const serverHistory = messages.filter(m => m.role !== 'system').map(m => ({
+      const recent = messages.filter(m => m.role !== 'system').slice(-8).map(m => ({
         role: m.role,
         content: m.content
       }));
-      formData.append('history', JSON.stringify(serverHistory));
+      formData.append('recent', JSON.stringify(recent));
+      if (summary) formData.append('summary', summary);
 
       const { data } = await api.post('/chatbot/voice', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
       if (data.success) {
+        if (data.data.summary) setSummary(data.data.summary);
         const updatedHistory = [...messages, { role: 'user', content: `🎤 ${data.data.transcription}` }];
         const finalHistory = [...updatedHistory, { role: 'assistant', content: data.data.reply }];
         setMessages(finalHistory);

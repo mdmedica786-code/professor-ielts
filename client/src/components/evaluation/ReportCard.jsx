@@ -1,13 +1,40 @@
+import { useState } from 'react';
 import ScoreGauge from './ScoreGauge';
 import MiniScoreCard from './MiniScoreCard';
 import { getCriteriaName, getBandDescriptor } from '../../utils/scoring';
 import { formatDuration, formatDateTime } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
-import { Printer, Award, Clock, Hash, User } from 'lucide-react';
+import { Printer, Award, Clock, Hash, User, AlertCircle, MessageSquare } from 'lucide-react';
 
-export default function ReportCard({ evaluation }) {
+export default function ReportCard({ evaluation, evaluationId }) {
   const ev = evaluation;
   const { studentName } = useApp();
+  
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState({ expectedBand: '', note: '' });
+  const [feedbackStatus, setFeedbackStatus] = useState('idle'); // idle | submitting | success | error
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!feedback.expectedBand) return;
+    setFeedbackStatus('submitting');
+    try {
+      const { submitGradeFeedback } = await import('../../api/client');
+      await submitGradeFeedback({
+        evaluationId: evaluationId || ev.id || `eval_${Date.now()}`,
+        section: ev.metadata?.questionPart ? 'speaking' : 'unknown',
+        modelBand: ev.overallBand,
+        expectedBand: feedback.expectedBand,
+        note: feedback.note,
+        snippet: ev.verdict || ''
+      });
+      setFeedbackStatus('success');
+      setTimeout(() => setShowFeedback(false), 2000);
+    } catch (err) {
+      console.error(err);
+      setFeedbackStatus('error');
+    }
+  };
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -83,58 +110,137 @@ export default function ReportCard({ evaluation }) {
         </button>
       </div>
 
-      {/* Overall Band */}
-      <div className="card-padded text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Award className="w-5 h-5 text-brand-500" />
-          <h2 className="text-lg font-bold text-slate-900">IELTS Speaking Score</h2>
-        </div>
+      {/* Overall Band — certificate-grade hero */}
+      <div className="relative overflow-hidden rounded-[22px] border border-slate-200/70 bg-white shadow-card-lg text-center p-6 md:p-8">
+        {/* Certificate chrome: gradient hairline + ambient brand wash */}
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-500 via-violet-500 to-fuchsia-500" />
+        <div aria-hidden="true" className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[280px] rounded-full bg-brand-500/[0.07] blur-3xl" />
 
-        <ScoreGauge score={ev.overallBand} size={160} strokeWidth={10} />
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 mb-5">
+            <Award className="w-3.5 h-3.5 text-brand-600" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700">
+              IELTS Speaking Report
+            </span>
+          </div>
 
-        <p className="text-sm text-slate-600 mt-3 font-medium">
-          Band {ev.overallBand.toFixed(1)} — {getBandDescriptor(ev.overallBand)}
-        </p>
+          <div className="flex justify-center">
+            <ScoreGauge score={ev.overallBand} size={160} strokeWidth={10} />
+          </div>
 
-        {/* 4 criteria scores */}
-        <div className="grid grid-cols-4 gap-3 mt-6">
-          {Object.entries(ev.scores).map(([key, val]) => (
-            <div key={key} className="text-center">
-              <div className="text-2xl font-mono font-extrabold" style={{ color: val >= 7 ? '#059669' : val >= 5.5 ? '#d97706' : '#e11d48' }}>
-                {val.toFixed(1)}
+          <p className="text-base text-slate-800 mt-3 font-semibold tracking-tight">
+            Band {ev.overallBand.toFixed(1)} — {getBandDescriptor(ev.overallBand)}
+          </p>
+
+          <p className="text-xs text-slate-400 mt-1 flex items-center justify-center gap-1">
+            <AlertCircle className="w-3 h-3" />
+            AI estimate — typically within ±0.5 of an examiner
+          </p>
+
+        <button 
+          onClick={() => setShowFeedback(!showFeedback)}
+          className="text-xs text-brand-600 hover:text-brand-700 underline mt-2 inline-flex items-center gap-1"
+        >
+          <MessageSquare className="w-3 h-3" />
+          Doesn't look right?
+        </button>
+
+        {showFeedback && (
+          <form onSubmit={handleFeedbackSubmit} className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl text-left animate-slide-up max-w-sm mx-auto">
+            <h4 className="text-sm font-bold text-slate-800 mb-2">Flag this Grade</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Expected Band</label>
+                <select 
+                  className="w-full text-sm rounded-lg border-slate-200"
+                  value={feedback.expectedBand}
+                  onChange={(e) => setFeedback({ ...feedback, expectedBand: e.target.value })}
+                  required
+                >
+                  <option value="">Select expected band...</option>
+                  {[9,8.5,8,7.5,7,6.5,6,5.5,5,4.5,4,3.5,3].map(b => (
+                    <option key={b} value={b}>{b.toFixed(1)}</option>
+                  ))}
+                </select>
               </div>
-              <div className="label-caps mt-1">{getCriteriaName(key)}</div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Note (Optional)</label>
+                <textarea 
+                  className="w-full text-sm rounded-lg border-slate-200 min-h-[60px]"
+                  placeholder="Why do you think it's wrong?"
+                  value={feedback.note}
+                  onChange={(e) => setFeedback({ ...feedback, note: e.target.value })}
+                />
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button type="button" onClick={() => setShowFeedback(false)} className="text-xs text-slate-500 hover:text-slate-700 px-3 py-1">Cancel</button>
+                <button type="submit" disabled={feedbackStatus === 'submitting' || feedbackStatus === 'success'} className="btn-primary text-xs py-1.5 px-4">
+                  {feedbackStatus === 'submitting' ? 'Sending...' : feedbackStatus === 'success' ? 'Sent!' : 'Submit'}
+                </button>
+              </div>
+              {feedbackStatus === 'error' && <p className="text-xs text-red-500 mt-1">Failed to submit feedback. Try again.</p>}
             </div>
-          ))}
+          </form>
+        )}
+
+          {/* 4 criteria scores — analytics stat tiles */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-7">
+            {Object.entries(ev.scores).map(([key, val]) => {
+              const tone =
+                val >= 7
+                  ? { text: 'text-emerald-600', bar: 'from-emerald-400 to-emerald-600' }
+                  : val >= 5.5
+                  ? { text: 'text-amber-600', bar: 'from-amber-400 to-amber-600' }
+                  : { text: 'text-rose-600', bar: 'from-rose-400 to-rose-600' };
+              return (
+                <div key={key} className="stat-tile">
+                  <div className={`text-2xl font-mono tabular-nums font-extrabold ${tone.text}`}>
+                    {val.toFixed(1)}
+                  </div>
+                  <div className="label-caps mt-1">{getCriteriaName(key)}</div>
+                  <div className="h-1 rounded-full bg-slate-100 overflow-hidden mt-2.5">
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r ${tone.bar} transition-[width] duration-1000`}
+                      style={{ width: `${Math.min(100, (val / 9) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Verdict */}
+      {/* Examiner's verdict */}
       {ev.verdict && (
-        <div className="card-padded bg-brand-50/50 border-brand-200">
+        <div className="relative overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50/80 to-violet-50/50 p-5 shadow-card">
+          <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand-500 to-violet-500" />
+          <div className="label-caps text-brand-400 mb-1.5">Examiner's Verdict</div>
           <p className="text-sm text-brand-900 leading-relaxed">{ev.verdict}</p>
         </div>
       )}
 
       {/* Metadata */}
-      <div className="flex flex-wrap gap-4 text-xs text-slate-400">
+      <div className="flex flex-wrap gap-2 text-xs text-slate-500">
         {ev.metadata?.studentName && (
-          <span className="flex items-center gap-1">
-            <User className="w-3 h-3" /> {ev.metadata.studentName}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 border border-slate-200/70 shadow-sm">
+            <User className="w-3 h-3 text-slate-400" /> {ev.metadata.studentName}
           </span>
         )}
         {ev.metadata?.audioDuration > 0 && (
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" /> {formatDuration(ev.metadata.audioDuration)}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 border border-slate-200/70 shadow-sm">
+            <Clock className="w-3 h-3 text-slate-400" /> {formatDuration(ev.metadata.audioDuration)}
           </span>
         )}
         {ev.metadata?.totalWords > 0 && (
-          <span className="flex items-center gap-1">
-            <Hash className="w-3 h-3" /> {ev.metadata.totalWords} words
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 border border-slate-200/70 shadow-sm">
+            <Hash className="w-3 h-3 text-slate-400" /> {ev.metadata.totalWords} words
           </span>
         )}
         {ev.metadata?.timestamp && (
-          <span>{formatDateTime(ev.metadata.timestamp)}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/70 border border-slate-200/70 shadow-sm">
+            {formatDateTime(ev.metadata.timestamp)}
+          </span>
         )}
       </div>
     </div>

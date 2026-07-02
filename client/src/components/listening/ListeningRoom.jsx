@@ -5,6 +5,7 @@ import ListeningSetup from './ListeningSetup';
 import ListeningPlayer from './ListeningPlayer';
 import AnswerSheet from './AnswerSheet';
 import ListeningResult from './ListeningResult';
+import ListeningFullTest from './ListeningFullTest';
 import { CheckCircle2, Send, Loader2 } from 'lucide-react';
 
 /**
@@ -18,7 +19,7 @@ import { CheckCircle2, Send, Loader2 } from 'lucide-react';
  * Mirrors ReadingRoom's shape so History/saveEvaluation behave consistently.
  */
 export default function ListeningRoom() {
-  const { studentName, saveEvaluation } = useApp();
+  const { studentName, saveEvaluation, testMode } = useApp();
 
   const [phase, setPhase] = useState('setup');
   const [generating, setGenerating] = useState(false);
@@ -100,6 +101,10 @@ export default function ListeningRoom() {
     setResult(null);
     setError(null);
   };
+
+  if (testMode === 'full') {
+    return <ListeningFullTest />;
+  }
 
   if (phase === 'setup') {
     return (

@@ -39,6 +39,13 @@ const presetQuestions = [
   { id: 30, part: 3, topic: "Future", text: "How do you think cities will change in the next 50 years?" },
   { id: 31, part: 3, topic: "Youth", text: "What challenges do young people face today that previous generations did not?" },
   { id: 32, part: 3, topic: "Arts", text: "Should governments spend money on arts and culture, or focus on more practical things?" },
+
+  // === OFFICIAL IELTS.org SAMPLE SPEAKING TASKS (2023) ===
+  { id: 33, part: 1, topic: "Home Town (official)", text: "What kind of place is your home town or village? What's the most interesting part of it? What kind of jobs do the people there do?" },
+  { id: 34, part: 1, topic: "Accommodation (official)", text: "Tell me about the kind of accommodation you live in. How long have you lived there, and what do you like about living there?" },
+  { id: 35, part: 2, topic: "Something You Own (official)", text: "Describe something you own which is very important to you.\nYou should say:\n• where you got it from\n• how long you have had it\n• what you use it for\nand explain why it is important to you." },
+  { id: 36, part: 3, topic: "Values & Status (official)", text: "What kinds of things give status to people in your country? Have these things changed since your parents' time?" },
+  { id: 37, part: 3, topic: "Advertising (official)", text: "Do you think advertising influences what people buy? Why or why not?" },
 ];
 
 export default presetQuestions;

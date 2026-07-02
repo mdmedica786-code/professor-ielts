@@ -5,9 +5,10 @@ import ReadingSetup from './ReadingSetup';
 import PassageView from './PassageView';
 import QuestionList from './QuestionList';
 import ReadingResult from './ReadingResult';
+import ReadingFullTest from './ReadingFullTest';
 
 export default function ReadingRoom() {
-  const { ieltsModule, studentName, saveEvaluation } = useApp();
+  const { ieltsModule, studentName, saveEvaluation, testMode } = useApp();
 
   const [phase, setPhase] = useState('setup'); // 'setup' | 'attempt' | 'result'
   const [generating, setGenerating] = useState(false);
@@ -77,6 +78,10 @@ export default function ReadingRoom() {
     setResult(null);
     setError(null);
   };
+
+  if (testMode === 'full') {
+    return <ReadingFullTest />;
+  }
 
   if (phase === 'setup') {
     return (

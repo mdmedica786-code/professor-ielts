@@ -1,0 +1,40 @@
+[
+  {
+    "id": "spk-part1-placeholder",
+    "section": "speaking",
+    "part": 1,
+    "questionText": "Let's talk about your hometown. Where is it and what is it like?",
+    "text": "My hometown is a small city in the north of my country. It is not very big but I like it because it is quiet and the people are friendly. There is a nice river and some old buildings in the centre. Um, the weather is cold in winter but in summer it is quite pleasant. I have lived there my whole life so I know it very well.",
+    "human": { "fc": 6.5, "lr": 6.0, "gra": 6.0, "overall": 6.0 },
+    "_placeholder": true
+  },
+  {
+    "id": "spk-part3-placeholder",
+    "section": "speaking",
+    "part": 3,
+    "questionText": "Do you think people rely too much on their smartphones these days?",
+    "text": "Yeah, definitely, I'd say we've become quite dependent on them, sometimes to an unhealthy degree. I mean, people check their phones the moment they wake up, and a lot of us struggle to sit through a meal without glancing at a screen. On the one hand, it's understandable because so much of our lives, from banking to socialising, has migrated onto these devices. On the other hand, I think it's eroding our ability to be present and to concentrate for long stretches, which is a bit worrying.",
+    "human": { "fc": 8.0, "lr": 8.0, "gra": 7.5, "overall": 8.0 },
+    "_placeholder": true
+  },
+  {
+    "id": "wrt-task2-placeholder",
+    "section": "writing",
+    "taskType": 2,
+    "module": "academic",
+    "prompt": "Some people think that governments should spend money on public services rather than on the arts. To what extent do you agree or disagree?",
+    "text": "It is often argued that public money is better spent on essential services than on the arts. While I understand the appeal of this view, I believe that a healthy society needs investment in both.\n\nOn one hand, services such as healthcare, education and transport clearly affect people's daily lives and safety. When hospitals are underfunded or schools lack resources, the consequences are immediate and severe. For this reason, it is reasonable that governments prioritise these areas, particularly in countries with limited budgets.\n\nHowever, dismissing the arts as a luxury is short-sighted. Museums, theatres and public art enrich communities, attract tourism and support countless jobs. Moreover, exposure to culture fosters creativity and critical thinking, qualities that ultimately benefit the economy and society as a whole. A city without art would be efficient but soulless.\n\nIn conclusion, although public services must come first when resources are scarce, I disagree that the arts should be neglected. A balanced approach that funds both is, in my opinion, the mark of a truly developed nation.",
+    "human": { "tr": 7.0, "cc": 7.5, "lr": 7.0, "gra": 7.0, "overall": 7.0 },
+    "_placeholder": true
+  },
+  {
+    "id": "wrt-task2-weak-placeholder",
+    "section": "writing",
+    "taskType": 2,
+    "module": "general",
+    "prompt": "Some people prefer to work for a large company. Others prefer to work for a small company. Which do you prefer? Give reasons.",
+    "text": "In this modern life, many people want to work in big company but some people like small company. I will explain my opinion in this essay.\n\nFirst, big company is good because they pay more salary and have many benefit. Also you can meet many people and learn new thing. My cousin work in big company and he is very happy because he get promotion fast.\n\nSecond, small company also have advantage. The environment is more friendly and you can know everyone. But sometime the salary is not enough and no job security.\n\nIn my opinion, I prefer big company because of money and future. So I think big company is better than small company for my life.",
+    "human": { "tr": 5.5, "cc": 5.5, "lr": 5.0, "gra": 5.0, "overall": 5.0 },
+    "_placeholder": true
+  }
+]

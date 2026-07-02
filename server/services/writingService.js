@@ -1,5 +1,6 @@
 const { OpenAI } = require("openai");
 const IELTS_WRITING_EXAMINER_PROMPT = require("../prompts/ieltsWritingExaminer");
+const { WRITING_TASK1_DESCRIPTORS, WRITING_TASK2_DESCRIPTORS } = require("../prompts/bandDescriptors");
 const { normalizeBand, meanBand } = require("../utils/bands");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -99,6 +100,7 @@ Assess this response now against the four IELTS Writing criteria. Return ONLY va
     model,
     messages: [
       { role: "system", content: IELTS_WRITING_EXAMINER_PROMPT },
+      { role: "system", content: taskType === 1 ? WRITING_TASK1_DESCRIPTORS : WRITING_TASK2_DESCRIPTORS },
       ...WRITING_FEW_SHOT,
       { role: "user", content: contentArray },
     ],
