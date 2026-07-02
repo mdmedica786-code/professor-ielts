@@ -1,0 +1,26 @@
+[
+  {
+    "id": "starter",
+    "title": "IELTS Starter",
+    "count": 41,
+    "file": "starter.json"
+  },
+  {
+    "id": "collocations",
+    "title": "Collocations",
+    "count": 50,
+    "file": "collocations.json"
+  },
+  {
+    "id": "4000_ielts_words_with_ipa",
+    "title": "4000 IELTS words with IPA",
+    "count": 3599,
+    "file": "4000_IELTS_words_with_IPA.json"
+  },
+  {
+    "id": "cambridge_vocabulary_for_ielts_advanced",
+    "title": "Cambridge Vocabulary for IELTS Advanced",
+    "count": 519,
+    "file": "Cambridge_Vocabulary_for_IELTS_Advanced.json"
+  }
+]

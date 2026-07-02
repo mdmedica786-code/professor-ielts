@@ -1,0 +1,59 @@
+/* BandLogic blog — lightweight, fast, readable. No frameworks. */
+:root{
+  --brand:#7c3aed; --brand-dark:#6d28d9; --ink:#0f172a; --body:#334155;
+  --muted:#64748b; --line:#e2e8f0; --bg:#ffffff; --soft:#f8fafc;
+  --maxw:720px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--body);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.7; font-size:18px;
+}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%;height:auto}
+
+.site-header{border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10}
+.site-header .wrap{max-width:var(--maxw);margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--ink);font-size:18px}
+.brand img{width:28px;height:28px;border-radius:7px}
+.nav a{margin-left:18px;font-size:15px;font-weight:600;color:var(--muted)}
+.nav a:hover{color:var(--ink);text-decoration:none}
+.cta-btn{background:var(--brand);color:#fff!important;padding:9px 16px;border-radius:10px;font-weight:700;font-size:15px}
+.cta-btn:hover{background:var(--brand-dark);text-decoration:none}
+
+main{max-width:var(--maxw);margin:0 auto;padding:32px 20px 64px}
+h1{font-size:34px;line-height:1.2;color:var(--ink);font-weight:800;margin:.2em 0 .3em}
+h2{font-size:24px;color:var(--ink);font-weight:700;margin:1.6em 0 .4em}
+h3{font-size:19px;color:var(--ink);font-weight:700;margin:1.4em 0 .3em}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.3em}
+li{margin:.3em 0}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:4px solid var(--brand);background:var(--soft);color:var(--ink);border-radius:0 10px 10px 0}
+.meta{color:var(--muted);font-size:14px;margin-bottom:1.6em}
+.lead{font-size:20px;color:var(--ink)}
+code{background:var(--soft);padding:.1em .4em;border-radius:6px;font-size:.92em}
+
+.card{display:block;border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:0 0 16px;transition:box-shadow .15s,border-color .15s}
+.card:hover{text-decoration:none;border-color:#cbd5e1;box-shadow:0 6px 20px rgba(15,23,42,.06)}
+.card .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.04em}
+.card h2{margin:.25em 0 .25em;font-size:21px}
+.card p{color:var(--muted);margin:0;font-size:16px}
+
+.appcta{margin:2.2em 0;padding:24px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+.appcta h3{color:#fff;margin:0 0 .3em}
+.appcta p{color:#ede9fe;margin:0 0 1em}
+.appcta a{display:inline-block;background:#fff;color:var(--brand)!important;padding:11px 20px;border-radius:10px;font-weight:800}
+.appcta a:hover{text-decoration:none;background:#f5f3ff}
+
+.site-footer{border-top:1px solid var(--line);background:var(--soft)}
+.site-footer .wrap{max-width:var(--maxw);margin:0 auto;padding:28px 20px;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+.site-footer a{color:var(--muted);font-weight:600}
+
+@media (max-width:560px){
+  body{font-size:17px}
+  h1{font-size:28px}
+  .nav a:not(.cta-btn){display:none}
+}
