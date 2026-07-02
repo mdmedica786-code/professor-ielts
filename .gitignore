@@ -10,7 +10,7 @@ venv/
 .env.local
 
 # Build output
-dist/
+# dist/
 build/
 
 # IDE
