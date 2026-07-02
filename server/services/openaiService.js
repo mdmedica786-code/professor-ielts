@@ -307,13 +307,52 @@ Evaluate this response now. Return ONLY valid JSON.`
 ];
 
 /**
- * Evaluate transcript using OpenAI gpt-4o
+ * Build a structured acoustic-evidence block for the FC grader.
+ * All inputs optional — returns '' when there's nothing measurable.
+ * @param {Object} ev { audioDuration, totalWords, pauseData, disfluencyData }
  */
-async function evaluateTranscript(transcript, questionText, questionPart, model = "gpt-4o") {
+function buildFluencyEvidence(ev = {}) {
+  const lines = [];
+  const { audioDuration, totalWords, pauseData, disfluencyData } = ev;
+
+  if (audioDuration > 0 && totalWords > 0) {
+    const wpm = Math.round((totalWords / audioDuration) * 60);
+    lines.push(`- Speech rate: ${wpm} words/min over ${Math.round(audioDuration)}s (${totalWords} words). Typical band 7+ conversational range ≈ 120–160 wpm; well below ≈ 100 wpm suggests laboured speech, but do not penalise a naturally measured pace if coherence is strong.`);
+  }
+  if (pauseData && typeof pauseData.count === 'number') {
+    lines.push(`- Hesitation pauses (≥0.6s): ${pauseData.count}, totalling ${pauseData.totalPauseDuration}s${
+      audioDuration ? ` (${Math.round((pauseData.totalPauseDuration / audioDuration) * 100)}% of speaking time)` : ''
+    }.`);
+    const longest = (pauseData.pauses || []).slice().sort((a, b) => b.duration - a.duration).slice(0, 3);
+    if (longest.length) {
+      lines.push(`- Longest pauses: ${longest.map((p) => `${p.duration}s after "${p.afterWord}"`).join('; ')}. Pauses before content words suggest lexical search; pauses at clause boundaries are natural.`);
+    }
+  }
+  if (disfluencyData?.summary) {
+    const s = disfluencyData.summary;
+    lines.push(`- Disfluencies (from verbatim transcript): ${s.total_disfluencies ?? 0} total${
+      s.fillers != null ? ` — fillers: ${s.fillers}, repetitions: ${s.repetitions ?? 0}, false starts: ${s.false_starts ?? 0}` : ''
+    }.`);
+  }
+  if (!lines.length) return '';
+
+  return `
+
+MEASURED ACOUSTIC EVIDENCE (from the audio recording — use this to ground the Fluency & Coherence band; the transcript alone hides hesitation):
+${lines.join('\n')}
+Weigh this evidence for the FLUENCY half of FC. Coherence (organisation, cohesive devices, topic development) must still be judged from the transcript. Do not double-penalise: a disfluency already reflected in a lower FC band should not also lower GRA.`;
+}
+
+/**
+ * Evaluate transcript using OpenAI gpt-4o
+ * @param {Object} [fluencyEvidence] optional { audioDuration, totalWords, pauseData, disfluencyData }
+ */
+async function evaluateTranscript(transcript, questionText, questionPart, model = "gpt-4o", fluencyEvidence = null) {
+  const evidenceBlock = fluencyEvidence ? buildFluencyEvidence(fluencyEvidence) : '';
   const userMessage = `IELTS Speaking Question (Part ${questionPart}): "${questionText}"
 
 Student's Transcript:
-"${transcript}"
+"${transcript}"${evidenceBlock}
 
 Evaluate this response now. Return ONLY valid JSON.`;
 

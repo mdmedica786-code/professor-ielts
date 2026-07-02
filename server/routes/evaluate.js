@@ -117,21 +117,30 @@ router.post("/", async (req, res, next) => {
         pronunciationP = Promise.resolve(null);
       }
       
-      // Step 5: OpenAI LLM evaluation
-      console.log(`LLM evaluation: Using OpenAI ${evalModelName}...`);
+      // Step 5: OpenAI LLM evaluation — grounded in acoustic evidence.
+      // Disfluency analysis is awaited FIRST (fast gpt-4o-mini call) so its
+      // summary + pause data + speech rate reach the FC grader instead of
+      // only decorating the report. Azure keeps running in parallel — its
+      // result only affects the P band, which merges after this step.
+      disfluencyData = await disfluencyP;
+      if (disfluencyData) {
+        console.log(`Disfluency analysis: Found ${disfluencyData.summary.total_disfluencies} disfluencies`);
+      }
+
+      console.log(`LLM evaluation: Using OpenAI ${evalModelName} (with acoustic fluency evidence)...`);
       const evaluationP = withTimeout(
-        openaiService.evaluateTranscript(transcript, questionText, questionPart, evalModelName),
+        openaiService.evaluateTranscript(transcript, questionText, questionPart, evalModelName, {
+          audioDuration,
+          totalWords: transcriptWords.length,
+          pauseData,
+          disfluencyData,
+        }),
         STEP_TIMEOUT_MS,
         "LLM evaluation"
       );
 
-      const [disfRes, pronRes, evalRes] = await Promise.all([disfluencyP, pronunciationP, evaluationP]);
-      
-      disfluencyData = disfRes;
-      if (disfluencyData) {
-        console.log(`Disfluency analysis: Found ${disfluencyData.summary.total_disfluencies} disfluencies`);
-      }
-      
+      const [pronRes, evalRes] = await Promise.all([pronunciationP, evaluationP]);
+
       pronunciationData = pronRes;
       if (ACOUSTIC_PRONUNCIATION_ENABLED) {
         if (pronunciationData) {
