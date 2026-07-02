@@ -49,7 +49,7 @@ const PORT = process.env.PORT || 3000;
 // Render/Hostinger sit behind a proxy
 app.set("trust proxy", 1);
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || "https://bandlogic.online")
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || "https://bandlogic.online,https://www.bandlogic.online,http://bandlogic.online,http://www.bandlogic.online")
   .split(",")
   .map((s) => s.trim());
 
