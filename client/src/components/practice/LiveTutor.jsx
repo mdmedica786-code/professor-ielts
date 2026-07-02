@@ -22,8 +22,12 @@ export default function LiveTutor({ question, onEndSession }) {
       setStatus('connecting');
       setErrorMessage('');
 
-      // 1. Get Ephemeral Token
-      const tokenRes = await api.post('/realtime/token');
+      // 1. Get Ephemeral Token. Send the selected question so the server
+      // bakes it into the session instructions (reliable, unlike a fake
+      // first user message).
+      const tokenRes = await api.post('/realtime/token', {
+        question: question ? { text: question.text, part: question.part } : null,
+      });
       const EPHEMERAL_KEY = tokenRes.data.client_secret;
 
       // 2. Setup WebRTC Peer Connection with STUN/TURN for NAT traversal
@@ -37,6 +41,15 @@ export default function LiveTutor({ question, onEndSession }) {
         ],
       });
       pcRef.current = pc;
+
+      // Surface dropped calls instead of showing "connected" forever.
+      pc.onconnectionstatechange = () => {
+        if (['failed', 'closed', 'disconnected'].includes(pc.connectionState) && pcRef.current === pc) {
+          cleanup();
+          setErrorMessage('The call dropped. Please start again.');
+          setStatus('error');
+        }
+      };
 
       // Setup audio element for remote stream
       audioRef.current = document.createElement("audio");
@@ -56,33 +69,24 @@ export default function LiveTutor({ question, onEndSession }) {
       
       dc.addEventListener("message", (e) => {
         const msg = JSON.parse(e.data);
-        if (msg.type === 'response.audio.delta') {
+        // Over WebRTC, model speech state arrives as output_audio_buffer.*
+        // (response.audio.delta is a WebSocket-only event).
+        if (msg.type === 'output_audio_buffer.started') {
           setAiSpeaking(true);
-        } else if (msg.type === 'response.done') {
+        } else if (msg.type === 'output_audio_buffer.stopped' || msg.type === 'output_audio_buffer.cleared' || msg.type === 'response.done') {
           setAiSpeaking(false);
         } else if (msg.type === 'input_audio_buffer.speech_started') {
           setUserSpeaking(true);
         } else if (msg.type === 'input_audio_buffer.speech_stopped') {
           setUserSpeaking(false);
+        } else if (msg.type === 'error') {
+          console.error('Realtime error:', msg);
         }
       });
 
       dc.addEventListener("open", () => {
-        // We can send an initial message to start the conversation!
-        const event = {
-          type: 'conversation.item.create',
-          item: {
-            type: 'message',
-            role: 'user',
-            content: [{
-              type: 'input_text',
-              text: `Hello! I am ready to practice. Please ask me this question: ${question?.topic || "Let's talk about my hobbies."}`
-            }]
-          }
-        };
-        dc.send(JSON.stringify(event));
-        
-        // Tell the AI to generate a response
+        // The selected question is already in the session instructions
+        // (server-side). Just ask the examiner to open the session.
         dc.send(JSON.stringify({ type: 'response.create' }));
       });
 
@@ -90,10 +94,9 @@ export default function LiveTutor({ question, onEndSession }) {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const baseUrl = "https://api.openai.com/v1/realtime";
-      const model = "gpt-4o-realtime-preview-2024-12-17";
-      
-      const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
+      // GA WebRTC endpoint — the model is bound to the ephemeral token's
+      // session config, so no ?model= query is needed.
+      const sdpResponse = await fetch("https://api.openai.com/v1/realtime/calls", {
         method: "POST",
         body: offer.sdp,
         headers: {
@@ -103,7 +106,7 @@ export default function LiveTutor({ question, onEndSession }) {
       });
 
       if (!sdpResponse.ok) {
-        throw new Error('Failed to connect to AI server');
+        throw new Error(`Could not reach the AI server (${sdpResponse.status}). Please try again.`);
       }
 
       const answer = { type: "answer", sdp: await sdpResponse.text() };
@@ -112,17 +115,19 @@ export default function LiveTutor({ question, onEndSession }) {
       setStatus('connected');
     } catch (err) {
       console.error(err);
+      cleanup();
+      // Set error AFTER cleanup — previously stopSession() overwrote the
+      // 'error' status with 'disconnected', so users never saw the message.
+      setErrorMessage(err.response?.data?.error || err.message || 'Failed to start live session.');
       setStatus('error');
-      setErrorMessage(err.message || 'Failed to start live session.');
-      stopSession();
     }
   };
 
-  const stopSession = () => {
-    setStatus('disconnected');
+  // Tear down WebRTC resources without touching the status.
+  const cleanup = () => {
     setAiSpeaking(false);
     setUserSpeaking(false);
-    
+
     if (pcRef.current) {
       pcRef.current.close();
       pcRef.current = null;
@@ -134,6 +139,12 @@ export default function LiveTutor({ question, onEndSession }) {
     if (audioRef.current) {
       audioRef.current.srcObject = null;
     }
+  };
+
+  // User-initiated hang-up (End Call button + unmount).
+  const stopSession = () => {
+    cleanup();
+    setStatus('disconnected');
   };
 
   return (

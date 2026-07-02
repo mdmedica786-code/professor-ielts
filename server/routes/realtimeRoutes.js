@@ -8,12 +8,25 @@ const router = express.Router();
 
 router.post('/token', verifyAuth, checkUsage, async (req, res) => {
   try {
+    // The question the student selected in the app (optional). Baking it into
+    // the session instructions is far more reliable than sending it as a
+    // first "user message" over the data channel.
+    const { question } = req.body || {};
+    const questionContext = question?.text
+      ? `\n\nTHE STUDENT HAS SELECTED THIS QUESTION (IELTS Part ${question.part || 2}):\n"""\n${String(question.text).slice(0, 1500)}\n"""\nGreet the student briefly, then present THIS question exactly as written. Stay on this question and natural follow-ups to it. Do not run a full 3-part mock unless the student asks for one.`
+      : '';
+
     const response = await axios.post(
-      'https://api.openai.com/v1/realtime/sessions',
+      // GA Realtime API. The old beta endpoint (/v1/realtime/sessions) and the
+      // gpt-4o-realtime-preview-* snapshot models are retired — that's what
+      // was breaking the live call.
+      'https://api.openai.com/v1/realtime/client_secrets',
       {
-        model: 'gpt-4o-realtime-preview-2024-12-17',
-        voice: 'verse', // Options: alloy, echo, fable, onyx, nova, shimmer, verse
-        instructions: `You are a certified IELTS speaking examiner conducting a realistic practice interview. Behave exactly like a real examiner in a live test — natural, conversational, professional.
+        session: {
+          type: 'realtime',
+          model: process.env.REALTIME_MODEL || 'gpt-realtime-2',
+          audio: { output: { voice: process.env.REALTIME_VOICE || 'marin' } },
+          instructions: `You are a certified IELTS speaking examiner conducting a realistic practice interview. Behave exactly like a real examiner in a live test — natural, conversational, professional.
 
 ROLE & PERSONA:
 - Speak naturally and concisely, like a real person on a phone call. No monologues.
@@ -37,19 +50,24 @@ BAND-AWARE FEEDBACK:
 SCORING REFERENCE (internal — use to gauge the candidate's level and calibrate how hard you push and what you correct; never read band numbers aloud):
 ${SPEAKING_BAND_DESCRIPTORS}
 
-Keep every response under 3–4 sentences unless giving a cue card. Sound warm but professional.`
+Keep every response under 3–4 sentences unless giving a cue card. Sound warm but professional.${questionContext}`,
+        },
       },
       {
         headers: {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
+          // Bound to the ephemeral token; the browser never needs to send it.
+          'OpenAI-Safety-Identifier': req.uid || 'anonymous',
         },
       }
     );
 
     res.json({
       success: true,
-      client_secret: response.data.client_secret.value,
+      // GA shape: the ephemeral key is the top-level `value` ("ek_...").
+      client_secret: response.data.value,
+      expires_at: response.data.expires_at,
     });
   } catch (error) {
     console.error('Error generating Realtime session token:', error.response?.data || error.message);
