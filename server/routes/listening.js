@@ -37,12 +37,34 @@ router.get("/tests", async (req, res, next) => {
   try {
     if (!fs.existsSync(TESTS_DIR)) return res.json({ tests: [] });
     
-    const files = fs.readdirSync(TESTS_DIR).filter(f => f.endsWith('.json'));
-    const tests = files.map(f => {
+    const files = fs.readdirSync(TESTS_DIR).filter(f => f.endsWith('.json') && !f.startsWith('test_full_'));
+    const sectionTests = files.map(f => {
       const data = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, f)));
-      return { id: data.test_id, name: data.title || `IELTS Listening Test ${data.test_id}`, totalSections: data.sections?.length || 4 };
+      return { id: data.test_id, name: data.title || `IELTS Listening Test ${data.test_id}`, totalSections: 1, type: 'section' };
     });
-    res.json({ success: true, data: tests.sort((a, b) => String(a.id).localeCompare(String(b.id))) });
+    
+    // Create combined tests dynamically
+    const fullTests = [];
+    for (let i = 1; i <= 20; i++) {
+      // Check if all 4 sections exist
+      if (
+        fs.existsSync(path.join(TESTS_DIR, `test_${i}.json`)) &&
+        fs.existsSync(path.join(TESTS_DIR, `test_${i+20}.json`)) &&
+        fs.existsSync(path.join(TESTS_DIR, `test_${i+40}.json`)) &&
+        fs.existsSync(path.join(TESTS_DIR, `test_${i+60}.json`))
+      ) {
+        fullTests.push({ id: `full_${i}`, name: `Full Official Test ${i}`, totalSections: 4, type: 'full' });
+      }
+    }
+
+    const allTests = [...fullTests, ...sectionTests];
+    res.json({ success: true, data: allTests.sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'full' ? -1 : 1; // full tests first
+      // Custom numeric sort based on id
+      const aId = parseInt(a.id.replace('full_', ''));
+      const bId = parseInt(b.id.replace('full_', ''));
+      return aId - bId;
+    })});
   } catch (err) { next(err); }
 });
 
@@ -52,30 +74,49 @@ router.get("/test/:id", async (req, res, next) => {
     if (!/^[A-Za-z0-9_-]+$/.test(id)) {
       return res.status(400).json({ success: false, error: "Invalid test id." });
     }
-    const filePath = path.join(TESTS_DIR, `test_${id}.json`);
-    if (!filePath.startsWith(TESTS_DIR + path.sep)) {
-      return res.status(400).json({ success: false, error: "Invalid test id." });
-    }
-    if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, error: "Test not found" });
     
-    const testData = JSON.parse(fs.readFileSync(filePath));
-    // Provide the GitHub Raw URL for the audio (since GitHub is handling the 480MB hosting for free)
-    // We create a dummy section layout for the existing Player
-    const sections = testData.sections.map(s => ({
-      number: s.number,
-      title: s.title,
-      instructions: s.instructions,
-      questions: s.questions,
-      // Fetch audio from the Hostinger domain instead of GitHub
-      audioUrl: `https://bandlogic.online/audio/TEST%20${s.audio_id || testData.test_id}.mp3`,
-      // Provide dummy utterances for the player to work
-      utterances: [{ speaker: "Examiner", transcript: "Listen to the audio.", audioUrl: `https://bandlogic.online/audio/TEST%20${s.audio_id || testData.test_id}.mp3` }]
-    }));
-
-    const tokenPayload = { title: `Official Test ${testData.test_id}`, size: 'full', sections, isOfficial: true };
+    let sections = [];
+    let title = "";
+    
+    if (id.startsWith("full_")) {
+      const testNum = parseInt(id.replace("full_", ""));
+      const s1 = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, `test_${testNum}.json`)));
+      const s2 = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, `test_${testNum+20}.json`)));
+      const s3 = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, `test_${testNum+40}.json`)));
+      const s4 = JSON.parse(fs.readFileSync(path.join(TESTS_DIR, `test_${testNum+60}.json`)));
+      
+      const allSecs = [s1, s2, s3, s4];
+      sections = allSecs.map((testData, index) => {
+        const s = testData.sections[0];
+        return {
+          number: index + 1,
+          title: `Section ${index + 1}`,
+          instructions: s.instructions || "",
+          questions: s.questions,
+          audioUrl: `/audio/TEST%20${testData.test_id}.mp3`,
+          utterances: [{ speaker: "Examiner", transcript: "Listen to the audio.", audioUrl: `/audio/TEST%20${testData.test_id}.mp3` }]
+        };
+      });
+      title = `Full Official Test ${testNum}`;
+    } else {
+      const filePath = path.join(TESTS_DIR, `test_${id}.json`);
+      if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, error: "Test not found" });
+      const testData = JSON.parse(fs.readFileSync(filePath));
+      sections = testData.sections.map(s => ({
+        number: s.number,
+        title: s.title,
+        instructions: s.instructions || "",
+        questions: s.questions,
+        audioUrl: `/audio/TEST%20${testData.test_id}.mp3`,
+        utterances: [{ speaker: "Examiner", transcript: "Listen to the audio.", audioUrl: `/audio/TEST%20${testData.test_id}.mp3` }]
+      }));
+      title = testData.title || `Test ${testData.test_id}`;
+    }
+    
+    const tokenPayload = { title, size: id.startsWith('full_') ? 'full' : 'section', sections, isOfficial: true };
     const token = encodeToken(tokenPayload);
 
-    res.json({ success: true, data: { title: `Official Test ${testData.test_id}`, size: 'full', sections, token } });
+    res.json({ success: true, data: { title, size: id.startsWith('full_') ? 'full' : 'section', sections, token } });
   } catch (err) { next(err); }
 });
 

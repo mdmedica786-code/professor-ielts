@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 import { evaluateSpeaking } from '../../api/client';
 import presetQuestions from '../../data/presetQuestions';
@@ -8,7 +9,8 @@ import FullTestReport from '../evaluation/FullTestReport';
 
 // Full IELTS Speaking test: sequential Part 1–3 recording + combined rich report.
 export default function SpeakingFullTest() {
-  const { studentName, saveEvaluation, setTestMode } = useApp();
+  const { t } = useTranslation();
+  const { studentName, ieltsModule, saveEvaluation, setTestMode } = useApp();
   const [testQuestions, setTestQuestions] = useState(null);
   
   const [phase, setPhase] = useState('intro'); // 'intro', 'part1', 'part2', 'part3', 'evaluating', 'result'
@@ -250,17 +252,44 @@ export default function SpeakingFullTest() {
         {error && <div className="bg-rose-50 text-rose-700 px-4 py-2.5 text-sm font-medium text-center shrink-0">{error}</div>}
 
         {phase === 'intro' ? (
-          <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-6 py-10">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-600 to-violet-500 grid place-items-center shadow-glow mb-6">
-              <Mic className="w-7 h-7 text-white" />
+          <div className="h-full flex flex-col items-center justify-center text-center space-y-6 max-w-lg mx-auto">
+            <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mb-4 border-4 border-brand-100">
+              <Mic className="w-10 h-10 text-brand-500" />
             </div>
-            <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 mb-3">Speaking — full test</h3>
-            <p className="text-slate-500 max-w-md mb-8 leading-relaxed text-sm">
-              Three parts, recorded in sequence: interview, a cue-card long turn (1 min prep), then discussion.
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              {t('speaking.fullMock', 'Full Mock Test')}
+            </h2>
+            <p className="text-slate-500 leading-relaxed">
+              {t('speaking.subtitle', 'You are about to start a complete IELTS Speaking test. The test consists of 3 parts and will take approximately 11-14 minutes.')}
             </p>
+            
+            <div className="w-full space-y-3 mt-6 text-left">
+              <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 flex-shrink-0">1</div>
+                <div>
+                  <h3 className="font-bold text-slate-900">{t('speaking.part1', 'Part 1: Familiar Topics')}</h3>
+                  <p className="text-sm text-slate-500">{t('speaking.part1Desc', 'Answer short questions about yourself.')}</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 flex-shrink-0">2</div>
+                <div>
+                  <h3 className="font-bold text-slate-900">{t('speaking.part2', 'Part 2: The Cue Card')}</h3>
+                  <p className="text-sm text-slate-500">{t('speaking.part2Desc', 'Speak for 1-2 minutes on a specific topic.')}</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 flex-shrink-0">3</div>
+                <div>
+                  <h3 className="font-bold text-slate-900">{t('speaking.part3', 'Part 3: Discussion')}</h3>
+                  <p className="text-sm text-slate-500">{t('speaking.part3Desc', 'Discuss abstract ideas related to Part 2.')}</p>
+                </div>
+              </div>
+            </div>
+
             <button
               onClick={() => setPhase('part1')}
-              className="inline-flex items-center gap-2 font-bold text-white px-8 py-3.5 rounded-2xl bg-gradient-to-br from-brand-600 to-violet-500 shadow-glow hover:-translate-y-0.5 active:translate-y-0 transition"
+              className="w-full max-w-sm mt-8 bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95"
             >
               Start test
             </button>

@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { registerSW } from 'virtual:pwa-register';
+import './i18n';
 import './index.css';
 
 registerSW({ immediate: true });

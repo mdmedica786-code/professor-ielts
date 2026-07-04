@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 import presetQuestions from '../../data/presetQuestions';
 import QuestionCard from './QuestionCard';
@@ -8,18 +9,19 @@ import MakkarLibrary from './MakkarLibrary';
 import ViewToggle from '../layout/ViewToggle';
 import { BookMarked, BookOpen, Plus, Sparkles } from 'lucide-react';
 
-const PART_FILTERS = [
-  { value: 'all', label: 'All Parts' },
-  { value: 1, label: 'Part 1' },
-  { value: 2, label: 'Part 2' },
-  { value: 3, label: 'Part 3' },
-];
-
 export default function QuestionBank({ onPick = () => {} }) {
+  const { t } = useTranslation();
   const { selectedQuestion, setSelectedQuestion } = useApp();
   const [partFilter, setPartFilter] = useState('all');
   const [mode, setMode] = useState('makkar'); // 'makkar' | 'preset' | 'ai' | 'manual'
   const [aiQuestions, setAiQuestions] = useState([]);
+
+  const PART_FILTERS = [
+    { value: 'all', label: t('speaking.allParts', 'All Parts') },
+    { value: 1, label: t('speaking.part1', 'Part 1') },
+    { value: 2, label: t('speaking.part2', 'Part 2') },
+    { value: 3, label: t('speaking.part3', 'Part 3') },
+  ];
 
   const filteredQuestions = [
     ...presetQuestions,
@@ -33,11 +35,11 @@ export default function QuestionBank({ onPick = () => {} }) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-brand-600" />
-            <h2 className="text-sm font-bold text-slate-900">Question Bank</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t('speaking.questionBank', 'Question Bank')}</h2>
           </div>
           {mode === 'preset' && (
             <span className="text-[10px] text-slate-400 font-medium">
-              {filteredQuestions.length} questions
+              {filteredQuestions.length} {t('common.questions', 'questions')}
             </span>
           )}
         </div>
@@ -53,7 +55,7 @@ export default function QuestionBank({ onPick = () => {} }) {
                 : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
-            <BookMarked className="w-3 h-3" /> Library
+            <BookMarked className="w-3 h-3" /> {t('speaking.library', 'Library')}
           </button>
           <button
             id="mode-preset"

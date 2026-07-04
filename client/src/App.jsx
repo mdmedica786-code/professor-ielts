@@ -2,6 +2,7 @@ import { useApp } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useState, useEffect } from 'react';
 import SignInScreen from './components/auth/SignInScreen';
+import NamePromptScreen from './components/auth/NamePromptScreen';
 import LandingPage from './components/landing/LandingPage';
 import PaywallModal from './components/common/PaywallModal';
 import AdBanner from './components/common/AdBanner';
@@ -34,12 +35,22 @@ export default function App() {
   }, [setCurrentView]);
 
   const [showSignIn, setShowSignIn] = useState(false);
+  const [profileUpdated, setProfileUpdated] = useState(false);
+
+  // Reset profile update state if a different user logs in
+  useEffect(() => {
+    setProfileUpdated(false);
+  }, [user?.uid]);
 
   if (!user) {
     if (showSignIn) {
       return <SignInScreen onBack={() => setShowSignIn(false)} />;
     }
     return <LandingPage onSignInClick={() => setShowSignIn(true)} />;
+  }
+
+  if (!user.displayName && !profileUpdated) {
+    return <NamePromptScreen onComplete={() => setProfileUpdated(true)} />;
   }
 
   return (

@@ -1,0 +1,94 @@
+{
+  "landing": {
+    "title": "Crack the IELTS code.",
+    "subtitle": "Stop guessing. Start measuring. The only AI coach that quantifies your English proficiency across all four modules with brutal precision.",
+    "tryAsGuest": "Try as Guest",
+    "signIn": "Sign In / Register"
+  },
+  "sidebar": {
+    "speaking": "Speaking",
+    "writing": "Writing",
+    "reading": "Reading",
+    "listening": "Listening",
+    "vocabulary": "Vocabulary",
+    "history": "History & Progress",
+    "signIn": "Sign in to save progress",
+    "signOut": "Sign Out"
+  },
+  "common": {
+    "language": "Language",
+    "difficulty": "Difficulty",
+    "topic": "Topic",
+    "startTest": "Start Test",
+    "generating": "Generating...",
+    "error": "Error",
+    "bandScore": "Band Score"
+  },
+  "speaking": {
+    "title": "IELTS Speaking Simulator",
+    "subtitle": "Real-time AI examiner. Dynamic follow-ups. Accurate band scoring.",
+    "module": "Module",
+    "academic": "Academic",
+    "general": "General Training",
+    "part1": "Part 1 (Familiar Topics)",
+    "part2": "Part 2 (Cue Card)",
+    "part3": "Part 3 (Discussion)",
+    "fullMock": "Full Mock Test (Parts 1-3)",
+    "mode": "Mode",
+    "easy": "Easy (5.0-6.0)",
+    "medium": "Medium (6.0-7.0)",
+    "hard": "Hard (7.0-9.0)",
+    "generate": "Generate Speaking Test"
+  },
+  "writing": {
+    "title": "IELTS Writing Evaluator",
+    "subtitle": "Instant grading for essays, letters, and reports against official rubrics.",
+    "task1": "Task 1",
+    "task2": "Task 2",
+    "generate": "Generate Writing Task"
+  },
+  "reading": {
+    "title": "IELTS Reading Practice",
+    "subtitle": "Authentic passages. Official question types. Instant performance analysis.",
+    "generate": "Generate Reading Test"
+  },
+  "listening": {
+    "title": "IELTS Listening Practice",
+    "subtitle": "Multi-voice AI audio. Played once — just like the real test. Auto-marked on the official band scale.",
+    "testSize": "Test Size",
+    "singleSection": "Single section",
+    "fullTest": "Full test",
+    "whichSection": "Which section",
+    "section1": "Section 1",
+    "section2": "Section 2",
+    "section3": "Section 3",
+    "section4": "Section 4",
+    "officialTests": "Official Tests",
+    "aiGenerator": "AI Generator",
+    "generate": "Generate Listening Test",
+    "selectTest": "Select a Test",
+    "fullTests": "Full Tests",
+    "bySection": "By Section"
+  },
+  "vocab": {
+    "title": "Vocabulary Decks",
+    "noDecks": "No Decks Found",
+    "installPrompt": "Install the default IELTS deck to get started instantly.",
+    "installDefault": "Install Default IELTS Deck",
+    "importCustom": "Import custom .apkg",
+    "yourDecks": "Your Decks",
+    "import": "Import"
+  },
+  "history": {
+    "title": "Performance Analytics",
+    "subtitle": "Track your progress across all modules.",
+    "speakingTrend": "Speaking Trend",
+    "writingTrend": "Writing Trend",
+    "readingTrend": "Reading Trend",
+    "listeningTrend": "Listening Trend",
+    "noData": "No data available yet.",
+    "recentTests": "Recent Tests",
+    "band": "Band",
+    "date": "Date"
+  }
+}

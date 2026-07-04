@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { BookOpen, Brain, Sparkles, Plus, Settings as SettingsIcon, ArrowLeft, Check, Loader2, Search, Layers, RotateCcw, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { schedule, previewIntervals, deckStats, isDue, RATING, RATING_LABELS, DEFAULT_SETTINGS } from '../../utils/srs';
 import { getManifest, getDeck, saveDeck, saveMediaBatch, updateCardProgress } from '../../utils/deckStorage';
@@ -25,6 +26,7 @@ const GRADE_STYLES = {
 };
 
 export default function VocabDeck() {
+  const { t } = useTranslation();
   const [manifest, setManifest] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -90,6 +92,41 @@ export default function VocabDeck() {
     }
   };
 
+  const installDefaultDeck = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/default.apkg');
+      if (!res.ok) throw new Error('Default deck not found on server.');
+      
+      const blob = await res.blob();
+      const file = new File([blob], 'BandLogic_Default.apkg', { type: 'application/octet-stream' });
+      
+      const parsed = await parseApkg(file);
+      const deckId = 'bandlogic_default';
+      
+      await saveMediaBatch(parsed.mediaFiles);
+      await saveDeck(deckId, {
+        id: deckId,
+        title: 'BandLogic Essential IELTS Vocabulary',
+        models: parsed.models,
+        cards: parsed.cards.map(c => ({
+          ...c,
+          id: c.id.toString(),
+          state: 'new',
+          due: Date.now()
+        }))
+      });
+      
+      await reloadManifest();
+    } catch (err) {
+      console.error(err);
+      setError('Could not download the default deck. Make sure default.apkg is in your client/public folder!');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const startStudy = async (deckId) => {
     setBusy(true);
     try {
@@ -148,7 +185,7 @@ export default function VocabDeck() {
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-violet-600" />
-          <h2 className="text-lg font-bold text-slate-900">Offline Anki Decks</h2>
+          <h2 className="text-lg font-bold text-slate-900">{t('vocab.title', 'Vocabulary Decks')}</h2>
         </div>
         <button onClick={() => setView('settings')} className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100">
           <SettingsIcon className="w-5 h-5" />
@@ -160,23 +197,40 @@ export default function VocabDeck() {
           <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Brain className="w-8 h-8 text-violet-500" />
           </div>
-          <h3 className="text-base font-bold text-slate-900 mb-1">No Decks Found</h3>
+          <h3 className="text-base font-bold text-slate-900 mb-1">{t('vocab.noDecks', 'No Decks Found')}</h3>
           <p className="text-sm text-slate-500 mb-5 max-w-sm mx-auto">
-            You are now using the full offline Anki engine. Import a real `.apkg` file to begin, with full support for images, audio, and cloze deletions!
+            {t('vocab.installPrompt', 'Install the default IELTS deck to get started instantly.')}
           </p>
-          <label className="btn-primary inline-flex items-center justify-center gap-2 py-3 px-6 cursor-pointer">
-            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            Import .apkg file
-            <input type="file" accept=".apkg" className="hidden" onChange={handleImport} disabled={busy} />
-          </label>
+          
+          {error && (
+            <div className="text-rose-600 text-sm font-semibold bg-rose-50 border border-rose-200 rounded-lg p-3 mb-5 max-w-sm mx-auto">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button 
+              onClick={installDefaultDeck}
+              disabled={busy}
+              className="px-6 py-3 rounded-xl font-bold text-white text-sm bg-gradient-to-r from-brand-600 to-violet-500 shadow-glow-sm hover:shadow-glow ring-1 ring-white/20 ring-inset transition-all active:scale-[0.97] inline-flex items-center gap-2"
+            >
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {t('vocab.installDefault', 'Install Default IELTS Deck')}
+            </button>
+            <label className="btn-ghost inline-flex items-center justify-center gap-2 py-3 px-6 cursor-pointer">
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {t('vocab.importCustom', 'Import custom .apkg')}
+              <input type="file" accept=".apkg" className="hidden" onChange={handleImport} disabled={busy} />
+            </label>
+          </div>
         </div>
       ) : (
         <>
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-2">
-               <h3 className="text-sm font-bold text-slate-800">Your Decks</h3>
+               <h3 className="text-sm font-bold text-slate-800">{t('vocab.yourDecks', 'Your Decks')}</h3>
                <label className="text-xs font-semibold text-brand-600 cursor-pointer flex items-center gap-1">
-                 <Upload className="w-3 h-3" /> Import
+                 <Upload className="w-3 h-3" /> {t('vocab.import', 'Import')}
                  <input type="file" accept=".apkg" className="hidden" onChange={handleImport} disabled={busy} />
                </label>
             </div>
@@ -211,10 +265,6 @@ export default function VocabDeck() {
               </div>
             ))}
           </div>
-
-          <p className="text-center text-[11px] text-slate-400 mt-6">
-            Data is saved securely offline on your device (IndexedDB). No cloud quota used.
-          </p>
         </>
       )}
     </div>

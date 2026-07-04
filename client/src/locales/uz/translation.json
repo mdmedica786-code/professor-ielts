@@ -1,0 +1,94 @@
+{
+  "landing": {
+    "title": "IELTS kodini buzing.",
+    "subtitle": "Taxmin qilishni to'xtating. O'lchashni boshlang. Barcha to'rtta modul bo'yicha ingliz tili darajangizni aniq baholaydigan yagona AI murabbiyi.",
+    "tryAsGuest": "Mehmon sifatida urinib ko'ring",
+    "signIn": "Kirish / Ro'yxatdan o'tish"
+  },
+  "sidebar": {
+    "speaking": "Gapirish (Speaking)",
+    "writing": "Yozish (Writing)",
+    "reading": "O'qish (Reading)",
+    "listening": "Tinglash (Listening)",
+    "vocabulary": "Lug'at",
+    "history": "Tarix va Rivojlanish",
+    "signIn": "Saqlash uchun kiring",
+    "signOut": "Chiqish"
+  },
+  "common": {
+    "language": "Til",
+    "difficulty": "Qiyinchilik",
+    "topic": "Mavzu",
+    "startTest": "Testni boshlash",
+    "generating": "Yaratilmoqda...",
+    "error": "Xato",
+    "bandScore": "Ball (Band)"
+  },
+  "speaking": {
+    "title": "IELTS Speaking Simulyatori",
+    "subtitle": "Haqiqiy vaqtdagi AI imtihon oluvchi. Dinamik savollar. Aniq baholash.",
+    "module": "Modul",
+    "academic": "Akademik",
+    "general": "Umumiy",
+    "part1": "1-qism (Tanish mavzular)",
+    "part2": "2-qism (Karta)",
+    "part3": "3-qism (Muhokama)",
+    "fullMock": "To'liq test (1-3 qismlar)",
+    "mode": "Rejim",
+    "easy": "Oson (5.0-6.0)",
+    "medium": "O'rtacha (6.0-7.0)",
+    "hard": "Qiyin (7.0-9.0)",
+    "generate": "Testni yaratish"
+  },
+  "writing": {
+    "title": "IELTS Writing Baholovchi",
+    "subtitle": "Insholar, xatlar va hisobotlarni rasmiy mezonlar asosida tezkor baholash.",
+    "task1": "1-vazifa",
+    "task2": "2-vazifa",
+    "generate": "Vazifani yaratish"
+  },
+  "reading": {
+    "title": "IELTS Reading Amaliyoti",
+    "subtitle": "Haqiqiy matnlar. Rasmiy savol turlari. Tezkor tahlil.",
+    "generate": "Matnni yaratish"
+  },
+  "listening": {
+    "title": "IELTS Listening Amaliyoti",
+    "subtitle": "Ko'p ovozli AI audiosi. Haqiqiy imtihondagidek bir marta eshittiriladi.",
+    "testSize": "Test hajmi",
+    "singleSection": "Bitta bo'lim",
+    "fullTest": "To'liq test",
+    "whichSection": "Qaysi bo'lim",
+    "section1": "1-bo'lim",
+    "section2": "2-bo'lim",
+    "section3": "3-bo'lim",
+    "section4": "4-bo'lim",
+    "officialTests": "Rasmiy testlar",
+    "aiGenerator": "AI Generatori",
+    "generate": "Tinglash testini yaratish",
+    "selectTest": "Testni tanlang",
+    "fullTests": "To'liq testlar",
+    "bySection": "Bo'limlar bo'yicha"
+  },
+  "vocab": {
+    "title": "Lug'at to'plamlari",
+    "noDecks": "To'plamlar topilmadi",
+    "installPrompt": "Boshlash uchun standart IELTS to'plamini o'rnating.",
+    "installDefault": "IELTS to'plamini o'rnatish",
+    "importCustom": ".apkg import qilish",
+    "yourDecks": "Sizning to'plamlaringiz",
+    "import": "Import"
+  },
+  "history": {
+    "title": "O'zlashtirish tahlili",
+    "subtitle": "Barcha modullar bo'yicha yutuqlaringizni kuzatib boring.",
+    "speakingTrend": "Gapirish tendentsiyasi",
+    "writingTrend": "Yozish tendentsiyasi",
+    "readingTrend": "O'qish tendentsiyasi",
+    "listeningTrend": "Tinglash tendentsiyasi",
+    "noData": "Hozircha ma'lumot yo'q.",
+    "recentTests": "So'nggi testlar",
+    "band": "Ball",
+    "date": "Sana"
+  }
+}

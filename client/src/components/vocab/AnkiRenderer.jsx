@@ -22,6 +22,10 @@ export default function AnkiRenderer({ card, model, side = 'front' }) {
 
       // Replace {{Field}} with actual values
       let output = format;
+
+      // Remove Anki typing tags like {{type:Word}} as we don't support typing inputs
+      output = output.replace(/{{\s*type:[^}]+}}/g, '');
+
       for (const [name, value] of Object.entries(fieldData)) {
         // Handle basic replacement {{Field}}
         const regex = new RegExp(`{{\\s*${name}\\s*}}`, 'g');

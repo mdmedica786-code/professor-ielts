@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import api from '../../api/client';
 import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, Crown, BookOpen } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
+import LanguagePicker from '../common/LanguagePicker';
+import { useTranslation } from 'react-i18next';
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const {
     section,
     setSection,
@@ -57,12 +60,12 @@ export default function Sidebar() {
   const onPractice = currentView === 'practice';
   const navItems = [
     { id: 'home', icon: Home, label: 'Sections', active: onPractice && !section, onClick: () => goSection(null) },
-    { id: 'speaking', icon: Mic, label: 'Speaking', active: onPractice && section === 'speaking', onClick: () => goSection('speaking') },
-    { id: 'writing', icon: PenLine, label: 'Writing', active: onPractice && section === 'writing', onClick: () => goSection('writing') },
-    { id: 'reading', icon: BookOpenText, label: 'Reading', active: onPractice && section === 'reading', onClick: () => goSection('reading') },
-    { id: 'listening', icon: Headphones, label: 'Listening', active: onPractice && section === 'listening', onClick: () => goSection('listening') },
-    { id: 'history', icon: History, label: 'History', active: currentView === 'history', onClick: goHistory },
-    { id: 'vocab', icon: BookOpen, label: 'Vocabulary', active: currentView === 'vocab', onClick: () => { setCurrentView('vocab'); if (isMobile()) closeSidebar(); } },
+    { id: 'speaking', icon: Mic, label: t('sidebar.speaking'), active: onPractice && section === 'speaking', onClick: () => goSection('speaking') },
+    { id: 'writing', icon: PenLine, label: t('sidebar.writing'), active: onPractice && section === 'writing', onClick: () => goSection('writing') },
+    { id: 'reading', icon: BookOpenText, label: t('sidebar.reading'), active: onPractice && section === 'reading', onClick: () => goSection('reading') },
+    { id: 'listening', icon: Headphones, label: t('sidebar.listening'), active: onPractice && section === 'listening', onClick: () => goSection('listening') },
+    { id: 'history', icon: History, label: t('sidebar.history'), active: currentView === 'history', onClick: goHistory },
+    { id: 'vocab', icon: BookOpen, label: t('sidebar.vocabulary'), active: currentView === 'vocab', onClick: () => { setCurrentView('vocab'); if (isMobile()) closeSidebar(); } },
   ];
 
   // Mobile: full-width glass drawer that slides in/out.
@@ -149,6 +152,10 @@ export default function Sidebar() {
         {/* User profile & Upgrade (expanded only) */}
         {sidebarOpen && (
           <div className="p-3 border-t border-white/60 flex-shrink-0 space-y-2">
+            <div className="flex items-center justify-between px-3 py-2 bg-slate-50/50 rounded-xl border border-slate-100">
+              <span className="text-xs font-semibold text-slate-500">{t('common.language')}</span>
+              <LanguagePicker />
+            </div>
             {user?.email === 'mdmedica786@gmail.com' && (
               <button
                 onClick={() => {
@@ -184,7 +191,7 @@ export default function Sidebar() {
                   {userPlan === 'ultra' ? 'Ultra Plan' : userPlan === 'pro' ? 'Pro Plan' : 'Free Plan'}
                 </div>
               </div>
-              <button onClick={() => signOut()} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-white/80" title="Sign Out">
+              <button onClick={() => signOut()} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-white/80" title={t('sidebar.signOut')}>
                 <LogOut className="w-4 h-4" />
               </button>
             </div>

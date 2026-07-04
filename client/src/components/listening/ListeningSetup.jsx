@@ -22,6 +22,7 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
   const [difficulty, setDifficulty] = useState('6.0–7.0');
 
   const [mode, setMode] = useState('official'); // 'official' | 'ai'
+  const [officialTab, setOfficialTab] = useState('full'); // 'full' | 'section'
   const [officialTests, setOfficialTests] = useState([]);
   const [loadingTests, setLoadingTests] = useState(false);
 
@@ -96,7 +97,13 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
 
       {mode === 'official' ? (
         <div className="card-padded">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Select a Test</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Select a Test</h2>
+            <div className="flex bg-slate-100 p-0.5 rounded-lg">
+              <button onClick={() => setOfficialTab('full')} className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${officialTab === 'full' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>Full Tests</button>
+              <button onClick={() => setOfficialTab('section')} className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${officialTab === 'section' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>By Section</button>
+            </div>
+          </div>
           {loadingTests ? (
             <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
           ) : officialTests.length === 0 ? (
@@ -105,15 +112,19 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {officialTests.map(t => (
+              {officialTests.filter(t => (officialTab === 'full' ? t.type === 'full' : t.type === 'section')).map(t => (
                 <button
                   key={t.id}
                   disabled={busy}
                   onClick={() => onGenerate({ isOfficial: true, testId: t.id })}
                   className="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-xl hover:border-brand-400 hover:bg-brand-50 transition-colors disabled:opacity-50"
                 >
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Test</span>
-                  <span className="text-2xl font-black text-slate-800">{t.id}</span>
+                  <span className="text-xs font-semibold text-slate-500 text-center uppercase tracking-wider mb-1 text-balance">
+                    {t.type === 'full' ? 'Full Test' : 'Section'}
+                  </span>
+                  <span className="text-2xl font-black text-slate-800">
+                    {t.id.toString().replace('full_', '')}
+                  </span>
                 </button>
               ))}
             </div>
