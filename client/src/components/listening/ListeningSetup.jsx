@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Headphones, Loader2, Sparkles, BookOpen } from 'lucide-react';
 import { getOfficialListeningTests, getOfficialListeningTest } from '../../api/client';
 
-const DIFFICULTIES = [
-  { id: 'easy', label: 'Easy (5.0–6.0)', value: '5.0–6.0' },
-  { id: 'medium', label: 'Medium (6.0–7.0)', value: '6.0–7.0' },
-  { id: 'hard', label: 'Hard (7.5–9.0)', value: '7.5–9.0' },
-];
-
-const SECTION_OPTIONS = [
-  { id: 1, label: 'Section 1', sub: 'Everyday conversation — form completion' },
-  { id: 2, label: 'Section 2', sub: 'Everyday monologue — notes / map / MCQ' },
-  { id: 3, label: 'Section 3', sub: 'Academic discussion — MCQ / matching' },
-  { id: 4, label: 'Section 4', sub: 'Academic lecture — note completion' },
-];
-
 export default function ListeningSetup({ onGenerate, busy, error }) {
+  const { t } = useTranslation();
+  
+  const DIFFICULTIES = [
+    { id: 'easy', label: t('listening.easy', 'Easy (5.0–6.0)'), value: '5.0–6.0' },
+    { id: 'medium', label: t('listening.medium', 'Medium (6.0–7.0)'), value: '6.0–7.0' },
+    { id: 'hard', label: t('listening.hard', 'Hard (7.5–9.0)'), value: '7.5–9.0' },
+  ];
+
+  const SECTION_OPTIONS = [
+    { id: 1, label: t('listening.section1', 'Section 1'), sub: t('listening.s1_sub', 'Everyday conversation — form completion') },
+    { id: 2, label: t('listening.section2', 'Section 2'), sub: t('listening.s2_sub', 'Everyday monologue — notes / map / MCQ') },
+    { id: 3, label: t('listening.section3', 'Section 3'), sub: t('listening.s3_sub', 'Academic discussion — MCQ / matching') },
+    { id: 4, label: t('listening.section4', 'Section 4'), sub: t('listening.s4_sub', 'Academic lecture — note completion') },
+  ];
+
   const [size, setSize] = useState('section'); // 'full' | 'section'
   const [whichSection, setWhichSection] = useState(1);
   const [topic, setTopic] = useState('');
@@ -83,7 +86,7 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
             mode === 'official' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <BookOpen className="w-4 h-4" /> Official Tests
+          <BookOpen className="w-4 h-4" /> {t('listening.official_tests', 'Official Tests')}
         </button>
         <button
           onClick={() => setMode('ai')}
@@ -91,24 +94,24 @@ export default function ListeningSetup({ onGenerate, busy, error }) {
             mode === 'ai' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Sparkles className="w-4 h-4" /> AI Generator
+          <Sparkles className="w-4 h-4" /> {t('listening.ai_generator', 'AI Generator')}
         </button>
       </div>
 
       {mode === 'official' ? (
         <div className="card-padded">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Select a Test</h2>
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{t('listening.select_test', 'Select a Test')}</h2>
             <div className="flex bg-slate-100 p-0.5 rounded-lg">
-              <button onClick={() => setOfficialTab('full')} className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${officialTab === 'full' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>Full Tests</button>
-              <button onClick={() => setOfficialTab('section')} className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${officialTab === 'section' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>By Section</button>
+              <button onClick={() => setOfficialTab('full')} className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${officialTab === 'full' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>{t('listening.full_tests', 'Full Tests')}</button>
+              <button onClick={() => setOfficialTab('section')} className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${officialTab === 'section' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>{t('listening.by_section', 'By Section')}</button>
             </div>
           </div>
           {loadingTests ? (
             <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
           ) : officialTests.length === 0 ? (
             <div className="text-center p-8 text-slate-500 text-sm bg-slate-50 rounded-xl border border-dashed">
-              No official tests have been processed yet.
+              {t('listening.no_tests', 'No official tests have been processed yet.')}
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

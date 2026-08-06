@@ -1,0 +1,103 @@
+{
+  "test_id": "4",
+  "title": "Practice Test 4 (Section 1)",
+  "sections": [
+    {
+      "number": 1,
+      "audio_id": 4,
+      "title": "Section 1",
+      "questions": [
+        {
+          "id": "1",
+          "number": 1,
+          "type": "gap",
+          "context": "Community Centre Evening Classes",
+          "prompt": "Class  Where  When  What to bring  Cost\nPainting with watercolours  Example  in the hall at 1 ______ pm on Tuesdays",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "7.30"
+        },
+        {
+          "id": "2",
+          "number": 2,
+          "type": "gap",
+          "context": "Community Centre Evening Classes",
+          "prompt": "water jar and set of 2 ______  £45 for four classes",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "pencils"
+        },
+        {
+          "id": "3",
+          "number": 3,
+          "type": "gap",
+          "context": "Community Centre Evening Classes",
+          "prompt": "Maori language  the small room  at the 3 ______ of the building",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "top"
+        },
+        {
+          "id": "4",
+          "number": 4,
+          "type": "gap",
+          "context": "Community Centre Evening Classes",
+          "prompt": "starts in 4 ______ small recorder  £40 for five classes",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "August"
+        },
+        {
+          "id": "5",
+          "number": 5,
+          "type": "gap",
+          "context": "Community Centre Evening Classes",
+          "prompt": "Digital photography  room 9  6 pm Wednesday evenings  the 5 ______ for the camera",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "instructions"
+        },
+        {
+          "id": "6",
+          "number": 6,
+          "type": "gap",
+          "context": "Community Centre Evening Classes",
+          "prompt": "6 ______ £55 for eight classes",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "55"
+        },
+        {
+          "id": "7",
+          "number": 7,
+          "type": "gap",
+          "context": "",
+          "prompt": "The watercolours class suits people who are ______.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "beginners"
+        },
+        {
+          "id": "8",
+          "number": 8,
+          "type": "gap",
+          "context": "",
+          "prompt": "To find out about the Maori language class, contact Jason ______.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "Kahui"
+        },
+        {
+          "id": "9",
+          "number": 9,
+          "type": "gap",
+          "context": "",
+          "prompt": "For the photography class, check the ______ for the camera.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "battery"
+        },
+        {
+          "id": "10",
+          "number": 10,
+          "type": "gap",
+          "context": "",
+          "prompt": "There is a trip to a local ______ in the final week of the photography class.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "show"
+        }
+      ]
+    }
+  ]
+}

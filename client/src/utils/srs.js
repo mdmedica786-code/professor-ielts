@@ -336,3 +336,89 @@ export function deckStats(cards, now = new Date()) {
   }
   return s;
 }
+
+/**
+ * Build a true Anki-style study queue from a deck's card array.
+ *
+ * Priority order (matches Anki desktop):
+ *   1. Learning / relearning cards that are due now (sorted by due time asc)
+ *   2. New cards (capped by newPerDay - todayNewShown, in deck order by default)
+ *   3. Review cards due today (capped by revPerDay - todayRevShown, optional shuffle)
+ *
+ * Cards are interleaved using Anki's mixing ratio (roughly: for every N new cards,
+ * show a review card). We use a simple alternating approach that matches AnkiDroid.
+ *
+ * @param {object[]}  cards            - All cards in the deck (progress-hydrated)
+ * @param {object}    deckConf         - { newPerDay, revPerDay, newOrder, learningSteps, relearningSteps }
+ * @param {object}    dailyCounters    - { newShown, revShown } — already shown today
+ * @param {Date}      [now]
+ * @returns {object[]}  Ordered queue of card objects ready for study
+ */
+export function buildSessionQueue(cards, deckConf, dailyCounters = {}, now = new Date()) {
+  const newPerDay   = deckConf.newPerDay  ?? 20;
+  const revPerDay   = deckConf.revPerDay  ?? 100;
+  const newShown    = dailyCounters.newShown  ?? 0;
+  const revShown    = dailyCounters.revShown  ?? 0;
+
+  const newRemaining = Math.max(0, newPerDay  - newShown);
+  const revRemaining = Math.max(0, revPerDay  - revShown);
+
+  // ── 1. Learning / relearning due NOW ──────────────────────────────────
+  const learningNow = cards
+    .filter(c => (c.state === 'learning' || c.state === 'relearning') && isDue(c, now))
+    .sort((a, b) => new Date(a.due) - new Date(b.due));
+
+  // ── 2. New cards ───────────────────────────────────────────────────────
+  let newCards = cards.filter(c => !c.state || c.state === 'new');
+  // newOrder 0 = random shuffle, 1 = order added (default)
+  if (deckConf.newOrder === 0) newCards = _shuffle(newCards);
+  newCards = newCards.slice(0, newRemaining);
+
+  // ── 3. Review cards due today ──────────────────────────────────────────
+  let reviewCards = cards
+    .filter(c => c.state === 'review' && isDue(c, now))
+    .sort((a, b) => new Date(a.due) - new Date(b.due))
+    .slice(0, revRemaining);
+
+  // ── 4. Interleave: learning first, then alternate new/review ──────────
+  // Anki's mixing: roughly show a new card every ~7 reviews.
+  // Simple approach: interleave new and review 1:1, then append learning at front.
+  const interleaved = _interleave(newCards, reviewCards);
+  return [...learningNow, ...interleaved];
+}
+
+/** Compute how many cards of each type are currently due (for deck list display). */
+export function getDeckDueCounts(cards, deckConf, dailyCounters = {}, now = new Date()) {
+  const newPerDay   = deckConf.newPerDay  ?? 20;
+  const revPerDay   = deckConf.revPerDay  ?? 100;
+  const newShown    = dailyCounters.newShown  ?? 0;
+  const revShown    = dailyCounters.revShown  ?? 0;
+
+  const newRemaining = Math.max(0, newPerDay  - newShown);
+  const revRemaining = Math.max(0, revPerDay  - revShown);
+
+  const newCount      = Math.min(newRemaining, cards.filter(c => !c.state || c.state === 'new').length);
+  const learningCount = cards.filter(c => (c.state === 'learning' || c.state === 'relearning') && isDue(c, now)).length;
+  const reviewCount   = Math.min(revRemaining, cards.filter(c => c.state === 'review' && isDue(c, now)).length);
+
+  return { new: newCount, learning: learningCount, review: reviewCount };
+}
+
+function _shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function _interleave(newCards, reviewCards) {
+  const result = [];
+  const n = Math.max(newCards.length, reviewCards.length);
+  for (let i = 0; i < n; i++) {
+    if (i < reviewCards.length) result.push(reviewCards[i]);
+    if (i < newCards.length)    result.push(newCards[i]);
+  }
+  return result;
+}

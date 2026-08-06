@@ -1,0 +1,103 @@
+{
+  "test_id": "6",
+  "title": "Practice Test 6 (Section 1)",
+  "sections": [
+    {
+      "number": 1,
+      "audio_id": 6,
+      "title": "Section 1",
+      "questions": [
+        {
+          "id": "1",
+          "number": 1,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "Contact phone number: 1 (0044) ______",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "208 613 2978"
+        },
+        {
+          "id": "2",
+          "number": 2,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "Email address: 2 richard@ ______",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "visiontech"
+        },
+        {
+          "id": "3",
+          "number": 3,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "Occupation: a local 3 ______",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "doctor"
+        },
+        {
+          "id": "4",
+          "number": 4,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "must have its own 4 ______",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "garage"
+        },
+        {
+          "id": "5",
+          "number": 5,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "no 5 ______ required (family bringing theirs)",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "furniture"
+        },
+        {
+          "id": "6",
+          "number": 6,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "a 6 ______ in the kitchen is preferable",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "fridge"
+        },
+        {
+          "id": "7",
+          "number": 7,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "Preferred location: near a 7 ______",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "school"
+        },
+        {
+          "id": "8",
+          "number": 8,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "Maximum rent: 8 ______ per month",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "950/£950"
+        },
+        {
+          "id": "9",
+          "number": 9,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "the accommodation has to be 9 ______ in the daytime",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "quiet"
+        },
+        {
+          "id": "10",
+          "number": 10,
+          "type": "gap",
+          "context": "ACCOMMODATION FORM: RENTAL PROPERTIES",
+          "prompt": "How did you first hear about us? through a 10 ______",
+          "instruction": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "friend"
+        }
+      ]
+    }
+  ]
+}

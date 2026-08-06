@@ -1,0 +1,103 @@
+{
+  "test_id": "7",
+  "title": "Practice Test 7 (Section 1)",
+  "sections": [
+    {
+      "number": 1,
+      "audio_id": 7,
+      "title": "Section 1",
+      "questions": [
+        {
+          "id": "1",
+          "number": 1,
+          "type": "gap",
+          "context": "Hostel accommodation in Darwin\nName  Price per person  (dormitory rooms)  Comments and reviews",
+          "prompt": "staff are 1 ______.",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "unfriendly"
+        },
+        {
+          "id": "2",
+          "number": 2,
+          "type": "gap",
+          "context": "Hostel accommodation in Darwin\nName  Price per person  (dormitory rooms)  Comments and reviews",
+          "prompt": "air-conditioning is too 2 ______.",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "noisy"
+        },
+        {
+          "id": "3",
+          "number": 3,
+          "type": "gap",
+          "context": "Hostel accommodation in Darwin\nName  Price per person  (dormitory rooms)  Comments and reviews",
+          "prompt": "Gum Tree Lodge  3 $ ______.",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "23.50"
+        },
+        {
+          "id": "4",
+          "number": 4,
+          "type": "gap",
+          "context": "Hostel accommodation in Darwin\nName  Price per person  (dormitory rooms)  Comments and reviews",
+          "prompt": "4 ______.. in the dormitories.",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "insects"
+        },
+        {
+          "id": "5",
+          "number": 5,
+          "type": "gap",
+          "context": "Hostel accommodation in Darwin\nName  Price per person  (dormitory rooms)  Comments and reviews",
+          "prompt": "the 5 ______.. are very clean.",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "bathrooms"
+        },
+        {
+          "id": "6",
+          "number": 6,
+          "type": "gap",
+          "context": "Hostel accommodation in Darwin\nName  Price per person  (dormitory rooms)  Comments and reviews",
+          "prompt": "seems to be a 6 ______.. every night.",
+          "instruction": "Write NO MORE THAN ONE WORD AND/OR A NUMBER for each answer.",
+          "answer": "party"
+        },
+        {
+          "id": "7",
+          "number": 7,
+          "type": "gap",
+          "context": "Kangaroo Lodge",
+          "prompt": "Address: on 7 ______ Lane.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "SHADFORTH"
+        },
+        {
+          "id": "8",
+          "number": 8,
+          "type": "gap",
+          "context": "General information about hostel accommodation",
+          "prompt": "can hire a 8 ______.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "towel"
+        },
+        {
+          "id": "9",
+          "number": 9,
+          "type": "gap",
+          "context": "General information about hostel accommodation",
+          "prompt": "9 ______.. is included.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "breakfast"
+        },
+        {
+          "id": "10",
+          "number": 10,
+          "type": "gap",
+          "context": "General information about hostel accommodation",
+          "prompt": "a shared 10 ______.. is available.",
+          "instruction": "Write ONE WORD ONLY for each answer.",
+          "answer": "kitchen"
+        }
+      ]
+    }
+  ]
+}
