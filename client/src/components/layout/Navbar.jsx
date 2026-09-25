@@ -4,17 +4,30 @@ import MiniScoreCard from '../evaluation/MiniScoreCard';
 import StudentMenu from './StudentMenu';
 import { BrandLogo } from '../common/BrandLogo';
 import StreakBar from '../common/StreakBar';
+import ExamSelector from '../common/ExamSelector';
 
 const SUBTITLE = {
   speaking: 'AI Speaking Coach',
   writing: 'AI Writing Coach',
   reading: 'AI Reading Coach',
   listening: 'AI Listening Coach',
+  // Goethe
+  sprechen: 'Goethe B1 · Mündliche Prüfung',
+  schreiben: 'Goethe B1 · Schriftlicher Ausdruck',
+  lesen: 'Goethe B1 · Leseverstehen',
+  hoeren: 'Goethe B1 · Hörverstehen',
+  themen: 'Goethe B1 · Themenkatalog C1–C15',
+  redemittel: 'Goethe B1 · Redemittel-Bibliothek',
+  plan: 'Goethe B1 · 8-Wochen-Trainingsplan',
+  rechner: 'Goethe B1 · Punkte- & Notenrechner',
 };
 
 export default function Navbar() {
-  const { section, currentEvaluation, toggleSidebar } = useApp();
-  const subtitle = SUBTITLE[section] || 'Decode your IELTS. Quantify your progress.';
+  const { section, currentEvaluation, toggleSidebar, examType } = useApp();
+  const defaultSub = examType === 'goethe'
+    ? 'Goethe-Zertifikat B1 · Prüfungstraining'
+    : 'Decode your IELTS. Quantify your progress.';
+  const subtitle = SUBTITLE[section] || defaultSub;
 
   return (
     <header className="h-14 md:h-16 bg-transparent flex items-center justify-between px-3 md:px-6 flex-shrink-0 z-30 gap-2">
@@ -41,7 +54,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+      <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+        <ExamSelector />
         <StreakBar />
         {section === 'speaking' && currentEvaluation && (
           <div className="hidden sm:flex items-center gap-2 animate-fade-in">

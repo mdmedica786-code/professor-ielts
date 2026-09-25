@@ -22,10 +22,21 @@ const PracticeRoom = lazy(() => import('./components/practice/PracticeRoom'));
 const WritingRoom = lazy(() => import('./components/writing/WritingRoom'));
 const ReadingRoom = lazy(() => import('./components/reading/ReadingRoom'));
 const ListeningRoom = lazy(() => import('./components/listening/ListeningRoom'));
+
+// Goethe German Exam Prep components
+const GoetheSectionPicker = lazy(() => import('./components/goethe/GoetheSectionPicker'));
+const GoetheSchreibenRoom = lazy(() => import('./components/goethe/GoetheSchreibenRoom'));
+const GoetheSprechenRoom = lazy(() => import('./components/goethe/GoetheSprechenRoom'));
+const GoetheLesenRoom = lazy(() => import('./components/goethe/GoetheLesenRoom'));
+const GoetheHoerenRoom = lazy(() => import('./components/goethe/GoetheHoerenRoom'));
+const GoetheThemenCatalog = lazy(() => import('./components/goethe/GoetheThemenCatalog'));
+const GoetheRedemittelGuide = lazy(() => import('./components/goethe/GoetheRedemittelGuide'));
+const GoetheStudyPlan = lazy(() => import('./components/goethe/GoetheStudyPlan'));
+
 import logoImg from './assets/bandlogic-logo-transparent.png';
 
 export default function App() {
-  const { section, currentView, currentEvaluation, setCurrentView } = useApp();
+  const { section, currentView, currentEvaluation, setCurrentView, examType } = useApp();
   const { user, profile, loading } = useAuth();
 
   useEffect(() => {
@@ -67,16 +78,31 @@ export default function App() {
           }>
             {currentView === 'practice' && (
               <div className="h-full">
-                {!section && <SectionPicker />}
+                {examType === 'goethe' ? (
+                  <>
+                    {!section && <GoetheSectionPicker />}
+                    {section === 'schreiben' && <GoetheSchreibenRoom />}
+                    {section === 'sprechen' && <GoetheSprechenRoom />}
+                    {section === 'lesen' && <GoetheLesenRoom />}
+                    {section === 'hoeren' && <GoetheHoerenRoom />}
+                    {section === 'themen' && <GoetheThemenCatalog />}
+                    {section === 'redemittel' && <GoetheRedemittelGuide />}
+                    {section === 'plan' && <GoetheStudyPlan />}
+                  </>
+                ) : (
+                  <>
+                    {!section && <SectionPicker />}
 
-                {section === 'speaking' &&
-                  (currentEvaluation ? <EvaluationPanel /> : <PracticeRoom />)}
+                    {section === 'speaking' &&
+                      (currentEvaluation ? <EvaluationPanel /> : <PracticeRoom />)}
 
-                {section === 'writing' && <WritingRoom />}
+                    {section === 'writing' && <WritingRoom />}
 
-                {section === 'reading' && <ReadingRoom />}
+                    {section === 'reading' && <ReadingRoom />}
 
-                {section === 'listening' && <ListeningRoom />}
+                    {section === 'listening' && <ListeningRoom />}
+                  </>
+                )}
               </div>
             )}
 

@@ -23,6 +23,8 @@ export function AppProvider({ children }) {
   });
   // IELTS module choice (Academic vs General Training) — affects Writing & Reading.
   const [ieltsModule, setIeltsModule] = useLocalStorage('ielts:module', 'academic');
+  // Exam selection ('ielts' for English IELTS, 'goethe' for Goethe-Zertifikat B1 German).
+  const [examType, setExamType] = useLocalStorage('app:examType', 'ielts');
   // Whether the desktop question/task bank is collapsed (preference remembered).
   const [bankCollapsed, setBankCollapsed] = useLocalStorage('ielts:bankCollapsed', false);
 
@@ -40,6 +42,13 @@ export function AppProvider({ children }) {
   const [testMode, setTestMode] = useState('practice'); // 'practice' | 'full'
 
   const toggleBankCollapsed = useCallback(() => setBankCollapsed((c) => !c), [setBankCollapsed]);
+
+  const switchExam = useCallback((type) => {
+    setExamType(type);
+    setSection(null);
+    setCurrentEvaluation(null);
+    setCurrentView('practice');
+  }, [setExamType]);
 
   // ─── One-time migration: ensure there's always at least one student ───
   // Migrates the legacy single 'ielts:studentName' into the roster and stamps
@@ -182,6 +191,7 @@ export function AppProvider({ children }) {
     studentName,
     settings,
     ieltsModule,
+    examType,
     bankCollapsed,
 
     // Session
@@ -198,6 +208,8 @@ export function AppProvider({ children }) {
     // Setters
     setSettings,
     setIeltsModule,
+    setExamType,
+    switchExam,
     setBankCollapsed,
     toggleBankCollapsed,
     setSection,
@@ -233,6 +245,7 @@ export function AppProvider({ children }) {
     studentName,
     settings,
     ieltsModule,
+    examType,
     bankCollapsed,
     section,
     currentView,
@@ -245,6 +258,8 @@ export function AppProvider({ children }) {
     testMode,
     setSettings,
     setIeltsModule,
+    setExamType,
+    switchExam,
     setBankCollapsed,
     toggleBankCollapsed,
     setSection,

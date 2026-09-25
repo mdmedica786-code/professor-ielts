@@ -2,7 +2,7 @@ import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import api from '../../api/client';
-import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, Crown, BookOpen } from 'lucide-react';
+import { Home, Mic, PenLine, BookOpenText, Headphones, History, ArrowLeft, X, Sparkles, LogOut, User, ShieldCheck, Crown, BookOpen, Calendar } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 import LanguagePicker from '../common/LanguagePicker';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 export default function Sidebar() {
   const { t } = useTranslation();
   const {
+    examType,
     section,
     setSection,
     currentView,
@@ -58,7 +59,8 @@ export default function Sidebar() {
   };
 
   const onPractice = currentView === 'practice';
-  const navItems = [
+  
+  const ieltsNavItems = [
     { id: 'home', icon: Home, label: 'Sections', active: onPractice && !section, onClick: () => goSection(null) },
     { id: 'speaking', icon: Mic, label: t('sidebar.speaking'), active: onPractice && section === 'speaking', onClick: () => goSection('speaking') },
     { id: 'writing', icon: PenLine, label: t('sidebar.writing'), active: onPractice && section === 'writing', onClick: () => goSection('writing') },
@@ -66,7 +68,23 @@ export default function Sidebar() {
     { id: 'listening', icon: Headphones, label: t('sidebar.listening'), active: onPractice && section === 'listening', onClick: () => goSection('listening') },
     { id: 'history', icon: History, label: t('sidebar.history'), active: currentView === 'history', onClick: goHistory },
     { id: 'vocab', icon: BookOpen, label: t('sidebar.vocabulary'), active: currentView === 'vocab', onClick: () => { setCurrentView('vocab'); if (isMobile()) closeSidebar(); } },
+    { id: 'task1-masterclass', icon: Sparkles, label: 'Task 1 Masterclass', active: false, onClick: () => { window.open('/ielts_task1_tool.html', '_blank'); if (isMobile()) closeSidebar(); } },
+    { id: 'task2-masterclass', icon: Sparkles, label: 'Task 2 Masterclass', active: false, onClick: () => { window.open('/ielts_task2_tool.html', '_blank'); if (isMobile()) closeSidebar(); } },
   ];
+
+  const goetheNavItems = [
+    { id: 'goethe-home', icon: Home, label: 'Goethe B1 Übersicht', active: onPractice && !section, onClick: () => goSection(null) },
+    { id: 'goethe-sprechen', icon: Mic, label: 'Sprechen (Mündlich)', active: onPractice && section === 'sprechen', onClick: () => goSection('sprechen') },
+    { id: 'goethe-schreiben', icon: PenLine, label: 'Schreiben (Schriftlich)', active: onPractice && section === 'schreiben', onClick: () => goSection('schreiben') },
+    { id: 'goethe-lesen', icon: BookOpenText, label: 'Lesen (Leseverstehen)', active: onPractice && section === 'lesen', onClick: () => goSection('lesen') },
+    { id: 'goethe-hoeren', icon: Headphones, label: 'Hören (Hörverstehen)', active: onPractice && section === 'hoeren', onClick: () => goSection('hoeren') },
+    { id: 'goethe-themen', icon: BookOpen, label: 'Themen C1–C15', active: onPractice && section === 'themen', onClick: () => goSection('themen') },
+    { id: 'goethe-redemittel', icon: Sparkles, label: 'Redemittel & Grammatik', active: onPractice && section === 'redemittel', onClick: () => goSection('redemittel') },
+    { id: 'goethe-plan', icon: Calendar, label: 'Trainingsplan & Rechner', active: onPractice && section === 'plan', onClick: () => goSection('plan') },
+    { id: 'history', icon: History, label: 'Verlauf & Ergebnisse', active: currentView === 'history', onClick: goHistory },
+  ];
+
+  const navItems = examType === 'goethe' ? goetheNavItems : ieltsNavItems;
 
   // Mobile: full-width glass drawer that slides in/out.
   // Desktop: floating glass rail, inset from the canvas edge, that toggles

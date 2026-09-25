@@ -1,0 +1,145 @@
+/**
+ * Official Goethe-Zertifikat B1 Grading Rules, Self-Scoring Checklists, and Study Plan
+ */
+
+export function calculateGoetheReadingListeningScore(rawCorrect) {
+  const raw = Math.max(0, Math.min(30, parseInt(rawCorrect, 10) || 0));
+  const points100 = Math.min(100, Math.round(raw * 3.3333333));
+  const passed = raw >= 18 && points100 >= 60;
+  return {
+    raw,
+    maxRaw: 30,
+    points100,
+    passed,
+    praedikat: getPraedikat(points100),
+  };
+}
+
+export function getPraedikat(scoreOutOf100) {
+  const s = Math.round(scoreOutOf100);
+  if (s >= 90) return { key: 'sehr_gut', label: 'Sehr gut', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
+  if (s >= 80) return { key: 'gut', label: 'Gut', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' };
+  if (s >= 70) return { key: 'befriedigend', label: 'Befriedigend', badgeClass: 'bg-amber-100 text-amber-800 border-amber-300' };
+  if (s >= 60) return { key: 'ausreichend', label: 'Ausreichend (Bestanden)', badgeClass: 'bg-orange-100 text-orange-800 border-orange-300' };
+  return { key: 'nicht_bestanden', label: 'Nicht bestanden', badgeClass: 'bg-rose-100 text-rose-800 border-rose-300' };
+}
+
+export const SCHREIBEN_CHECKLIST = [
+  {
+    criterion: 'Erfüllung',
+    description: 'Sind alle Leitpunkte mit mind. 2 Sätzen ausgeführt? Textsorte und Register (du/Sie, Anrede, Gruß) korrekt? Wortzahl >= 80 / 40?',
+    bands: { A: 'Alle Punkte voll erfüllt (10 Pkt)', B: 'Ein Punkt etwas dünn (7.5 Pkt)', C: 'Punkte nur knapp/teilweise (5 Pkt)', D: 'Nur 1 Punkt behandelt (2.5 Pkt)', E: 'Thema verfehlt / <50% Worte (0 Pkt -> Knockout)' },
+  },
+  {
+    criterion: 'Kohärenz',
+    description: 'Logischer Aufbau (Einleitung, Reihenfolge, Schluss)? Mindestens 4-5 unterschiedliche Konnektoren (weil, denn, deshalb, trotzdem, außerdem)?',
+    bands: { A: 'Sehr flüssig & logisch verknüpft (10 Pkt)', B: 'Weitgehend logisch, wenige Wortwiederholungen (7.5 Pkt)', C: 'Stellenweise sprunghaft (5 Pkt)', D: 'Kaum Zusammenhalt (2.5 Pkt)', E: 'Völlig unstrukturiert (0 Pkt)' },
+  },
+  {
+    criterion: 'Wortschatz',
+    description: 'Passender B1-Themenwortschatz? Werden Wörter präzise verwendet? Keine Bedeutungsverzerrungen?',
+    bands: { A: 'Breiter differenzierter Wortschatz (10 Pkt)', B: 'Angemessen für B1 mit kleinen Lücken (7.5 Pkt)', C: 'Nur A2-Basiswortschatz (5 Pkt)', D: 'Stark eingeschränkt (2.5 Pkt)', E: 'Ungenügend (0 Pkt)' },
+  },
+  {
+    criterion: 'Strukturen',
+    description: 'Nebensätze (Verb am Ende), Perfekt mit haben/sein, Konjunktiv II für Bitten, Adjektivendungen?',
+    bands: { A: '0–1 Fehler pro 20 Wörter (10 Pkt)', B: '2–3 Fehler pro 20 Wörter, Sinn klar (7.5 Pkt)', C: '4–5 Fehler, Lesefluss gestört (5 Pkt)', D: 'Häufige elementare Fehler (2.5 Pkt)', E: 'Kaum korrekte Sätze (0 Pkt)' },
+  },
+];
+
+export const SPRECHEN_CHECKLIST = [
+  {
+    part: 'Teil 1: Planen (28 Pkt)',
+    checks: [
+      'Mindestens 3 konkrete Vorschläge gemacht?',
+      'Mindestens einmal höflich mit Gegenargument widersprochen?',
+      'Auf alle Ideen des Partners eingegangen?',
+      'Alle 4 Leitpunkte + eigene Idee abgedeckt?',
+      'Am Ende gemeinsam zusammengefasst?',
+    ],
+  },
+  {
+    part: 'Teil 2: Präsentation (40 Pkt)',
+    checks: [
+      'Alle 5 Folien mit Inhalt gefüllt?',
+      'Klare Überleitungen (Zuerst, dann, danach, zum Schluss) genutzt?',
+      'Innerhalb des Zeitrahmens von ~3 Minuten geblieben?',
+      'Frei gesprochen, nicht von Notizen abgelesen?',
+    ],
+  },
+  {
+    part: 'Teil 3: Feedback & Fragen (16 Pkt)',
+    checks: [
+      'Konkretes, positives Feedback zum Vortrag des Partners gegeben?',
+      'Eine offene W-Frage (Warum...? Wie...?) gestellt?',
+      'Fragen des Partners und der Prüfer in 2–3 zusammenhängenden Sätzen beantwortet?',
+    ],
+  },
+  {
+    part: 'Aussprache (16 Pkt)',
+    checks: [
+      'Satzmelodie und deutscher Wortakzent verständlich?',
+      'Schwierige Laute (ü, ö, ä, ch, Wortende -er) sauber artikuliert?',
+      'Flüssiges Sprechtempo ohne überlange Pausen?',
+    ],
+  },
+];
+
+export const EIGHT_WEEK_STUDY_PLAN = [
+  {
+    week: 1,
+    title: 'Woche 1: Fundament & Diagnostik',
+    focus: 'Lesen Teil 1 & 5 · Hören Teil 1 · Schreiben Aufgabe 3 (Formell) · Sprechen 5-Folien-Rahmen',
+    topics: 'C1 Person & Identität, C2 Wohnen, C3 Umwelt',
+    grammar: 'Perfekt (haben vs. sein), Verbstellung in Nebensätzen (weil, dass)',
+  },
+  {
+    week: 2,
+    title: 'Woche 2: Zuordnen & Planen',
+    focus: 'Lesen Teil 3 (Anzeigen) · Hören Teil 3 (Gespräche 1x) · Schreiben Aufgabe 1 (Informell) · Sprechen Teil 1 Planen',
+    topics: 'C4 Reisen & Verkehr, C5 Essen & Trinken, C6 Einkaufen',
+    grammar: 'Konjunktiv II (könnten, würden, hätten, wären), Modalverben im Präteritum',
+  },
+  {
+    week: 3,
+    title: 'Woche 3: Meinungen & Argumentation',
+    focus: 'Lesen Teil 4 (Ja/Nein) · Hören Teil 4 (Wer sagt was?) · Schreiben Aufgabe 2 (Forum) · Sprechen 2 Präsentationen stoppen',
+    topics: 'C7 Dienstleistungen & Behörden, C8 Gesundheit, C9 Arbeit & Beruf',
+    grammar: 'Adjektivdeklination, n-Deklination (Kollegen, Herrn, Nachbarn)',
+  },
+  {
+    week: 4,
+    title: 'Woche 4: Halbzeit & Zwischentest',
+    focus: 'Kompletter Übungssatz unter Realbedingungen simulieren · Fehleranalyse aller 4 Module',
+    topics: 'C10 Ausbildung & Schule, C11 Freizeit & Sport',
+    grammar: 'Fehlerlog überprüfen, Wortschatzwiederholung',
+  },
+  {
+    week: 5,
+    title: 'Woche 5: Vertiefung & Presseartikel',
+    focus: 'Lesen Teil 2 (Presseberichte) · Hören Teil 2 (Vortrag 1x) · Schreiben abwechselnd Typ 1 & 2 · Sprechen Teil 3 Q&A',
+    topics: 'C12 Medien & Kommunikation, C13 Feste & Feiern',
+    grammar: 'Relativsätze (mit Präpositionen), Passiv Präsens & Präteritum, Plusquamperfekt',
+  },
+  {
+    week: 6,
+    title: 'Woche 6: Vollständige Prüfungssimulation',
+    focus: 'Lesen 65 Min strikt · Hören am Stück · Schreiben 60 Min Volltest · Sprechen Partner-Simulation (15+15 Min)',
+    topics: 'C14 Familie & Beziehungen, C15 Gesellschaft & Ehrenamt',
+    grammar: 'Zweiteilige Konnektoren (sowohl...als auch, weder...noch, je...desto)',
+  },
+  {
+    week: 7,
+    title: 'Woche 7: Tempotraining & Feinschliff',
+    focus: 'Lesen in 58 Min schaffen · Hören einmaliges Hören trainieren · 3 Schreiben-Sessions zur Fehlerbeseitigung',
+    topics: 'Wortschatzkatalog 450 Kernwörter Spaced Repetition',
+    grammar: 'Top-3 Wiederholungsfehler gezielt eliminieren',
+  },
+  {
+    week: 8,
+    title: 'Woche 8: Endspurt & Generalprobe',
+    focus: 'Finaler Modellsatz · Redemittel auswendig festigen · Aussprache-Shadowing · Am Vortag der Prüfung ausruhen!',
+    topics: 'Prüfungsstrategie & Zeitmanagement',
+    grammar: 'Sichere Standardfloskeln für maximale Kohärenz & Strukturen',
+  },
+];

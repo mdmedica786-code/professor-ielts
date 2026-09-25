@@ -1,0 +1,2470 @@
+export const task2Data = {
+  "opinion": {
+    "essayType": "opinion",
+    "label": "Opinion Essay",
+    "scenarios": [
+      {
+        "scenarioLabel": "Smartphones & Social Skills",
+        "prompt": "Many people believe that the widespread use of smartphones and social media has had a negative effect on face-to-face social skills, particularly among young people. To what extent do you agree or disagree with this view?",
+        "diagnostics": {
+          "question_analysis": "This is an OPINION (agree/disagree) question. Underline the keywords: 'smartphones and social media', 'negative effect', 'face-to-face social skills', 'young people'. Notice it asks for YOUR extent of agreement, not a balanced discussion.",
+          "position": "Choose a stance before drafting: full agreement, full disagreement, or partial agreement (e.g. 'largely agree, but the effect depends on how the technology is used'). Partial positions are often easiest to argue convincingly and still score well for Task Response.",
+          "paragraph_plan": "4 paragraphs: Intro (paraphrase + thesis) -> Body 1 (your strongest reason, with an example) -> Body 2 (a second reason, or a brief concession before reinforcing your view) -> Conclusion (restate position, summarise both reasons).",
+          "central_argument": "Keep every paragraph tied to ONE governing claim: that reduced face-to-face practice weakens real-world social ability. Don't drift into a general essay about 'technology and society' -- stay narrow and specific."
+        },
+        "vocabulary": [
+          {
+            "word": "unequivocally",
+            "definition": "in a way that leaves no doubt; clearly and firmly",
+            "example": "I unequivocally agree that screen-based communication is displacing real conversation."
+          },
+          {
+            "word": "detrimental",
+            "definition": "causing harm or damage over time",
+            "example": "Excessive messaging can be detrimental to a teenager's confidence in face-to-face settings."
+          },
+          {
+            "word": "counterargument",
+            "definition": "an opposing point you raise in order to address or refute it",
+            "example": "A common counterargument is that video calls still involve visible facial expressions."
+          },
+          {
+            "word": "erode",
+            "definition": "to gradually wear away or weaken something",
+            "example": "Constant texting can erode a young person's ability to read body language."
+          }
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "struct": "Intro",
+              "text": "Nowadays many young people use phone and social media all the time. Some people think this is bad for their social skills.",
+              "lexical": "'phone' and 'bad' are basic; 'social skills' is copied straight from the question.",
+              "grammar": "Two short simple sentences with no connection between them.",
+              "cohesion": "Almost no paraphrasing -- swap 'phone and social media' for something like 'digital devices', and 'bad for' for 'harmful to'.",
+              "idea_development": "Introduces the topic but doesn't yet say what YOU think -- the position is still missing."
+            },
+            {
+              "struct": "Thesis",
+              "text": "I agree with this because young people spend too much time on their phone.",
+              "lexical": "'too much' is vague, conversational phrasing for an essay.",
+              "grammar": "Correct simple sentence, but 'because' introduces only one flat reason.",
+              "cohesion": "The stance finally appears, but it isn't linked back to 'face-to-face skills' specifically.",
+              "idea_development": "States a position and gives a reason, but the reason is asserted rather than explained."
+            },
+            {
+              "struct": "Body 1",
+              "text": "For example, many teenagers talk to their friends on phone instead of meeting them in real life.",
+              "lexical": "'in real life' is informal; 'in person' fits an academic register better.",
+              "grammar": "One loosely joined sentence using 'instead of'; no cause-effect clause.",
+              "cohesion": "'For example' promises an example, but the sentence just restates the thesis instead of giving a specific case.",
+              "idea_development": "Repeats the same idea without adding a new layer, such as what happens to the friendship or the teenager's confidence."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Also, they can not read face expression when they text so much.",
+              "lexical": "'face expression' should be 'facial expressions'; range stays narrow.",
+              "grammar": "Error in word order and article use: should be 'cannot read facial expressions'.",
+              "cohesion": "'Also' is a basic additive linker, typical of essays that rely only on simple connectors.",
+              "idea_development": "A second, genuinely different reason is attempted, which is a strength, but it isn't developed further."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, I think phones are bad for social skills of young people.",
+              "lexical": "Near word-for-word repeat of the thesis with no fresh phrasing.",
+              "grammar": "Simple, accurate, but unambitious sentence structure.",
+              "cohesion": "'In conclusion' correctly signals the final paragraph -- a genuine strength even at this band.",
+              "idea_development": "Restates the position but doesn't briefly recap the two specific reasons above, so the essay ends abruptly."
+            }
+          ],
+          "6.0": [
+            {
+              "struct": "Intro",
+              "text": "In the modern world, smartphones and social media have become a central part of young people's daily lives, and many believe this has damaged their social skills.",
+              "lexical": "'central part of daily lives' is a step up, though 'damaged' is a slightly blunt choice.",
+              "grammar": "One combined sentence using 'and', showing an early attempt at complexity.",
+              "cohesion": "Better paraphrasing of the prompt overall, though the second half still mirrors 'face-to-face social skills' closely.",
+              "idea_development": "Sets up the topic more smoothly, though the writer's own stance is still one sentence away."
+            },
+            {
+              "struct": "Thesis",
+              "text": "I agree with this opinion because constant phone use reduces the amount of time young people spend interacting with others directly.",
+              "lexical": "'interacting with others directly' is a reasonable paraphrase of 'face-to-face'.",
+              "grammar": "Complex sentence using 'because', correctly formed.",
+              "cohesion": "The thesis is now clearly connected to the specific mechanism (less direct interaction), not just a general complaint.",
+              "idea_development": "Gives a cause, but the consequence of that cause (what actually gets weaker) is still missing."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Firstly, when teenagers rely on texting rather than talking, they lose regular practice at reading tone of voice and body language, which are essential parts of communication.",
+              "lexical": "'rely on', 'essential parts of communication' show wider range than band 5.5.",
+              "grammar": "Relative clause 'which are essential parts of communication' is used, though slightly tacked on.",
+              "cohesion": "'Firstly' correctly signals the first main point, and the sentence stays focused on one clear mechanism.",
+              "idea_development": "Adds a specific skill that is lost (reading tone and body language), moving beyond a vague claim."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Secondly, some young people feel more comfortable online, so they start avoiding real conversations because it feels awkward or difficult.",
+              "lexical": "'feel comfortable', 'avoiding' are adequate but common; no less-frequent vocabulary yet.",
+              "grammar": "Two clauses joined by 'so' and 'because'; accurate but still fairly basic in structure.",
+              "cohesion": "'Secondly' clearly signals the second point, keeping the two-reason structure easy to follow.",
+              "idea_development": "Introduces a believable psychological reason (comfort online, awkwardness offline), which adds variety to the argument."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, I agree that smartphones and social media have a negative impact on young people's face-to-face social skills for the reasons given above.",
+              "lexical": "'negative impact' is a slight improvement on 'bad for'.",
+              "grammar": "Correct, if formulaic, concluding sentence.",
+              "cohesion": "'For the reasons given above' is a genuine, if simple, attempt to summarise rather than just repeat.",
+              "idea_development": "Refers back to the reasons rather than only restating the topic, showing early awareness of essay unity."
+            }
+          ],
+          "6.5": [
+            {
+              "struct": "Intro",
+              "text": "It is often argued that the growing reliance on smartphones and social media has weakened young people's ability to socialise face to face, and I largely share this view.",
+              "lexical": "'growing reliance', 'weakened' are more precise, less literal translations of the prompt.",
+              "grammar": "Sentence combines a passive-style reporting structure ('it is often argued') with a personal clause.",
+              "cohesion": "Paraphrase and thesis are now combined naturally into one flowing sentence, rather than two separate blunt statements.",
+              "idea_development": "Signals a nuanced 'largely agree' rather than a flat 'I agree', hinting at the qualification to come."
+            },
+            {
+              "struct": "Thesis",
+              "text": "While digital communication has some benefits, the decline in everyday face-to-face contact appears to outweigh them.",
+              "lexical": "'outweigh' is a useful, slightly more advanced comparative verb for opinion essays.",
+              "grammar": "Concessive clause with 'While...' correctly used to open the sentence.",
+              "cohesion": "This sentence performs double duty: it briefly concedes a counterpoint and restates the thesis, both in one place.",
+              "idea_development": "Introduces a genuine, if brief, concession, which shows awareness of the other side without losing the position."
+            },
+            {
+              "struct": "Body 1",
+              "text": "One clear reason is that teenagers who spend hours messaging friends get far less practice reading tone of voice, facial expressions and body language, skills that can only really develop through in-person interaction.",
+              "lexical": "'in-person interaction' is a precise, natural academic phrase.",
+              "grammar": "Uses an appositive-style clause ('skills that can only really develop...') to add extra explanation without starting a new sentence.",
+              "cohesion": "'One clear reason is that' functions as a strong topic sentence, clearly signalling the paragraph's single focus.",
+              "idea_development": "Names three specific skills, then explains why they matter (they can only develop in person) -- a genuine extension of the idea."
+            },
+            {
+              "struct": "Body 2",
+              "text": "In addition, because online interaction rarely involves the same social risk as speaking face to face, many young people become anxious in situations that require spontaneous conversation.",
+              "lexical": "'social risk', 'spontaneous conversation' show a wider, more precise vocabulary range.",
+              "grammar": "Complex sentence with a 'because' clause embedded inside the main clause.",
+              "cohesion": "'In addition' cleanly signals a second, separate point rather than repeating the first.",
+              "idea_development": "Links the cause (low social risk online) to a specific psychological outcome (anxiety in spontaneous situations), a clear step beyond band 6.0's simpler 'feel comfortable'."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Overall, although technology offers convenience, its overuse seems to come at a real cost to young people's face-to-face confidence, so I agree that the effect is largely negative.",
+              "lexical": "'comes at a real cost', 'confidence' add a more natural, idiomatic feel.",
+              "grammar": "Long sentence with a concessive clause, a main clause, and a result clause ('so'), all correctly linked.",
+              "cohesion": "'Overall' signals a genuine summary rather than a repeated opening line.",
+              "idea_development": "Weighs convenience against cost before restating the position, a small but real gesture towards balance."
+            }
+          ],
+          "7.0": [
+            {
+              "struct": "Intro",
+              "text": "It is frequently claimed that the growing dominance of smartphones and social media has eroded young people's face-to-face social skills, and this essay largely agrees with that claim.",
+              "lexical": "'dominance', 'eroded' are precise, less common word choices used accurately.",
+              "grammar": "Passive reporting structure combined with a clear signposting clause ('this essay largely agrees').",
+              "cohesion": "Effective paraphrase that changes both vocabulary and sentence structure from the original prompt, not just individual words.",
+              "idea_development": "Immediately signals both the topic and a qualified stance, giving the reader a clear map of what follows."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Although online platforms can connect people across distances, they cannot fully replace the subtle, unplanned exchanges that build genuine social confidence.",
+              "lexical": "'subtle, unplanned exchanges' is a precise, slightly abstract phrase that captures a specific idea economically.",
+              "grammar": "Concessive clause followed by a main clause containing a relative clause ('that build genuine social confidence').",
+              "cohesion": "The thesis directly names what is lost (subtle, unplanned exchanges), setting up both body paragraphs clearly.",
+              "idea_development": "Moves beyond a simple concession to identify the precise mechanism the essay will explore -- a genuinely developed thesis."
+            },
+            {
+              "struct": "Body 1",
+              "text": "To begin with, face-to-face conversation forces people to respond instantly to tone, expression and pause, skills that atrophy when most exchanges happen through delayed, edited text.",
+              "lexical": "'atrophy' is a sophisticated, precise verb used correctly in context.",
+              "grammar": "Complex sentence with an embedded relative clause and a contrast between 'instantly' and 'delayed, edited'.",
+              "cohesion": "'To begin with' opens the first body paragraph clearly while linking directly back to the thesis's 'subtle exchanges'.",
+              "idea_development": "Explains the mechanism (instant response vs. delayed, edited text) rather than simply asserting a skill is lost -- a clear example-implication structure."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Moreover, because a text message can be revised or ignored without consequence, many teenagers never learn to manage the discomfort that spontaneous, face-to-face conversation naturally involves.",
+              "lexical": "'without consequence', 'discomfort' are used precisely to build a specific psychological argument.",
+              "grammar": "Complex sentence with a 'because' clause and a result clause, both accurately controlled.",
+              "cohesion": "'Moreover' signals a second, escalating point rather than a simple addition, strengthening the logical flow.",
+              "idea_development": "Extends band 6.5's 'anxiety' point into a fuller explanation of why the anxiety develops (never learning to manage discomfort)."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In summary, while digital tools undeniably offer convenience, the resulting decline in unscripted, face-to-face practice justifies a largely negative assessment of their impact on young people's social skills.",
+              "lexical": "'unscripted', 'justifies' add precision without sounding forced.",
+              "grammar": "Long, well-controlled sentence balancing a concessive clause against the final position.",
+              "cohesion": "'In summary' is followed by a genuine synthesis of both body paragraphs' ideas, not a repeated sentence.",
+              "idea_development": "Ties the concession, the mechanism (unscripted practice), and the final judgement together in a single coherent close."
+            }
+          ],
+          "7.5": [
+            {
+              "struct": "Intro",
+              "text": "Few would dispute that smartphones and social media now dominate young people's daily interactions, yet whether this has genuinely undermined their face-to-face social skills is a more debatable question I broadly answer in the affirmative.",
+              "lexical": "'undermined', 'debatable' are natural, well-chosen academic words.",
+              "grammar": "Complex sentence with a concessive opening ('Few would dispute') and an embedded relative clause.",
+              "cohesion": "The sentence itself performs the paraphrase, the framing of debate, and the thesis, all in a single, well-controlled structure.",
+              "idea_development": "Frames the issue as genuinely debatable before taking a position, signalling critical awareness rather than a flat assertion."
+            },
+            {
+              "struct": "Thesis",
+              "text": "My view is that, although social platforms offer valuable connections, they encourage a style of interaction too curated and low-risk to substitute for the unpredictability of real conversation.",
+              "lexical": "'curated', 'low-risk', 'unpredictability' form a precise, cohesive semantic field around the central idea.",
+              "grammar": "Balanced sentence with a concession, a main clause, and a purpose-style infinitive phrase.",
+              "cohesion": "'My view is that' clearly signals the personal stance while the rest of the sentence previews the argument's core logic.",
+              "idea_development": "Introduces a specific, original angle -- curated, low-risk interaction -- that goes beyond the generic 'less practice' argument seen at lower bands."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Firstly, because online exchanges can be paused, edited or abandoned entirely, they rarely demand the split-second emotional reading that in-person conversation requires, so this responsiveness never gets exercised.",
+              "lexical": "'split-second emotional reading' is an original, precise phrase rather than a stock expression.",
+              "grammar": "Long sentence coordinating a causal clause, a result clause, and a final consequence, all accurately punctuated.",
+              "cohesion": "The paragraph opens by naming the mechanism, then traces a clear chain: cause, missing skill, consequence.",
+              "idea_development": "Fully extends the idea through a cause-effect-consequence chain rather than stopping at a single observation."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Secondly, the safety of a screen removes the small social risks, such as an awkward pause or a misread joke, through which young people traditionally learned to recover gracefully from social missteps.",
+              "lexical": "'social missteps', 'recover gracefully' show idiomatic, natural control of English.",
+              "grammar": "Complex sentence with an embedded example clause ('such as...') inside a longer relative structure.",
+              "cohesion": "'Secondly' signals the second, distinct mechanism (risk-removal) rather than repeating the first paragraph's logic.",
+              "idea_development": "Gives a concrete, specific example (an awkward pause, a misread joke) that makes the abstract claim vivid and convincing."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "On balance, then, the convenience that smartphones provide seems a poor trade for the everyday resilience that face-to-face interaction quietly builds, which is why I lean firmly towards agreement with the statement.",
+              "lexical": "'poor trade', 'quietly builds', 'lean firmly towards' are natural, idiomatic closing phrases.",
+              "grammar": "Sentence combines a comparative structure with a relative clause and a final causal link, all fluently controlled.",
+              "cohesion": "'On balance, then' signals genuine synthesis of the concession and both body arguments before the final restatement.",
+              "idea_development": "Closes by naming the specific thing being traded away (resilience), tying the whole essay together around one consistent idea."
+            }
+          ],
+          "8.0": [
+            {
+              "struct": "Intro",
+              "text": "That constant exposure to smartphones and social media might be reshaping how young people relate to one another face to face is no longer a fringe concern, and on the whole I find the argument persuasive.",
+              "lexical": "'reshaping', 'fringe concern', 'persuasive' are used with real precision and control.",
+              "grammar": "Sophisticated sentence opening with a nominal clause as subject ('That constant exposure... is no longer a fringe concern'), a genuinely advanced structure.",
+              "cohesion": "The subject-clause opening itself performs the framing work, letting the thesis follow with minimal extra scaffolding.",
+              "idea_development": "Positions the topic within a wider conversation ('no longer a fringe concern') before committing to a stance, showing genuine critical distance."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Social media undeniably widens young people's networks, yet it does so partly by substituting low-stakes, asynchronous exchanges for the higher-stakes encounters in which social competence is actually forged.",
+              "lexical": "'asynchronous', 'forged' (in the sense of developed through pressure) are skilfully chosen, precise terms.",
+              "grammar": "Complex sentence balancing a concession with a main clause containing a purposeful, non-obvious verb choice ('forged').",
+              "cohesion": "The thesis names the trade-off explicitly (widened networks vs. lost higher-stakes practice), giving the essay a clear analytical spine.",
+              "idea_development": "Reframes the whole debate around a single, original metaphor (competence being 'forged' under pressure), which will organise both body paragraphs."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Consider, for instance, how a misjudged comment online can simply be deleted, whereas the same slip in person demands an immediate, often uncomfortable recovery -- precisely the kind of pressure that trains social adaptability.",
+              "lexical": "'misjudged', 'social adaptability' are precise, low-frequency but natural word choices.",
+              "grammar": "Uses a dash to add an explanatory clause, alongside a contrastive 'whereas' structure -- a genuinely flexible, native-like punctuation choice.",
+              "cohesion": "'Consider, for instance' invites the reader into a specific scenario rather than simply asserting a claim, a more persuasive rhetorical move.",
+              "idea_development": "Builds the argument through a vivid, concrete contrast (delete vs. immediate recovery) that makes the abstract claim about 'training' feel demonstrably true."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Equally significant is the sheer volume of curated self-presentation that social media rewards, which can leave young people more fluent in performing an identity than in navigating the messier give-and-take of real dialogue.",
+              "lexical": "'curated self-presentation', 'messier give-and-take' are original, sophisticated phrases that avoid clichéd IELTS vocabulary.",
+              "grammar": "Inverted sentence opening ('Equally significant is...') followed by a relative clause -- an advanced structural choice used accurately.",
+              "cohesion": "'Equally significant' signals that this point carries comparable weight to the first, rather than being a lesser add-on.",
+              "idea_development": "Introduces a genuinely distinct dimension (identity performance vs. dialogue skill) rather than restating the first paragraph's logic in new words."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "None of this suggests that smartphones are inherently harmful, only that a generation raised on low-risk, editable interaction may be underprepared for the unfiltered demands of face-to-face life, which is ultimately why I side with the statement.",
+              "lexical": "'unfiltered demands', 'underprepared' are precise, well-controlled closing choices.",
+              "grammar": "Sentence opens with a careful qualification ('None of this suggests...') before pivoting to the final position -- an advanced concessive-to-conclusion structure.",
+              "cohesion": "The qualification prevents the conclusion from overstating the case, a subtle but important cohesive and rhetorical move.",
+              "idea_development": "Closes by distinguishing 'harmful' from 'underprepared', a nuanced final distinction that shows real command of the argument's limits."
+            }
+          ],
+          "8.5": [
+            {
+              "struct": "Intro",
+              "text": "Whether the smartphone has quietly rewired the mechanics of adolescent friendship is difficult to prove with certainty, but the circumstantial case -- thinner conversational stamina, a growing discomfort with silence -- strikes me as compelling enough to broadly agree.",
+              "lexical": "'rewired', 'conversational stamina', 'circumstantial case' are original, highly specific phrases rarely seen in formulaic essays.",
+              "grammar": "Long, fluently controlled sentence with an embedded parenthetical (dashes) listing supporting evidence before the main verb arrives.",
+              "cohesion": "The parenthetical list does real argumentative work rather than simply padding the sentence, tightly integrated into the thesis itself.",
+              "idea_development": "Acknowledges the limits of certainty ('difficult to prove') while still committing to a reasoned position -- a genuinely sophisticated epistemic stance."
+            },
+            {
+              "struct": "Thesis",
+              "text": "My contention is not that digital platforms are without merit, but that they have quietly shifted the default setting of youth interaction from spontaneous to curated, and something real is lost in that shift.",
+              "lexical": "'default setting', 'quietly shifted' are natural, almost conversational phrases used with precise control in a formal register.",
+              "grammar": "Balanced 'not... but' structure followed by an independent clause, fluently joined with 'and'.",
+              "cohesion": "The metaphor of a 'default setting' gives the reader a single, memorable image that will implicitly organise the rest of the essay.",
+              "idea_development": "Distils the entire argument into one governing image (default setting shifting), demonstrating unusually tight conceptual control."
+            },
+            {
+              "struct": "Body 1",
+              "text": "The clearest evidence lies in how differently young people now handle unstructured time: where a pause in conversation once prompted eye contact and small talk, it now more often prompts a reflexive glance at a screen, quietly starving the very skill it might have exercised.",
+              "lexical": "'reflexive glance', 'quietly starving' show a rare, precise command of connotation and figurative language.",
+              "grammar": "Long sentence with a comparative 'where... now' structure and a participial clause ('quietly starving...') that adds a final, subtle twist.",
+              "cohesion": "'The clearest evidence' signals confident prioritisation of this point as the strongest, not merely the first.",
+              "idea_development": "Uses a single, vivid before-and-after contrast to embody the entire mechanism, avoiding generic claims entirely."
+            },
+            {
+              "struct": "Body 2",
+              "text": "A second, less obvious cost is that social media rewards responses polished in private, so that when spontaneity is unavoidable -- a job interview, a first date -- many young people report a disproportionate anxiety that earlier generations, forced into practice by necessity, rarely described.",
+              "lexical": "'polished in private', 'disproportionate anxiety' are precise, nuanced phrasal choices.",
+              "grammar": "Complex sentence with an embedded parenthetical example and a comparative clause referencing 'earlier generations' -- genuinely sophisticated structure.",
+              "cohesion": "'A second, less obvious cost' explicitly signals both sequence and a shift in the type of evidence, from subtle to overt.",
+              "idea_development": "Introduces a generational comparison as implicit evidence, adding a historical dimension the essay hasn't used before and strengthening the overall case."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "I would not go so far as to call smartphones socially corrosive outright, but the quiet retreat from unscripted contact they have encouraged seems, on balance, to have cost young people more in adaptability than it has given them in reach.",
+              "lexical": "'socially corrosive', 'quiet retreat', 'adaptability' close the essay with vocabulary as precise as the opening.",
+              "grammar": "Balanced concessive structure ('would not go so far... but') resolving into a final comparative judgement.",
+              "cohesion": "'On balance' echoes the epistemic caution of the introduction, giving the essay a genuinely circular, unified structure.",
+              "idea_development": "Ends by weighing two named quantities, adaptability lost vs. reach gained, rather than simply restating agreement, a mature final synthesis."
+            }
+          ],
+          "9.0": [
+            {
+              "struct": "Intro",
+              "text": "Every generation worries that new technology is eroding some essential human capacity, and smartphones are no exception; still, the specific claim that they have blunted young people's face-to-face social skills merits more agreement than scepticism, in my view.",
+              "lexical": "'blunted', 'merits... than scepticism' demonstrate idiomatic precision at the very top of the range.",
+              "grammar": "Compound-complex sentence with a semicolon linking two independent clauses, followed by a fronted adverbial and inserted personal clause -- flawless, native-like control.",
+              "cohesion": "Opens by situating the claim within a historical pattern before narrowing to the specific case, a genuinely sophisticated rhetorical strategy.",
+              "idea_development": "Pre-empts an obvious objection (this is just generational anxiety) and answers it in the same breath, showing full command of the debate's landscape."
+            },
+            {
+              "struct": "Thesis",
+              "text": "What distinguishes this technology from earlier ones is not merely its ubiquity but its capacity to offer a frictionless substitute for exactly the encounters -- awkward, unedited, immediate -- through which social fluency has always been built.",
+              "lexical": "'ubiquity', 'frictionless substitute', 'unedited' form a tightly coherent, sophisticated semantic field.",
+              "grammar": "Cleft-style construction ('What distinguishes... is not merely... but...') used with complete accuracy, alongside an embedded appositive list.",
+              "cohesion": "The thesis explicitly differentiates this technology from prior ones, anticipating and neutralising a likely counterargument before it is raised.",
+              "idea_development": "Identifies the precise, non-obvious mechanism (frictionlessness as a substitute for necessary friction) that will govern the entire essay with total conceptual clarity."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Consider that fluency in any skill depends on repeated, unavoidable exposure to its harder cases; face-to-face conversation supplies exactly this through interruption, misunderstanding and recovery, none of which a scrollable, deletable feed ever truly requires a person to endure.",
+              "lexical": "'scrollable, deletable feed', 'endure' are precise, original, and entirely fit for purpose.",
+              "grammar": "Semicolon-linked independent clauses followed by a negative relative clause ('none of which...') -- advanced and completely controlled.",
+              "cohesion": "Draws on a general principle (fluency requires exposure to hard cases) before applying it specifically, a persuasive deductive structure.",
+              "idea_development": "Grounds the entire argument in a transferable principle about skill acquisition, elevating the essay from anecdote to genuine analysis."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Equally, because algorithmic feeds are tuned to sustain engagement rather than to challenge users, young people increasingly rehearse a version of social interaction that is frictionless by design, and it is precisely this design, not the technology itself, that leaves so many underprepared for encounters they cannot curate.",
+              "lexical": "'algorithmic feeds', 'frictionless by design' show command of a precise, contemporary register without lapsing into jargon.",
+              "grammar": "Long sentence with a causal clause, a result clause, and a final emphatic clause using 'not X, but Y' logic -- sustained accuracy throughout.",
+              "cohesion": "'Equally' signals a parallel but structurally distinct point, deliberately shifting from the psychological (Body 1) to the systemic (Body 2).",
+              "idea_development": "Locates responsibility precisely (design, not technology per se), a genuinely nuanced distinction that most essays at any band never reach."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Smartphones have not made a single generation incapable of face-to-face connection, but they have, I believe, quietly narrowed its practice enough that the claim deserves considerably more agreement than dismissal.",
+              "lexical": "'narrowed its practice', 'deserves... than dismissal' close the essay with the same precision and restraint as the opening.",
+              "grammar": "Balanced concessive-to-conclusion structure, entirely error-free, mirroring the introduction's architecture for a unified whole essay.",
+              "cohesion": "Deliberately echoes the introduction's 'agreement... than scepticism' phrasing, giving the essay a polished, circular finish.",
+              "idea_development": "Closes with a carefully calibrated final judgement ('considerably more... than dismissal') rather than an absolute claim, the hallmark of genuinely mature argumentation."
+            }
+          ]
+        }
+      },
+      {
+        "scenarioLabel": "Space Exploration",
+        "prompt": "Some people think that spending money on space exploration is a waste of resources that could be better used to solve problems on Earth. To what extent do you agree or disagree?",
+        "diagnostics": {
+          "question_analysis": "This is an OPINION essay. Keywords: 'space exploration', 'waste of resources', 'solve problems on Earth'. You must take a clear position on whether space exploration is justified.",
+          "structure": "1. Intro: Paraphrase prompt and state opinion. 2. Body 1: Acknowledge Earth's problems (counter-argument) OR support space exploration (technology). 3. Body 2: Support space exploration (long-term survival). 4. Conclusion: Summarize and restate opinion.",
+          "grammar_focus": "Conditionals (If we stop exploring space, we might miss crucial discoveries), relative clauses, and passive voice.",
+          "cohesion": "Contrast linkers (While it is true that, However), addition (Furthermore, In addition), and result (Therefore)."
+        },
+        "vocabulary": [
+          "astronomical costs - extremely high costs",
+          "pressing terrestrial issues - urgent problems on Earth",
+          "technological spin-offs - secondary benefits from space research",
+          "long-term survival of humanity - humans living far into the future",
+          "frivolous expenditure - unnecessary spending",
+          "pushing the boundaries of knowledge - advancing human understanding"
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "label": "Introduction",
+              "text": "Many people say that spending money on space is bad because we have problems on Earth. I agree that we should fix Earth first, but space is also important.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "First, we have many problems on Earth like poverty and diseases. Governments should spend money to help poor people instead of sending rockets to space. Space travel is very expensive and takes too much money.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "However, space exploration is also good for science. We can learn new things about the universe. Also, satellites in space help us with weather and internet.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, we need to spend money on Earth's problems. But a little money for space is okay because it gives us new technology.",
+              "type": "struct"
+            }
+          ],
+          "6.0": [
+            {
+              "label": "Introduction",
+              "text": "There is a debate about whether funding space exploration is a waste of money when there are many problems on Earth. In my opinion, while Earth's problems are important, space exploration should still be funded.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "On the one hand, people argue that billions of dollars are spent on space programs while many people suffer from hunger and poverty on Earth. They believe this money should be used to improve healthcare and education. This is a very strong argument because human lives are important.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "On the other hand, space exploration brings many benefits to our daily lives. Many technologies we use today, like GPS and solar panels, were invented for space missions. Therefore, space research actually helps solve problems on Earth.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To conclude, I disagree that space exploration is a waste of resources. Even though we must solve terrestrial problems, the technological benefits of space research make it a valuable investment.",
+              "type": "struct"
+            }
+          ],
+          "6.5": [
+            {
+              "label": "Introduction",
+              "text": "It is often argued that the massive budgets allocated to space exploration are an unjustified waste of resources given the urgent problems facing humanity on Earth. I completely disagree with this view, as space research offers vital long-term benefits.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Those who oppose space funding point out the pressing terrestrial issues such as extreme poverty, climate change, and incurable diseases. They argue that governments have a moral obligation to prioritize the immediate needs of their citizens. Redirecting space budgets to these areas could theoretically alleviate a significant amount of human suffering in the short term.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Nevertheless, the technological spin-offs from space exploration have consistently improved life on Earth. Innovations ranging from satellite communication to advanced medical imaging owe their existence to aerospace research. Furthermore, looking beyond our planet is essential for the long-term survival of the human race in the event of a global catastrophe.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while the desire to solve immediate problems on Earth is understandable, labeling space exploration a waste of money is short-sighted. The technological and scientific advancements it provides far outweigh the initial financial costs.",
+              "type": "struct"
+            }
+          ],
+          "7.0": [
+            {
+              "label": "Introduction",
+              "text": "The question of whether government funding should be directed towards space exploration rather than pressing terrestrial issues is a subject of ongoing debate. I firmly disagree with the notion that space research is a waste of resources, as it yields indispensable technological and scientific dividends.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Critics of space exploration often highlight the severe socio-economic problems plaguing our planet, such as poverty, famine, and inadequate healthcare. They contend that the astronomical costs associated with launching rockets and maintaining space stations represent a frivolous expenditure. From this perspective, prioritizing human welfare on Earth appears to be the more ethical choice.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "However, this argument overlooks the profound secondary benefits derived from aerospace research. The technological spin-offs from space programs have revolutionized global communications, weather forecasting, and disaster management. Moreover, the quest to explore the cosmos pushes the boundaries of human knowledge and inspires future generations of scientists and engineers, which ultimately drives terrestrial innovation.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In summary, I reject the idea that space exploration diverts vital resources away from Earth's problems. Instead, the pursuit of space science acts as a catalyst for technological breakthroughs that actively enhance our ability to address those very challenges.",
+              "type": "struct"
+            }
+          ],
+          "7.5": [
+            {
+              "label": "Introduction",
+              "text": "A common criticism of space exploration is that it constitutes an unjustifiable drain on financial resources that would be better utilized combating urgent global challenges on Earth. I strongly disagree with this assertion, as I believe the ancillary benefits of space research render it a crucial and highly productive investment.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Admittedly, the financial resources required to sustain modern space programs are colossal, and it is easy to see why some view this with skepticism when billions suffer from poverty and environmental degradation. The argument that governments possess a fundamental moral duty to alleviate immediate human suffering before looking to the stars is a compelling one, rooted in practical humanitarianism.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Nevertheless, characterizing space exploration as a zero-sum game is fundamentally flawed. The technological innovations birthed by the aerospace sector—such as satellite-based climate monitoring and advanced water purification systems—have proven instrumental in tackling the very terrestrial problems critics highlight. Furthermore, establishing a human presence beyond Earth may eventually prove necessary to ensure the long-term survival of our species in the face of existential threats.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while the gravity of Earth's socio-economic problems cannot be understated, abandoning space exploration would be remarkably short-sighted. The scientific advancements it generates are indispensable tools for solving both current and future challenges on our home planet.",
+              "type": "struct"
+            }
+          ],
+          "8.0": [
+            {
+              "label": "Introduction",
+              "text": "The allocation of vast sums of public money to space exploration frequently draws criticism from those who argue such funds should be redirected towards pressing terrestrial crises. I completely disagree with the premise that space programs are a wasteful extravagance, as they consistently generate profound technological dividends that benefit humanity.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "It is undeniable that our planet is beset by severe, systemic issues ranging from widespread poverty to the escalating impacts of climate change. For critics, the astronomical expenditure required for interplanetary missions represents a gross misallocation of capital that could otherwise be utilized to eradicate disease or build sustainable infrastructure. This perspective is driven by a utilitarian desire to maximize immediate human welfare, making it a highly resonant argument.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "However, to dismiss space exploration on these grounds is to fundamentally misunderstand its reciprocal relationship with terrestrial progress. The rigorous demands of surviving in space force engineers to pioneer cutting-edge technologies, many of which transition into everyday applications that address Earth-bound problems. From advanced medical imaging to efficient solar panels, these technological spin-offs demonstrate that investing in the cosmos is, paradoxically, an investment in Earth's future.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To summarize, the assertion that space exploration is a frivolous endeavor is entirely misguided. Rather than detracting from our ability to solve problems on Earth, the aerospace sector serves as an unparalleled engine of innovation that continually equips us with the tools necessary to improve the human condition.",
+              "type": "struct"
+            }
+          ],
+          "8.5": [
+            {
+              "label": "Introduction",
+              "text": "The staggering financial demands of space exploration frequently invite intense scrutiny, with detractors arguing that such colossal budgets would be more ethically deployed in alleviating pressing terrestrial challenges. I vehemently disagree with the characterization of space programs as a profligate waste of resources, primarily because they act as a vital catalyst for paradigm-shifting technological advancements.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The rationale underpinning the opposition to space funding is rooted in a pragmatic humanitarianism; critics contend that while millions endure poverty and inadequate healthcare, investing in deep-space missions is morally indefensible. From this viewpoint, prioritizing the immediate alleviation of human suffering must take precedence over abstract scientific curiosity. This argument holds considerable weight, particularly when framed around the sheer scale of unmet basic needs across the globe.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Despite the moral appeal of this stance, it relies on a false dichotomy that pits space exploration against terrestrial problem-solving. In reality, the extreme engineering challenges of space travel necessitate unprecedented technological breakthroughs, which inevitably trickle down to civilian applications. Satellite meteorology, which mitigates the impact of natural disasters, and advancements in telemedicine are direct corollaries of aerospace research, proving that looking outward invariably helps us resolve crises inward.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while the impulse to prioritize immediate earthly concerns is entirely understandable, categorizing space exploration as an unwarranted luxury is profoundly short-sighted. The enduring scientific and technological dividends yielded by space programs ensure that they remain an indispensable component of human progress.",
+              "type": "struct"
+            }
+          ],
+          "9.0": [
+            {
+              "label": "Introduction",
+              "text": "The staggering financial demands of space exploration frequently invite intense scrutiny, with detractors contending that such colossal budgets would be more ethically deployed in mitigating pressing terrestrial crises. I vehemently disagree with the characterization of aerospace programs as a profligate waste of resources, as they invariably act as a vital catalyst for paradigm-shifting technological and scientific advancements.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The rationale underpinning the opposition to space funding is firmly rooted in pragmatic humanitarianism; critics assert that while millions endure systemic poverty and inadequate healthcare, investing in deep-space missions remains morally indefensible. From this utilitarian perspective, prioritizing the immediate alleviation of human suffering must unquestionably take precedence over seemingly abstract scientific curiosity. This argument holds considerable ethical weight, particularly when framed around the sheer scale of unmet basic needs globally.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Despite the undeniable moral appeal of this stance, it relies on a false dichotomy that erroneously pits space exploration against terrestrial problem-solving. In reality, the extreme engineering challenges inherent to space travel necessitate unprecedented technological breakthroughs, which seamlessly trickle down into vital civilian applications. Satellite meteorology, which drastically mitigates the impact of natural disasters, alongside crucial advancements in telemedicine, are direct corollaries of aerospace research, proving that looking outward invariably equips us to resolve crises inward.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while the impulse to prioritize immediate earthly concerns is entirely understandable, categorizing space exploration as an unwarranted luxury is profoundly short-sighted. The enduring scientific dividends yielded by these programs ensure that they remain not merely a pursuit of knowledge, but an indispensable engine of human progress.",
+              "type": "struct"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "discussion": {
+    "essayType": "discussion",
+    "label": "Discussion Essay",
+    "scenarios": [
+      {
+        "scenarioLabel": "Remote vs. Office Work",
+        "prompt": "Some people think that employees should be allowed to work from home permanently, while others believe staff should return to the office full-time. Discuss both these views and give your own opinion.",
+        "diagnostics": {
+          "question_analysis": "This is a DISCUSSION (discuss both views) question. You must cover BOTH sides -- permanent home working AND a full return to the office -- with equal depth, then add your own opinion. Don't silently turn this into a one-sided opinion essay.",
+          "position": "Your opinion can appear early, as a balanced signal in the intro, or in a short final paragraph before the conclusion -- but it must appear somewhere explicit and cannot simply be 'both have points'; the examiner wants a genuine, specific view.",
+          "paragraph_plan": "4 paragraphs: Intro (paraphrase + preview both views) -> Body 1 (View A: home working) -> Body 2 (View B: office return, with your opinion woven in or flagged) -> Conclusion (restate both views briefly, restate your opinion).",
+          "central_argument": "Treat Body 1 and Body 2 as a genuine debate, not two disconnected paragraphs -- use contrast language ('By contrast', 'However', 'meanwhile') to show you are weighing the two views against each other."
+        },
+        "vocabulary": [
+          {
+            "word": "proponents",
+            "definition": "people who support a particular idea or plan",
+            "example": "Proponents of remote work point to the time saved on commuting."
+          },
+          {
+            "word": "cohesion (team)",
+            "definition": "the sense of unity and connection among a group",
+            "example": "Some managers worry that permanent remote work weakens team cohesion."
+          },
+          {
+            "word": "autonomy",
+            "definition": "the freedom to manage your own time and decisions",
+            "example": "Employees often value the autonomy that working from home provides."
+          },
+          {
+            "word": "on balance",
+            "definition": "considering everything together before reaching a conclusion",
+            "example": "On balance, a hybrid model seems to capture the benefits of both approaches."
+          }
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "struct": "Intro",
+              "text": "Some people want to work from home all the time, but other people think workers should go back to office every day. This is a big topic now.",
+              "lexical": "'big topic' is informal, conversational filler for an essay opening.",
+              "grammar": "Two short simple sentences with no real connection between them.",
+              "cohesion": "Barely paraphrased -- 'work from home' and 'go back to office' are copied straight from the prompt.",
+              "idea_development": "Names both sides but gives no signal yet of which view the essay will favour."
+            },
+            {
+              "struct": "Thesis",
+              "text": "In my opinion, I think both ways have good and bad points.",
+              "lexical": "'good and bad points' is a vague, overused phrase.",
+              "grammar": "Correct but flat simple sentence.",
+              "cohesion": "'In my opinion, I think' repeats the same idea twice unnecessarily.",
+              "idea_development": "A real opinion is still missing -- 'both have good and bad points' avoids actually answering the question."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Firstly, if people work at home, they don't need to travel to work, so they save time and money.",
+              "lexical": "'travel to work', 'save time and money' are simple but accurate.",
+              "grammar": "Cause-result chain with 'so', correctly formed.",
+              "cohesion": "'Firstly' clearly opens the first view being discussed.",
+              "idea_development": "Gives one plausible benefit but doesn't say how much time or money, or for whom."
+            },
+            {
+              "struct": "Body 2",
+              "text": "On the other hand, some people say working in office is better because workers can talk to their colleague easily and learn from them.",
+              "lexical": "'colleague' should be plural ('colleagues'); phrasing stays simple.",
+              "grammar": "'Because' clause correctly used, minor article and number errors elsewhere.",
+              "cohesion": "'On the other hand' correctly signals the contrasting view.",
+              "idea_development": "Presents the second view but doesn't yet state the writer's own opinion, which the question requires."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, both working from home and office work have benefits, but I prefer to work from home.",
+              "lexical": "Repeats 'working from home' and 'office work' rather than varying the phrasing.",
+              "grammar": "Correct compound sentence joined with 'but'.",
+              "cohesion": "'In conclusion' appropriately signals closure.",
+              "idea_development": "Finally states an opinion, but only in the last sentence, with no reason given."
+            }
+          ],
+          "6.0": [
+            {
+              "struct": "Intro",
+              "text": "There is an ongoing debate about whether employees should be permitted to work from home permanently or should return to the office on a full-time basis.",
+              "lexical": "'ongoing debate', 'permitted' show a clear improvement in register.",
+              "grammar": "Single sentence using a 'whether... or' correlative structure.",
+              "cohesion": "Clean paraphrase of the prompt using different structure and vocabulary.",
+              "idea_development": "Frames the two sides clearly as a debate, though the writer's own view is not previewed yet."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will discuss both sides before explaining why I believe a mixture of the two is the best solution.",
+              "lexical": "'a mixture of the two' is a simple way of saying 'hybrid'.",
+              "grammar": "Correct complex sentence with an embedded 'before' clause.",
+              "cohesion": "Clearly signals the essay's structure -- discuss both, then give an opinion -- helping the reader follow along.",
+              "idea_development": "Previews a specific opinion (a mixture) rather than a vague 'both have points', a genuine improvement."
+            },
+            {
+              "struct": "Body 1",
+              "text": "On one hand, supporters of remote work argue that it saves employees time and money by removing the daily commute, and that people often feel more relaxed and productive at home.",
+              "lexical": "'commute', 'productive' are more precise than 'travel to work'.",
+              "grammar": "Two coordinated 'that' clauses after 'argue', correctly formed.",
+              "cohesion": "'On one hand' signals the first view while 'supporters' names who holds it, adding clarity.",
+              "idea_development": "Combines two related benefits, saved commute and comfort, rather than just one flat claim."
+            },
+            {
+              "struct": "Body 2",
+              "text": "On the other hand, those who favour office work believe that face-to-face contact helps colleagues communicate more clearly and builds a stronger sense of teamwork.",
+              "lexical": "'sense of teamwork' is a natural, appropriate collocation.",
+              "grammar": "Parallel structure to Body 1 ('those who favour... believe that'), showing controlled sentence variety.",
+              "cohesion": "The parallel phrasing with Body 1 makes the contrast between the two views easy to follow.",
+              "idea_development": "Gives a distinct, specific benefit, clearer communication and teamwork, rather than repeating Body 1's logic."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, while both approaches have clear benefits, I personally believe a hybrid model that combines home and office days would work best for most employees.",
+              "lexical": "'hybrid model' is precise and topic-appropriate.",
+              "grammar": "Concessive 'while' clause combined with the final opinion, correctly formed.",
+              "cohesion": "'In conclusion, while... I personally believe' ties both views together before the final stance.",
+              "idea_development": "Restates both sides briefly and gives a clear, reasoned final opinion, unlike band 5.5's unexplained last-minute preference."
+            }
+          ],
+          "6.5": [
+            {
+              "struct": "Intro",
+              "text": "The question of whether employees should work from home permanently or return fully to the office has become increasingly relevant since the pandemic changed working habits worldwide.",
+              "lexical": "'increasingly relevant', 'working habits' show a more natural, topic-specific register.",
+              "grammar": "Complex sentence with an embedded 'since' clause providing context.",
+              "cohesion": "Adds a brief, relevant contextual detail, the pandemic, rather than jumping straight to the two views, orienting the reader.",
+              "idea_development": "Situates the debate in a real-world cause, giving the introduction more substance than a bare restatement."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will examine the merits of both arrangements before arguing that a hybrid approach best balances flexibility with collaboration.",
+              "lexical": "'merits', 'arrangements', 'balances flexibility with collaboration' show a wider, more precise range.",
+              "grammar": "Infinitive purpose clause ('before arguing that...') smoothly integrated.",
+              "cohesion": "Previews not just the opinion but the reason behind it, balancing flexibility and collaboration, giving the essay a clear analytical direction.",
+              "idea_development": "Names the two competing values, flexibility versus collaboration, that both body paragraphs will actually explore, a genuinely organising thesis."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Advocates of permanent remote work point out that, without a daily commute, employees gain several extra hours each week, time that can be redirected towards family, rest or even further training.",
+              "lexical": "'redirected towards', 'further training' are precise, slightly less common phrasing choices.",
+              "grammar": "Appositive clause ('time that can be redirected...') adds detail without a new sentence.",
+              "cohesion": "'Advocates... point out that' clearly attributes the view rather than presenting it as fact, appropriate for a discussion essay.",
+              "idea_development": "Extends the 'saved time' idea by specifying what the time is used for, adding a concrete consequence."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Those who favour a full return to the office, however, contend that spontaneous conversations in shared spaces generate ideas and build trust in ways that scheduled video calls rarely replicate.",
+              "lexical": "'spontaneous conversations', 'replicate' are precise and natural.",
+              "grammar": "'However' inserted mid-clause for contrast, alongside a relative clause ('in ways that... rarely replicate').",
+              "cohesion": "'However' explicitly signals the contrast with Body 1's argument, strengthening the discussion structure.",
+              "idea_development": "Gives a specific mechanism, spontaneous conversation generating ideas and trust, rather than a general claim about 'communication'."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Ultimately, since both arrangements offer genuine advantages that suit different tasks, I believe organisations should let employees split their time between home and office rather than choosing one extreme.",
+              "lexical": "'suit different tasks', 'one extreme' add nuance to the closing argument.",
+              "grammar": "Causal 'since' clause leading into the final recommendation, correctly formed.",
+              "cohesion": "'Ultimately' signals a considered final judgement rather than an abrupt restatement.",
+              "idea_development": "The opinion is now tied to specific reasoning, different tasks suiting different arrangements, not just a stated preference."
+            }
+          ],
+          "7.0": [
+            {
+              "struct": "Intro",
+              "text": "As remote-working technology has matured, opinion has split between those who want employees to work from home permanently and those who insist on a full-time return to the office, a divide this essay will explore before offering a personal view.",
+              "lexical": "'matured', 'insist on', 'a personal view' are precise, natural choices.",
+              "grammar": "Long sentence with a participial opening clause and an appositive ('a divide this essay will explore').",
+              "cohesion": "The appositive clause performs the essay-structure signposting within the same sentence as the paraphrase, an efficient technique.",
+              "idea_development": "Attributes the debate to a specific cause, maturing technology, rather than stating it as a timeless fact, adding analytical depth."
+            },
+            {
+              "struct": "Thesis",
+              "text": "While each position has genuine merit, I would argue that the most productive model is one that grants employees choice rather than imposing either extreme uniformly.",
+              "lexical": "'imposing... uniformly', 'grants employees choice' show precise, natural academic phrasing.",
+              "grammar": "Concessive clause followed by 'would argue that', a hedged but confident stance marker.",
+              "cohesion": "The thesis reframes the debate around a new axis, choice versus imposition, that neither original view explicitly raised.",
+              "idea_development": "Introduces an original angle, the value of choice itself, rather than simply picking a midpoint between the two views."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Supporters of permanent remote work rightly note that eliminating the commute not only returns hours to employees' lives but also widens the talent pool companies can draw from, since location no longer restricts who can be hired.",
+              "lexical": "'talent pool', 'restricts' are precise, business-register vocabulary used accurately.",
+              "grammar": "Complex sentence coordinating two 'not only... but also' benefits, followed by a 'since' clause.",
+              "cohesion": "'Not only... but also' explicitly signals that a second, larger-scale benefit is being added to the first, familiar one.",
+              "idea_development": "Moves the argument beyond the individual employee, saved time, to an organisational benefit, a wider talent pool, broadening the scope convincingly."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Those favouring office-based work, meanwhile, point to the difficulty of mentoring junior staff remotely, arguing that skills historically absorbed by simply observing experienced colleagues are far harder to transmit through a screen.",
+              "lexical": "'mentoring', 'absorbed', 'transmit' form a precise, coherent set of terms around the idea of learning by observation.",
+              "grammar": "Participial clause ('arguing that...') smoothly extends the sentence with a supporting explanation.",
+              "cohesion": "'Meanwhile' signals that this is a parallel, comparably weighted concern to Body 1's talent-pool point.",
+              "idea_development": "Introduces a genuinely distinct concern, mentoring and skill transfer, rather than restating 'communication is harder', giving the discussion real range."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In weighing these positions, it becomes clear that neither remote nor office-based work suits every role equally well, which is why I ultimately favour policies that let teams choose their own balance rather than a single company-wide rule.",
+              "lexical": "'suits every role equally well', 'company-wide rule' are precise and natural.",
+              "grammar": "Participial opening clause leading into a result clause ('which is why...').",
+              "cohesion": "'In weighing these positions' explicitly signals synthesis of both prior paragraphs before the final opinion.",
+              "idea_development": "The conclusion's logic, different roles need different arrangements, directly answers both Body 1 and Body 2's evidence, rather than simply restating a preference."
+            }
+          ],
+          "7.5": [
+            {
+              "struct": "Intro",
+              "text": "The shift towards flexible working arrangements has turned a once-settled question -- where should employees physically work? -- into one of the more contested workplace debates of the decade, and this essay will weigh both sides before settling on a qualified position.",
+              "lexical": "'once-settled question', 'contested', 'qualified position' are natural, sophisticated phrasing.",
+              "grammar": "Embedded rhetorical question inside dashes, a genuinely advanced punctuation choice, followed by a signposting clause.",
+              "cohesion": "The rhetorical question itself performs the paraphrase while adding stylistic variety rarely seen at lower bands.",
+              "idea_development": "Frames the topic as having shifted over time, once-settled, now contested, giving the introduction a sense of context and stakes."
+            },
+            {
+              "struct": "Thesis",
+              "text": "My own position is that permanence, in either direction, is the wrong goal; what matters more is whether an organisation's arrangement actually fits the nature of its work.",
+              "lexical": "'permanence... is the wrong goal' is a precise, original reframing rather than a stock phrase.",
+              "grammar": "Semicolon linking two independent clauses, the second containing an embedded 'whether' clause.",
+              "cohesion": "Explicitly rejects both extremes before proposing a criterion, fit with the nature of work, giving the essay a clear evaluative lens.",
+              "idea_development": "The thesis supplies a test -- does the arrangement fit the work? -- that both body paragraphs can apply, a genuinely organising move."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Remote work clearly suits roles built around individual, deep-focus tasks -- software development or writing, for instance -- where interruptions common in open-plan offices can measurably reduce output.",
+              "lexical": "'deep-focus tasks', 'open-plan offices', 'measurably reduce output' are precise, natural collocations.",
+              "grammar": "Dash-inserted examples followed by a relative clause quantifying the consequence.",
+              "cohesion": "Opens by directly applying the thesis's 'fit' criterion to a specific case, rather than repeating a generic benefit.",
+              "idea_development": "Names concrete job types and a measurable consequence, reduced output from interruptions, grounding the abstract argument in something testable."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Office-based work, conversely, better serves roles that depend on rapid, informal coordination -- client-facing teams or creative departments, say -- where a single overheard conversation can resolve a problem that might otherwise take days of scheduled calls to untangle.",
+              "lexical": "'rapid, informal coordination', 'untangle' are vivid, precise, and idiomatic.",
+              "grammar": "Parallel structure to Body 1, dash examples plus a relative clause, reinforces the essay's internal consistency.",
+              "cohesion": "'Conversely' explicitly signals the contrast while the parallel sentence pattern makes the two-sided comparison easy to track.",
+              "idea_development": "Uses a vivid, specific scenario, an overheard conversation resolving a problem, that makes the abstract 'coordination benefit' concrete and memorable."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Neither camp, then, is simply right or wrong; the wiser conclusion is that organisations should match the arrangement to the task rather than the other way around, which is the view this essay ultimately defends.",
+              "lexical": "'the other way around', 'defends' close the essay with natural, controlled phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in a relative clause that explicitly names the essay's own stance.",
+              "cohesion": "'Then' signals that this is a direct consequence of the preceding two paragraphs, not a fresh restatement.",
+              "idea_development": "Closes by reasserting the thesis's test, match arrangement to task, in a way that clearly grew out of both specific examples given, not just a repeated slogan."
+            }
+          ],
+          "8.0": [
+            {
+              "struct": "Intro",
+              "text": "Few workplace debates have proven as durable, or as polarising, as the question of where employees ought to be physically located, with permanent remote work and a full office return typically presented as the only two options -- a framing this essay ultimately resists.",
+              "lexical": "'durable', 'polarising', 'framing... resists' are precise, sophisticated choices used with confidence.",
+              "grammar": "Long sentence with a participial clause and a dash-inserted final clause that pre-empts the essay's own argument.",
+              "cohesion": "The closing dash clause signals the thesis's direction without yet stating it outright, building productive tension.",
+              "idea_development": "Critiques the question itself, only two options, before answering it, a genuinely advanced move that most essays never attempt."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Rather than adjudicating between two blunt extremes, this essay contends that the more useful question is what conditions make either arrangement succeed, since it is those conditions, not the location itself, that ultimately determine productivity and morale.",
+              "lexical": "'adjudicating', 'blunt extremes', 'morale' are precise, low-frequency, and used with complete accuracy.",
+              "grammar": "'Rather than' opening balanced against a 'since' clause explaining the underlying logic -- sustained complexity throughout.",
+              "cohesion": "Explicitly reframes the debate's central question, giving the essay an unusually clear and original organising principle.",
+              "idea_development": "Shifts the entire analytical frame from where to under what conditions, a genuinely original contribution that both body paragraphs will operationalise."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Remote work succeeds, for example, when managers set clear, outcome-based expectations rather than monitoring hours, because employees freed from artificial oversight tend to organise their time around genuine productivity rather than visible presence.",
+              "lexical": "'outcome-based expectations', 'artificial oversight', 'visible presence' form a precise, coherent argument about management practice rather than technology itself.",
+              "grammar": "Layered causal structure ('succeeds when... because...') accurately sustained across a long sentence.",
+              "cohesion": "Directly operationalises the thesis's 'conditions' framework rather than simply listing a benefit of remote work in isolation.",
+              "idea_development": "Locates the real variable, management style, not location, that determines success, a substantive analytical claim rather than a restated commonplace."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Office-based arrangements, conversely, tend to falter precisely where this essay's earlier logic would predict: in organisations that mandate attendance without redesigning space or schedules to actually exploit the proximity they are paying for, leaving employees commuting merely to sit in video calls anyway.",
+              "lexical": "'falter', 'mandate attendance', 'exploit the proximity' are sophisticated, precisely deployed terms.",
+              "grammar": "Complex sentence with an embedded conditional-style clause and a final participial consequence clause, fully controlled.",
+              "cohesion": "Explicitly ties this paragraph back to the thesis's predictive claim, a rare and effective cross-referencing move.",
+              "idea_development": "Identifies the ironic failure case, commuting just to sit in video calls, that makes the abstract 'conditions matter more than location' argument vivid and concrete."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "The real dividing line, then, is not between home and office but between organisations that thoughtfully design working conditions and those that simply default to a location and hope productivity follows, and it is this distinction, rather than either camp's slogans, that should guide the decision.",
+              "lexical": "'thoughtfully design', 'default to a location', 'slogans' close with precise, original phrasing.",
+              "grammar": "'Not X but Y' balanced structure followed by a relative clause delivering the final judgement -- sustained sophistication to the last word.",
+              "cohesion": "'Then' signals this is the essay's synthesised conclusion, directly derived from both body paragraphs' logic rather than a fresh claim.",
+              "idea_development": "Closes by relocating the entire debate onto the thesis's original axis, conditions versus location, giving the essay genuine argumentative unity from first sentence to last."
+            }
+          ],
+          "8.5": [
+            {
+              "struct": "Intro",
+              "text": "That the pandemic forced a global experiment in remote work is well known; less appreciated is how thoroughly it has scrambled a debate that once had comfortably fixed sides, leaving 'home or office' looking less like a real question than a proxy for several smaller ones this essay intends to unpack.",
+              "lexical": "'scrambled', 'proxy for several smaller ones', 'unpack' are original, precise, almost conversational-yet-formal choices.",
+              "grammar": "Semicolon-linked clauses followed by a participial clause containing an embedded metaphor -- genuinely advanced, fluent control.",
+              "cohesion": "The metaphor of a 'proxy question' does real structural work, previewing that the essay will decompose the debate rather than simply take a side.",
+              "idea_development": "Reframes the entire debate as a stand-in for smaller, more answerable questions, an unusually sophisticated opening move."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Beneath the location question sit at least two others -- who actually benefits from flexibility, and what kind of collaboration a given team genuinely needs -- and I will argue that only by answering these first does the original question resolve itself sensibly.",
+              "lexical": "'resolve itself sensibly' is a precise, understated closing phrase typical of highly controlled academic writing.",
+              "grammar": "Dash-inserted list of two embedded questions, followed by a cleft-adjacent structure ('only by answering... does it resolve').",
+              "cohesion": "The two named sub-questions become the explicit organising principle for the two body paragraphs that follow.",
+              "idea_development": "Decomposes the thesis's abstract 'proxy question' claim into two concrete, checkable sub-questions, a genuinely rigorous analytical move."
+            },
+            {
+              "struct": "Body 1",
+              "text": "On the question of who benefits, the evidence so far suggests unevenly: employees with quiet homes, senior roles and established professional networks gain real autonomy from remote work, while newer or more junior staff, often working from cramped or shared spaces, can find themselves quietly disadvantaged by its supposed neutrality.",
+              "lexical": "'unevenly', 'cramped or shared spaces', 'supposed neutrality' show precise, socially aware vocabulary rarely attempted at lower bands.",
+              "grammar": "Colon introducing a balanced contrast clause ('while...'), sustained across a long, fully controlled sentence.",
+              "cohesion": "Directly answers the first sub-question named in the thesis, keeping the essay's structure explicit and easy to follow.",
+              "idea_development": "Introduces an equity dimension, who actually benefits, that neither simpler view of the debate usually considers, substantially deepening the discussion."
+            },
+            {
+              "struct": "Body 2",
+              "text": "On the second question, teams whose work is genuinely interdependent -- product design, live client negotiation -- tend to report real losses from full remote work, whereas teams whose contributions are largely parallel and individually measurable often notice little difference at all, suggesting collaboration needs, not company culture alone, should drive the policy.",
+              "lexical": "'interdependent', 'parallel and individually measurable' are precise, almost technical terms used with complete accuracy.",
+              "grammar": "'Whereas' contrast clause followed by a participial clause drawing an explicit conclusion -- sustained complexity to the sentence's end.",
+              "cohesion": "Answers the second sub-question in direct parallel to Body 1's structure, reinforcing the essay's internal logic.",
+              "idea_development": "Draws a genuinely actionable distinction, interdependent versus parallel work, that moves the discussion from opinion towards something resembling policy analysis."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Neither 'home' nor 'office' is therefore the right unit of analysis; the more defensible position is that policy should track who is affected and how interdependent the work actually is, a conclusion less quotable than either original slogan but, I would argue, considerably more honest.",
+              "lexical": "'unit of analysis', 'quotable', 'considerably more honest' close the essay with unusually self-aware, precise phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in a concessive-final clause -- sophisticated to the last word.",
+              "cohesion": "Explicitly synthesises both sub-questions from the thesis into a single final recommendation, giving the essay full circularity.",
+              "idea_development": "Ends by candidly acknowledging its own conclusion is less catchy than the two original positions, a mature rhetorical move that reinforces the essay's intellectual honesty."
+            }
+          ],
+          "9.0": [
+            {
+              "struct": "Intro",
+              "text": "It is easy to mistake 'should employees work from home or return to the office' for a single question with a single best answer; in practice it bundles together at least three distinct concerns -- individual wellbeing, team performance and organisational equity -- that this essay will treat separately before drawing them back together.",
+              "lexical": "'bundles together', 'organisational equity' demonstrate precise, high-register vocabulary handled with complete naturalness.",
+              "grammar": "Semicolon-linked independent clauses, the second containing a dash-inserted list and a forward-signalling infinitive clause -- flawless, native-level control sustained across a long sentence.",
+              "cohesion": "Explicitly names the essay's full analytical architecture within the introduction itself, an unusually confident structural choice.",
+              "idea_development": "Identifies the debate's underlying complexity, three bundled concerns, with complete precision, setting up an essay of real analytical ambition rather than a simple two-sided comparison."
+            },
+            {
+              "struct": "Thesis",
+              "text": "My contention is that most public arguments on this topic conflate these three concerns, and that doing so is precisely why the debate feels so intractable; disentangle them, and a workable, if unglamorous, answer emerges for each.",
+              "lexical": "'conflate', 'intractable', 'unglamorous' are deployed with complete precision and genuine stylistic confidence.",
+              "grammar": "Semicolon linking a diagnostic clause to a conditional-flavoured resolution clause -- an elegant, economical structure.",
+              "cohesion": "Diagnoses why the debate is difficult before promising a resolution, giving the thesis genuine explanatory power beyond a simple opinion.",
+              "idea_development": "The thesis doesn't just state a position -- it explains the epistemic failure of the public debate itself, a mark of genuinely original, high-level argumentation."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Individual wellbeing, first, responds mainly to autonomy and environment rather than to location as such, which is why remote work benefits some employees enormously and others barely at all, depending on factors -- housing, caregiving duties, personality -- that have nothing to do with the office-versus-home framing itself.",
+              "lexical": "'as such', 'caregiving duties', 'framing itself' show total command of nuance and register.",
+              "grammar": "Relative clause followed by a dash-inserted list functioning as an appositive -- sustained, effortless complexity.",
+              "cohesion": "Explicitly isolates the first of the three concerns named in the introduction, maintaining the essay's promised structure with precision.",
+              "idea_development": "Makes the genuinely subtle point that the variable driving wellbeing outcomes isn't location at all, undercutting the entire premise of the popular debate with real analytical force."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Team performance and organisational equity, by contrast, respond far more directly to structural choices -- how work is divided, who sits in which meetings, whose visibility translates into advancement -- meaning that a company can preserve full flexibility for individuals while still designing deliberately for collaboration and fairness, provided it treats these as engineering problems rather than as a binary policy choice.",
+              "lexical": "'structural choices', 'engineering problems', 'binary policy choice' are precise, original, and confidently deployed.",
+              "grammar": "Long, fully controlled sentence combining a dash-inserted list, a participial 'meaning that' clause, and a final conditional-style qualifier -- exceptional sustained accuracy.",
+              "cohesion": "'By contrast' explicitly separates this from Body 1's individual-level analysis while 'these' cleanly references back to the three concerns named at the outset.",
+              "idea_development": "Resolves the apparent tension between the two concerns by reframing both as solvable design problems, the essay's most original and consequential claim."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "The home-versus-office debate will likely never produce a single winner, because it was never really one debate; treated instead as three separate, answerable design questions, it becomes considerably less divisive and considerably more solvable, which is the resolution this essay has tried to demonstrate rather than merely assert.",
+              "lexical": "'considerably less divisive', 'demonstrate rather than merely assert' close the essay with total precision and self-awareness.",
+              "grammar": "Semicolon-linked clauses culminating in a relative clause that reflects on the essay's own method -- flawless control maintained to the final word.",
+              "cohesion": "'Because it was never really one debate' directly recalls the introduction's opening claim, giving the essay a fully circular, unified structure.",
+              "idea_development": "The conclusion doesn't just restate a position -- it reflects on the essay's own argumentative strategy, the clearest possible signal of sustained, high-level critical control."
+            }
+          ]
+        }
+      },
+      {
+        "scenarioLabel": "Free University Education",
+        "prompt": "Some people think that university education should be free for everyone, while others think that higher education should be paid for by students. Discuss both views and give your opinion.",
+        "diagnostics": {
+          "question_analysis": "This is a DISCUSSION essay. Keywords: 'university education', 'free for everyone', 'paid for by students'. You must objectively discuss both sides before giving your own opinion.",
+          "structure": "1. Intro: Introduce the debate and state your opinion. 2. Body 1: Discuss why it should be free (equality, skilled workforce). 3. Body 2: Discuss why students should pay (funding, motivation). 4. Conclusion: Summarize and state final opinion clearly.",
+          "grammar_focus": "Reporting verbs (Some argue that, It is believed that), passive voice for objective tone, and advanced conditionals.",
+          "cohesion": "Comparative structures (On the one hand... On the other hand), expressing contrast (Conversely, Nevertheless)."
+        },
+        "vocabulary": [
+          "financial burden - heavy cost",
+          "equal opportunity - fair chance for everyone",
+          "highly skilled workforce - educated workers",
+          "devalue the degree - make the qualification less respected",
+          "taxpayer funded - paid for by public taxes",
+          "socioeconomic background - a person's social and financial class"
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "label": "Introduction",
+              "text": "Many people discuss if university should be free or if students must pay. Some think free education is good, but others say students should pay. I think it is better if students pay a little bit.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "On one hand, free university is good for poor students. They can go to university and get a good job. This makes the country have smart workers and less poor people.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "On the other hand, if university is free, the government will lose a lot of money. The quality of the university might become bad. Also, students might be lazy because they did not pay for it.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, both sides have good points. I believe that university should not be completely free, but the government should help poor students pay for it.",
+              "type": "struct"
+            }
+          ],
+          "6.0": [
+            {
+              "label": "Introduction",
+              "text": "There is a debate about whether higher education should be free for all students or if they should have to pay tuition fees. While free education provides equal opportunities, I believe that students should contribute to the cost.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Those who support free university education argue that it creates a fairer society. If education is free, students from poor families have the same chance to study as rich students. Furthermore, a country with more educated graduates will have a stronger economy.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "However, others argue that making universities free would be a huge burden on the government. Taxpayers would have to pay more money to support this system. In addition, when students pay for their education, they are usually more motivated to study hard and value their degree.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To conclude, although free university would help poorer students, it is too expensive for the government to afford. In my opinion, students should pay, but there should be scholarships for those who cannot afford it.",
+              "type": "struct"
+            }
+          ],
+          "6.5": [
+            {
+              "label": "Introduction",
+              "text": "The question of whether university education should be universally free or funded by the students themselves is highly debated. While abolishing tuition fees promotes equal opportunity, I firmly believe that a system where students contribute financially is more sustainable.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Supporters of free higher education point out that it eliminates financial barriers, allowing anyone with academic ability to attend university regardless of their socioeconomic background. This egalitarian approach ensures that a nation does not waste the potential of its brightest young minds. Furthermore, a highly skilled workforce is essential for driving economic growth and innovation in the modern world.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Conversely, opponents argue that taxpayer-funded universities place an enormous strain on the national budget. Maintaining high-quality facilities and retaining top professors requires significant capital, which can be secured through tuition fees. Moreover, it is often argued that students who invest their own money into their education tend to exhibit higher levels of dedication and are less likely to drop out.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while free education offers clear social benefits in terms of equality, the financial realities of running world-class universities cannot be ignored. Therefore, I believe students should pay for their studies, supplemented by robust government loan systems.",
+              "type": "struct"
+            }
+          ],
+          "7.0": [
+            {
+              "label": "Introduction",
+              "text": "The debate over whether higher education should be provided free of charge or financed by tuition fees remains a contentious issue. While I acknowledge that free education fosters social mobility, I am of the opinion that requiring students to pay for their studies ensures a higher quality of education.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "On the one hand, advocates of free university education emphasize its role in leveling the playing field. Removing the financial burden of tuition fees allows individuals from disadvantaged socioeconomic backgrounds to pursue academic excellence without the fear of accumulating crippling debt. In a broader sense, society as a whole benefits from this approach, as it cultivates a highly skilled and knowledgeable workforce capable of driving national prosperity.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "On the other hand, those who favor a fee-paying system argue that universities require substantial funding to maintain academic standards. Relying solely on government subsidies can lead to overcrowded lecture halls and a decline in educational quality due to budget constraints. Additionally, paying for education instills a sense of responsibility in students; when they have a financial stake in their studies, they are arguably more motivated to succeed and less likely to take their opportunities for granted.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In summary, although the concept of free higher education is noble and promotes equality, it is financially impractical. I believe that a system where students pay tuition, backed by accessible government loans and scholarships, is the most effective way to maintain educational excellence.",
+              "type": "struct"
+            }
+          ],
+          "7.5": [
+            {
+              "label": "Introduction",
+              "text": "Whether tertiary education should be fully subsidized by the state or funded through student tuition fees is a subject of considerable debate. While providing free education undeniably promotes equal opportunity, I am inclined to believe that a fee-based system is crucial for preserving the standard and sustainability of universities.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Proponents of state-funded higher education primarily argue from a standpoint of social justice. They assert that tying educational access to financial capacity inherently discriminates against those from lower socioeconomic backgrounds, thereby perpetuating social inequality. By abolishing fees, governments can harness the full intellectual potential of their populace, generating a highly skilled workforce that is vital for long-term economic competitiveness and innovation.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Conversely, advocates of tuition fees highlight the severe financial strain that universally free education places on public resources. Without the revenue generated by students, universities may struggle to attract leading academics, upgrade research facilities, or maintain reasonable student-to-staff ratios. Furthermore, it is often argued that rendering higher education entirely free might devalue the degree in the eyes of both students and employers, whereas a financial investment fosters a greater sense of personal accountability and academic rigor.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To conclude, while the egalitarian appeal of free university education is evident, the economic realities of maintaining world-class institutions cannot be overlooked. In my view, a model combining reasonable tuition fees with extensive financial aid for underprivileged students represents the most balanced approach.",
+              "type": "struct"
+            }
+          ],
+          "8.0": [
+            {
+              "label": "Introduction",
+              "text": "The funding model for tertiary education is a highly polarized issue, with some advocating for universal free access and others insisting that students must bear the cost. While the egalitarian benefits of state-funded education are undeniable, I firmly believe that a tuition-based system is essential to safeguard the quality and global competitiveness of academic institutions.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Those who champion free higher education typically frame their argument around the principles of meritocracy and social mobility. By removing exorbitant tuition fees, the state ensures that academic potential, rather than financial privilege, dictates university admissions. This democratic approach not only eradicates systemic barriers for marginalized demographics but also yields a macro-economic dividend, as an expanded pool of highly skilled graduates invariably accelerates national innovation and productivity.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Despite these compelling social advantages, opponents argue that abolishing fees fundamentally jeopardizes institutional excellence. The operational costs of modern universities—encompassing state-of-the-art research laboratories and competitive faculty salaries—are immense, and relying exclusively on taxpayer funding often results in detrimental budget deficits. Moreover, there is a psychological dimension to consider: students who personally invest in their education tend to exhibit heightened intrinsic motivation and are less prone to treating their academic pursuits with complacency.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, although the concept of universally free university education aligns beautifully with ideals of social equity, it is practically unsustainable. Therefore, I opine that maintaining tuition fees, whilst simultaneously offering robust grants for low-income candidates, is the optimal strategy to ensure educational excellence.",
+              "type": "struct"
+            }
+          ],
+          "8.5": [
+            {
+              "label": "Introduction",
+              "text": "The debate surrounding the financing of higher education revolves around whether it should be treated as a universal public good, funded entirely by the state, or as a private investment borne by the individual student. While acknowledging the profound social equity achieved through free education, I contend that a tuition-based model remains indispensable for preserving the caliber and financial viability of academic institutions.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Advocates for the abolition of tuition fees predominantly base their arguments on the imperative of social mobility and egalitarianism. They assert that commodifying education erects insurmountable barriers for individuals from lower socioeconomic strata, thereby entrenching systemic inequality. By fully subsidizing university attendance, a nation can seamlessly tap into its entire reservoir of intellectual talent, subsequently cultivating a highly skilled, dynamic workforce that serves as the bedrock of modern economic prosperity.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Nevertheless, detractors legitimately caution against the immense fiscal strain that a universally free system imposes on government coffers. The infrastructural and pedagogical demands of world-class universities are staggeringly expensive; stripping them of tuition revenue often precipitates a decline in educational standards, manifesting as overcrowded lectures and underfunded research initiatives. Additionally, the financial commitment required by a fee-paying system inherently filters for dedicated scholars, fostering an environment characterized by rigorous academic accountability rather than complacency.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To summarize, while the utopian vision of barrier-free higher education is morally persuasive, its implementation is fraught with economic perils that can compromise institutional integrity. I ultimately believe that a hybrid model—retaining tuition fees while providing comprehensive bursaries for the disadvantaged—represents the most pragmatic and effective solution.",
+              "type": "struct"
+            }
+          ],
+          "9.0": [
+            {
+              "label": "Introduction",
+              "text": "The debate surrounding the financing of tertiary education fundamentally contrasts the vision of university access as a universal public right against its classification as a private, self-funded investment. While acknowledging the profound social equity facilitated by state-subsidized education, I contend that a tuition-based model remains unequivocally indispensable for preserving the academic rigor and financial viability of leading institutions.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "Advocates for the abolition of tuition fees predominantly anchor their arguments in the imperatives of meritocracy and unhindered social mobility. They rightly assert that commodifying education erects insurmountable barriers for intellectually capable individuals from marginalized socioeconomic strata, thereby entrenching systemic inequality. By universally subsidizing university attendance, a nation can seamlessly harness its entire reservoir of intellectual talent, subsequently cultivating a remarkably skilled, dynamic workforce that serves as the essential bedrock for sustained economic prosperity.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Nevertheless, detractors legitimately caution against the crippling fiscal strain that a universally free system inevitably imposes upon government coffers. The infrastructural, technological, and pedagogical demands of maintaining world-class universities are staggeringly expensive; unilaterally stripping them of tuition revenue frequently precipitates a stark decline in educational standards, manifesting as overcrowded lectures and chronically underfunded research initiatives. Additionally, the tangible financial commitment demanded by a fee-paying system inherently filters for highly dedicated scholars, fostering an academic environment characterized by rigorous accountability rather than mere complacency.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To summarize, while the utopian vision of entirely barrier-free higher education is undeniably morally persuasive, its practical implementation is fraught with economic perils that can severely compromise institutional integrity. I ultimately believe that a nuanced hybrid model—retaining reasonable tuition fees while concurrently providing comprehensive bursaries for the disadvantaged—represents the most pragmatic and effective paradigm.",
+              "type": "struct"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "adv_disadv": {
+    "essayType": "adv_disadv",
+    "label": "Advantage / Disadvantage",
+    "scenarios": [
+      {
+        "scenarioLabel": "Studying Abroad",
+        "prompt": "An increasing number of students are choosing to pursue higher education in a foreign country rather than in their home country. Discuss the advantages and disadvantages of this trend.",
+        "diagnostics": {
+          "question_analysis": "This is an ADVANTAGE/DISADVANTAGE question. It does not explicitly ask for your opinion, though a brief personal lean in the conclusion still reads well. Keywords: 'higher education', 'foreign country', 'advantages and disadvantages', 'this trend'.",
+          "position": "Decide whether to give a neutral 'both sides' treatment or lean towards one side overall (e.g. 'while there are drawbacks, the advantages generally outweigh them for well-prepared students'). A mild lean in the conclusion tends to read as more confident than a flat 'there are pros and cons'.",
+          "paragraph_plan": "4 paragraphs: Intro (paraphrase + preview that both sides will be covered) -> Body 1 (advantages, 1-2 well-developed points) -> Body 2 (disadvantages, 1-2 well-developed points) -> Conclusion (brief overall judgement).",
+          "central_argument": "Keep advantages and disadvantages genuinely parallel -- if Body 1 discusses academic or career benefits, address the SAME dimension (academic or career costs) in Body 2, rather than jumping to an unrelated category."
+        },
+        "vocabulary": [
+          {
+            "word": "exposure",
+            "definition": "the experience of being introduced to new ideas, cultures or situations",
+            "example": "Studying abroad gives students valuable exposure to different teaching styles."
+          },
+          {
+            "word": "assimilate",
+            "definition": "to adapt to and become part of a new culture or environment",
+            "example": "Some students struggle to assimilate into an unfamiliar academic system."
+          },
+          {
+            "word": "financial strain",
+            "definition": "difficulty caused by the cost of something",
+            "example": "International tuition fees can place considerable financial strain on families."
+          },
+          {
+            "word": "outweigh",
+            "definition": "to be greater or more significant than something else",
+            "example": "For many students, the career benefits outweigh the initial difficulties of adjustment."
+          }
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "struct": "Intro",
+              "text": "More and more students go to another country to study instead of studying in their own country. This has good points and bad points.",
+              "lexical": "'good points and bad points' is vague and repeats the prompt's own wording.",
+              "grammar": "Two disconnected simple sentences.",
+              "cohesion": "Weak paraphrase -- 'go to another country to study' mirrors the prompt too closely.",
+              "idea_development": "Names the topic and previews a 'good/bad' structure but with no specifics yet."
+            },
+            {
+              "struct": "Thesis",
+              "text": "I think studying in a foreign country has more advantages than disadvantages.",
+              "lexical": "'more advantages than' is simple comparative phrasing.",
+              "grammar": "Correct simple sentence.",
+              "cohesion": "Gives an early lean, which is a reasonable strategy even at this band.",
+              "idea_development": "States a position but doesn't yet preview which advantages will be discussed."
+            },
+            {
+              "struct": "Body 1",
+              "text": "One advantage is that students can learn a new language and meet people from different country.",
+              "lexical": "'different country' should be 'different countries'; vocabulary stays basic.",
+              "grammar": "Article and number error -- should read 'different countries'.",
+              "cohesion": "'One advantage is that' is a clear, simple topic sentence.",
+              "idea_development": "Names two benefits, language and meeting people, but doesn't explain how or why they matter."
+            },
+            {
+              "struct": "Body 2",
+              "text": "However, one disadvantage is that it is very expensive and students can feel homesick.",
+              "lexical": "'very expensive', 'homesick' are simple, accurate everyday words.",
+              "grammar": "Correct sentence joining two ideas with 'and'.",
+              "cohesion": "'However' signals the shift to disadvantages, contrasting with Body 1.",
+              "idea_development": "Names two problems but stops at simple assertion without an example or consequence."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, I believe studying abroad is a good choice for students even though it has some problems.",
+              "lexical": "'good choice', 'some problems' are generic phrases.",
+              "grammar": "Correct sentence using 'even though'.",
+              "cohesion": "'In conclusion' appropriately closes the essay.",
+              "idea_development": "Restates the lean from the thesis but doesn't briefly recap the specific advantage or disadvantage mentioned."
+            }
+          ],
+          "6.0": [
+            {
+              "struct": "Intro",
+              "text": "In recent years, a growing number of students have chosen to study for their degree in a foreign country rather than at home, a trend that brings both benefits and drawbacks.",
+              "lexical": "'a growing number', 'drawbacks' show improved range.",
+              "grammar": "Single sentence with an appositive clause ('a trend that brings...').",
+              "cohesion": "Good paraphrase of the prompt using varied vocabulary and structure.",
+              "idea_development": "Previews the essay's balanced structure within the same sentence as the paraphrase."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will discuss both the advantages and disadvantages of this trend before reaching an overall conclusion.",
+              "lexical": "'reaching an overall conclusion' is a standard, functional academic phrase.",
+              "grammar": "Correct complex sentence with an infinitive clause.",
+              "cohesion": "Clearly signposts the essay's two-part structure, helping the examiner follow the plan.",
+              "idea_development": "A neutral preview that doesn't yet commit to a lean, which is acceptable for this question type."
+            },
+            {
+              "struct": "Body 1",
+              "text": "On the positive side, studying overseas allows students to experience a different education system and develop skills such as independence and adaptability that may benefit their future career.",
+              "lexical": "'independence', 'adaptability' are more precise skill words than 'meet people'.",
+              "grammar": "Relative clause ('that may benefit their future career') correctly extends the sentence.",
+              "cohesion": "'On the positive side' clearly opens the advantages paragraph.",
+              "idea_development": "Names specific transferable skills and links them to a future benefit, career, a real step up from band 5.5."
+            },
+            {
+              "struct": "Body 2",
+              "text": "On the negative side, however, the high cost of tuition and living expenses can create financial pressure, and being far from family may cause emotional difficulties for some students.",
+              "lexical": "'tuition', 'living expenses', 'emotional difficulties' are more precise than 'expensive'/'homesick'.",
+              "grammar": "Two coordinated clauses joined by 'and', each independently correct.",
+              "cohesion": "'On the negative side, however' clearly contrasts with Body 1's structure.",
+              "idea_development": "Separates two different types of disadvantage, financial and emotional, rather than listing them as one vague idea."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, although there are some clear challenges, I believe the advantages of studying abroad generally outweigh the disadvantages for well-prepared students.",
+              "lexical": "'well-prepared students' adds useful precision and qualification.",
+              "grammar": "Concessive 'although' clause correctly combined with the final judgement.",
+              "cohesion": "'In conclusion, although...' signals genuine weighing rather than a flat restatement.",
+              "idea_development": "Adds a meaningful qualifier, for well-prepared students, that band 5.5's conclusion lacked."
+            }
+          ],
+          "6.5": [
+            {
+              "struct": "Intro",
+              "text": "It has become increasingly common for students to pursue their higher education abroad rather than remain in their home country, and this shift carries a distinct set of both advantages and disadvantages worth examining.",
+              "lexical": "'increasingly common', 'distinct set of' show a wider, more academic register.",
+              "grammar": "Compound sentence joined by 'and', both clauses correctly formed.",
+              "cohesion": "'Worth examining' smoothly signals the essay's purpose without a separate sentence.",
+              "idea_development": "Frames studying abroad as a genuine 'shift', giving the introduction a slightly more analytical tone than a flat description."
+            },
+            {
+              "struct": "Thesis",
+              "text": "While both sides of this trend deserve attention, the balance of evidence suggests the benefits tend to outweigh the costs for most students who plan carefully.",
+              "lexical": "'balance of evidence', 'plan carefully' are precise and natural.",
+              "grammar": "Concessive clause followed by a hedged main clause ('tend to', 'most students').",
+              "cohesion": "Gives a nuanced lean rather than an absolute claim, appropriate for a genuinely balanced essay.",
+              "idea_development": "Introduces a meaningful condition, careful planning, that will likely be picked up again in the conclusion."
+            },
+            {
+              "struct": "Body 1",
+              "text": "The clearest advantage is academic: students gain access to specialised courses, modern facilities and internationally recognised qualifications that may not be available in their home country.",
+              "lexical": "'specialised courses', 'internationally recognised qualifications' are precise, topic-specific phrases.",
+              "grammar": "Colon introduces a list of three parallel noun phrases, correctly punctuated.",
+              "cohesion": "'The clearest advantage is academic' functions as a strong, specific topic sentence.",
+              "idea_development": "Groups three related academic benefits under one clear category rather than listing unrelated points."
+            },
+            {
+              "struct": "Body 2",
+              "text": "By contrast, the most significant disadvantage is often financial, since international tuition fees, accommodation and travel costs combine to place real strain on many families' budgets.",
+              "lexical": "'accommodation', 'strain on... budgets' are precise, natural collocations.",
+              "grammar": "'Since' clause explains the cause behind the stated disadvantage, correctly formed.",
+              "cohesion": "'By contrast' explicitly signals the shift from advantage to disadvantage, and 'most significant' mirrors Body 1's 'clearest' for parallel structure.",
+              "idea_development": "Identifies one dominant disadvantage, financial, and explains its components, rather than listing several unrelated problems briefly."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Overall, despite the financial pressure it can create, studying abroad appears to offer academic and personal rewards substantial enough to justify the trend for many students.",
+              "lexical": "'personal rewards', 'justify the trend' add a natural, confident closing tone.",
+              "grammar": "Concessive 'despite' phrase combined with the final evaluative clause, correctly formed.",
+              "cohesion": "'Overall, despite...' signals genuine weighing of both paragraphs before the final judgement.",
+              "idea_development": "Directly references both the academic advantage and the financial disadvantage discussed earlier, unifying the essay."
+            }
+          ],
+          "7.0": [
+            {
+              "struct": "Intro",
+              "text": "As higher education has become more globalised, an increasing number of students now choose to study abroad rather than at home, a decision that offers clear rewards alongside some significant challenges this essay will explore.",
+              "lexical": "'globalised', 'significant challenges' are precise and current.",
+              "grammar": "Participial opening clause combined with an appositive ('a decision that offers...').",
+              "cohesion": "The appositive clause performs the signposting within the same sentence as the paraphrase, an efficient technique.",
+              "idea_development": "Attributes the trend to a broader cause, globalisation, rather than simply describing it, adding analytical depth."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Although the disadvantages are genuine and should not be dismissed, this essay will argue that, for students who choose their destination carefully, the advantages are ultimately more substantial.",
+              "lexical": "'should not be dismissed', 'more substantial' show precise, confident academic phrasing.",
+              "grammar": "Long concessive sentence with an embedded conditional clause ('for students who choose... carefully').",
+              "cohesion": "Explicitly acknowledges the strength of the opposing view before stating a position, a mature rhetorical move.",
+              "idea_development": "Introduces a specific condition, careful destination choice, that narrows and strengthens the claim, rather than a blanket statement."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Academically, studying overseas often exposes students to teaching methods that emphasise critical thinking and independent research, skills that are increasingly valued by employers in a competitive global job market.",
+              "lexical": "'critical thinking', 'competitive global job market' are precise, natural academic collocations.",
+              "grammar": "Appositive clause ('skills that are increasingly valued...') smoothly extends the sentence without a new clause boundary.",
+              "cohesion": "'Academically' functions as a clear category label, keeping the paragraph tightly focused.",
+              "idea_development": "Connects an academic experience, teaching methods, to a concrete long-term outcome, employability, a genuine cause-to-consequence chain."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Financially and emotionally, however, the costs can be considerable: beyond high tuition fees, many students report a difficult adjustment period marked by homesickness and unfamiliar social norms.",
+              "lexical": "'adjustment period', 'social norms' are precise, appropriately academic phrases.",
+              "grammar": "Colon introduces a two-part explanation, both parts correctly balanced.",
+              "cohesion": "'Financially and emotionally, however' explicitly names the two dimensions of disadvantage while contrasting with Body 1's single 'academically' focus.",
+              "idea_development": "Groups a psychological cost, adjustment and homesickness, alongside the financial one, giving the paragraph genuine range rather than one flat complaint."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In weighing these factors, it seems reasonable to conclude that the long-term academic and career benefits generally justify the short-term financial and emotional difficulties, provided students research their choice thoroughly beforehand.",
+              "lexical": "'short-term... difficulties', 'thoroughly beforehand' add precision to the final judgement.",
+              "grammar": "Participial opening clause leading into a conditional final clause ('provided...').",
+              "cohesion": "'In weighing these factors' explicitly signals synthesis of both body paragraphs before the final judgement.",
+              "idea_development": "Distinguishes short-term costs from long-term benefits, a genuinely useful analytical distinction that strengthens the overall argument."
+            }
+          ],
+          "7.5": [
+            {
+              "struct": "Intro",
+              "text": "The decision to pursue higher education abroad, once reserved for a small, privileged minority, has become a mainstream option for students worldwide, bringing with it a familiar but still worth-examining trade-off between opportunity and hardship.",
+              "lexical": "'mainstream option', 'trade-off between opportunity and hardship' are natural, precise phrases.",
+              "grammar": "Participial clause ('once reserved for...') inserted mid-sentence, a genuinely advanced structural choice.",
+              "cohesion": "Frames the topic historically, once rare, now mainstream, before naming the trade-off, giving the introduction real context.",
+              "idea_development": "The phrase 'trade-off between opportunity and hardship' effectively previews both body paragraphs in a single, economical image."
+            },
+            {
+              "struct": "Thesis",
+              "text": "My own assessment is that this trade-off, while real, tends to favour students who arrive with realistic expectations and adequate financial support, making preparation, more than the decision itself, the decisive factor.",
+              "lexical": "'realistic expectations', 'decisive factor' are precise and natural.",
+              "grammar": "Participial final clause ('making preparation... the decisive factor') smoothly closes a long, well-controlled sentence.",
+              "cohesion": "Reframes the entire question around preparation rather than a simple abroad-versus-home comparison, giving the essay an original angle.",
+              "idea_development": "Identifies a variable, preparation, that both body paragraphs can implicitly test, rather than simply restating 'pros and cons'."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Where preparation is strong, the advantages are considerable: access to research facilities and faculty expertise unavailable at home, a credential that travels well internationally, and a network of contacts spanning multiple countries.",
+              "lexical": "'faculty expertise', 'a credential that travels well', 'spanning multiple countries' are precise, idiomatic phrases.",
+              "grammar": "Colon introducing a list of three parallel noun phrases, each internally complex, correctly punctuated throughout.",
+              "cohesion": "'Where preparation is strong' directly applies the thesis's key variable to this paragraph, keeping the essay's logic explicit.",
+              "idea_development": "Extends beyond generic 'better education' into three distinct, concrete benefits, facilities, portable credential, network, a genuinely rich list."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Where it is lacking, however, the same experience can turn corrosive: mounting debt without a clear post-graduation plan, isolation compounded by an unfamiliar language, and a qualification that, without proper research beforehand, may not even be recognised at home.",
+              "lexical": "'corrosive', 'compounded', 'recognised' are precise, sophisticated word choices used accurately.",
+              "grammar": "Colon introducing a parallel list mirroring Body 1's structure, including an embedded conditional clause.",
+              "cohesion": "'Where it is lacking, however' directly mirrors Body 1's opening structure, making the parallel comparison explicit and easy to follow.",
+              "idea_development": "Shows that the same features praised in Body 1, credential, exposure, become liabilities without preparation, a genuinely sophisticated symmetrical argument."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "The real question, then, is not whether studying abroad is advantageous in the abstract, but whether a given student is equipped to convert its opportunities into outcomes, and it is this framing, rather than a simple balance sheet, that should guide the decision.",
+              "lexical": "'convert its opportunities into outcomes', 'balance sheet' are precise, original closing images.",
+              "grammar": "'Not X but Y' balanced structure followed by a relative clause delivering the final judgement.",
+              "cohesion": "'Then' signals this is a direct consequence of the preceding two paragraphs' parallel logic.",
+              "idea_development": "Closes by reframing the whole debate around the thesis's original variable, preparation, giving the essay genuine argumentative unity."
+            }
+          ],
+          "8.0": [
+            {
+              "struct": "Intro",
+              "text": "Rising numbers of students crossing borders for their degrees are usually described in terms of the opportunities this creates, yet the accompanying difficulties are just as instructive, and this essay treats both as two sides of a single underlying condition: readiness.",
+              "lexical": "'crossing borders', 'instructive', 'underlying condition' are precise, sophisticated choices deployed with confidence.",
+              "grammar": "Long sentence balancing two coordinated clauses before a final appositive naming the essay's organising concept.",
+              "cohesion": "The closing appositive, 'readiness', previews the thesis's central idea without stating it outright, building productive tension.",
+              "idea_development": "Reframes advantages and disadvantages as two expressions of one variable rather than a simple list, a genuinely original analytical move."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay contends that readiness, encompassing financial planning, language preparation and realistic expectations, does more to determine whether the experience proves beneficial than the destination country itself.",
+              "lexical": "'encompassing', 'realistic expectations' are precise, low-frequency terms handled with complete accuracy.",
+              "grammar": "Appositive clause ('encompassing...') inserted mid-sentence to define the key term, a genuinely advanced structural choice.",
+              "cohesion": "Explicitly defines 'readiness' with three components, giving the essay a precise analytical vocabulary to use throughout.",
+              "idea_development": "Makes a specific, testable claim, readiness matters more than destination, that both body paragraphs will need to support with evidence."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Where all three elements of readiness are present, the advantages compound: financially secure students can focus fully on academic opportunities, while linguistic and cultural preparation allows them to build the kind of local networks that convert a degree into lasting professional value.",
+              "lexical": "'compound', 'convert a degree into lasting professional value' are precise and used with genuine sophistication.",
+              "grammar": "Long sentence with a conditional opening and two coordinated consequence clauses, fully controlled throughout.",
+              "cohesion": "Directly applies all three components of 'readiness' named in the thesis, keeping the essay's logic transparent.",
+              "idea_development": "Shows how the three readiness factors interact and reinforce one another, financial security enabling academic focus, which enables networking, a genuinely systemic argument."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Where readiness is absent, however, the very same conditions turn punishing: unexpected costs force students into part-time work that erodes academic performance, while limited language skills can leave them socially isolated regardless of how welcoming the host institution intends to be.",
+              "lexical": "'punishing', 'erodes', 'regardless of how welcoming' are precise, sophisticated, and idiomatic.",
+              "grammar": "Complex sentence with a conditional opening, two coordinated consequence clauses, and a concessive final clause -- sustained accuracy throughout.",
+              "cohesion": "'The very same conditions' explicitly signals the symmetry with Body 1, reinforcing the thesis's central claim without restating it.",
+              "idea_development": "Demonstrates that outcomes diverge not because the opportunity differs but because readiness does, directly supporting the thesis's most original claim."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "The advantages and disadvantages of studying abroad are therefore best understood not as fixed properties of the experience itself but as probable outcomes of how well a student is prepared for it, a distinction with real implications for how prospective students, and the institutions advising them, should approach the decision.",
+              "lexical": "'fixed properties', 'probable outcomes', 'prospective students' close the essay with precise, academic vocabulary.",
+              "grammar": "'Not X but Y' structure followed by an appositive clause extending the implication -- sustained sophistication to the final word.",
+              "cohesion": "'Therefore' signals this is the essay's synthesised conclusion, directly derived from both body paragraphs' parallel logic.",
+              "idea_development": "Extends the conclusion beyond the individual student to institutions, broadening the argument's relevance in its final sentence."
+            }
+          ],
+          "8.5": [
+            {
+              "struct": "Intro",
+              "text": "The familiar case for and against studying abroad -- richer opportunities set against real hardship -- is not wrong so much as incomplete, since it treats an outcome that varies enormously between individuals as though it were a fixed property of the decision itself.",
+              "lexical": "'not wrong so much as incomplete', 'fixed property' are original, precise, and confidently deployed.",
+              "grammar": "Dash-inserted summary followed by a 'since' clause containing an embedded comparative structure -- genuinely advanced, fluent control.",
+              "cohesion": "The phrase 'fixed property of the decision' sets up a critique that the rest of the essay will develop, an unusually sophisticated opening move.",
+              "idea_development": "Critiques the conventional framing of the debate itself before offering an alternative, a hallmark of top-band analytical writing."
+            },
+            {
+              "struct": "Thesis",
+              "text": "What the standard advantages-and-disadvantages list obscures, I will argue, is that both columns are largely populated by the same underlying variable -- preparedness -- meaning the more useful question is not what studying abroad offers, but to whom and under what conditions it offers it.",
+              "lexical": "'obscures', 'populated by the same underlying variable', 'to whom and under what conditions' show total command of precise, analytical register.",
+              "grammar": "Dash-inserted clause naming the key variable, followed by a parallel 'not X, but Y' structure -- sustained, effortless complexity.",
+              "cohesion": "Explicitly reframes the entire question, giving the essay a genuinely original organising principle rather than a simple list.",
+              "idea_development": "The thesis doesn't just state a position -- it diagnoses a flaw in how the topic is usually discussed, a mark of unusually mature critical thinking."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Consider the academic case: unfamiliar teaching styles that reward independent thought can either accelerate a well-prepared student's intellectual growth or leave an unprepared one adrift, depending entirely on whether they arrive equipped to interpret, rather than simply endure, the difference.",
+              "lexical": "'accelerate', 'adrift', 'interpret, rather than simply endure' show precise, nuanced control of connotation.",
+              "grammar": "Colon-introduced elaboration followed by an 'either... or' structure and a final participial contrast clause -- sustained complexity throughout.",
+              "cohesion": "'Consider the academic case' signals that this is the first of several parallel test cases for the thesis's claim, not a standalone point.",
+              "idea_development": "Shows the same feature, unfamiliar teaching style, producing opposite outcomes depending on preparedness, directly demonstrating the thesis rather than merely asserting it."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Consider, equally, the financial case: identical tuition costs can be a manageable investment for a student with family support and a clear post-graduation plan, or a source of chronic stress for one without either, meaning the fee itself was never really the determining factor.",
+              "lexical": "'a manageable investment', 'chronic stress', 'determining factor' are precise and deployed with genuine analytical purpose.",
+              "grammar": "Parallel structure to Body 1 ('Consider... the... case') reinforces the essay's internal consistency and rigour.",
+              "cohesion": "'Equally' signals that this second test case carries the same argumentative weight as the first, sustaining the essay's symmetry.",
+              "idea_development": "Applies the same preparedness-based logic to a second, independent domain, finance, strengthening the thesis through replication rather than mere repetition."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Neither advantage nor disadvantage, then, belongs to studying abroad as such; both belong to the match, or mismatch, between a particular student's preparation and the demands of an unfamiliar system, which is the distinction any honest evaluation of the trend should start from.",
+              "lexical": "'as such', 'the match, or mismatch' close the essay with precise, restrained, highly controlled phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in a relative clause naming the essay's own methodological contribution -- sophisticated to the last word.",
+              "cohesion": "'Then' explicitly signals that this is the direct product of both parallel test cases just given, not a fresh claim.",
+              "idea_development": "Ends by naming the essay's own analytical contribution, match versus mismatch, as the proper starting point for the topic, a mature, self-aware close."
+            }
+          ],
+          "9.0": [
+            {
+              "struct": "Intro",
+              "text": "Debates about studying abroad tend to proceed as though 'advantage' and 'disadvantage' were properties fixed in the experience itself, waiting to be tallied; in reality, the evidence suggests these are less like fixed weights on a scale and more like outcomes contingent on a small set of identifiable conditions, which this essay sets out to specify.",
+              "lexical": "'tallied', 'contingent on', 'a small set of identifiable conditions' demonstrate complete command of precise, analytical, academic register.",
+              "grammar": "Semicolon-linked independent clauses, the second containing an embedded comparative metaphor and a forward-signalling relative clause -- flawless, native-level control sustained across a long sentence.",
+              "cohesion": "The metaphor of 'weights on a scale' versus 'contingent outcomes' does genuine argumentative work, previewing the essay's entire approach in one image.",
+              "idea_development": "Critiques the implicit metaphor underlying the standard debate before replacing it with a more accurate one, an exceptionally sophisticated opening move."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Three conditions, I will show, do most of the work in determining outcome: the financial buffer a student has before unexpected costs arise, the linguistic and cultural preparation that converts unfamiliarity into curiosity rather than isolation, and the clarity of purpose that turns a foreign credential into a career asset rather than an expensive detour.",
+              "lexical": "'financial buffer', 'converts unfamiliarity into curiosity', 'expensive detour' are original, precise, and confidently sustained across a long, complex claim.",
+              "grammar": "Appositive-style opening ('Three conditions, I will show') followed by three parallel, internally complex noun clauses -- exceptional sustained accuracy and rhetorical control.",
+              "cohesion": "Names exactly the three variables the two body paragraphs will need to demonstrate, giving the essay a rigorously explicit structure.",
+              "idea_development": "The thesis functions almost as a hypothesis to be tested, the clearest possible signal of genuinely analytical, rather than merely descriptive, writing."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Where these three conditions hold, the familiar advantages of studying abroad are not merely present but self-reinforcing: financial security allows full academic engagement, which builds the confidence to navigate cultural difference, which in turn produces exactly the kind of adaptable, internationally credible graduate that employers claim to want but rarely find.",
+              "lexical": "'self-reinforcing', 'internationally credible graduate' are precise, sophisticated, and used with total naturalness.",
+              "grammar": "Chain of relative clauses ('which builds... which in turn produces...') sustained across a long sentence with complete grammatical control -- a genuinely advanced structure.",
+              "cohesion": "Traces a causal chain that directly operationalises all three conditions from the thesis, demonstrating rather than merely asserting the claim.",
+              "idea_development": "Shows the three variables interacting dynamically, each enabling the next, rather than simply co-occurring, the essay's most sophisticated analytical move so far."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Where even one condition is absent, however, the same trend can produce precisely the outcomes its critics describe: a thin financial buffer converts a single unexpected expense into a crisis, weak preparation turns cultural difference into a source of chronic stress rather than growth, and an unclear sense of purpose leaves an expensive credential looking, in hindsight, like a detour rather than an investment.",
+              "lexical": "'crisis', 'in hindsight', 'a detour rather than an investment' are precise, vivid, and idiomatically natural.",
+              "grammar": "Long sentence with three parallel conditional-consequence clauses, each independently complex, sustained with complete accuracy -- exceptional control.",
+              "cohesion": "Mirrors Body 1's three-part structure exactly, making the argument's symmetry, and therefore its central claim, unmistakable.",
+              "idea_development": "Completes the demonstration begun in Body 1 by showing the same three variables producing the opposite outcome when absent, fully proving the thesis through structural parallelism rather than assertion."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "The trend of studying abroad is therefore neither simply beneficial nor simply risky; it is a wager whose odds are set almost entirely by conditions a student can identify, and in most cases influence, well before departure, which is the practical use this essay hopes its analysis has demonstrated rather than merely claimed.",
+              "lexical": "'a wager whose odds are set', 'practical use' close the essay with precise, original, and completely natural phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in a relative clause reflecting on the essay's own purpose -- flawless control maintained to the final word.",
+              "cohesion": "The metaphor of a 'wager' directly recalls the introduction's 'scale' image, giving the essay a fully circular, unified structure.",
+              "idea_development": "Closes by explicitly stating the essay's practical value, identifiable, influenceable conditions, rather than a restated opinion, the clearest possible signal of sustained, top-band critical purpose."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "problem_solution": {
+    "essayType": "problem_solution",
+    "label": "Problem / Solution",
+    "scenarios": [
+      {
+        "scenarioLabel": "Urban Traffic Congestion",
+        "prompt": "Traffic congestion has become an increasingly serious problem in many major cities around the world. What are the causes of this problem, and what measures can be taken to solve it?",
+        "diagnostics": {
+          "question_analysis": "This is a PROBLEM/SOLUTION (causes + solutions) question, not an opinion question -- you are not asked to agree or disagree. Keywords: 'traffic congestion', 'major cities', 'causes', 'measures... to solve it'. Both parts, causes AND solutions, must be answered.",
+          "position": "No personal 'agree/disagree' stance is required, but a brief evaluative comment in the conclusion (e.g. which solution seems most realistic) shows critical engagement and often lifts Task Response.",
+          "paragraph_plan": "4 paragraphs: Intro (paraphrase + preview causes and solutions) -> Body 1 (1-2 causes, explained) -> Body 2 (1-2 solutions, ideally matched to the causes in Body 1) -> Conclusion (brief summary + realistic final comment).",
+          "central_argument": "Match your solutions to your causes. If Body 1 blames excessive private car use, Body 2 should address that specifically, e.g. public transport investment, not drift into an unrelated fix like 'plant more trees'."
+        },
+        "vocabulary": [
+          {
+            "word": "gridlock",
+            "definition": "a situation in which traffic is completely blocked and cannot move",
+            "example": "During rush hour, the city centre often descends into complete gridlock."
+          },
+          {
+            "word": "commuters",
+            "definition": "people who regularly travel between home and work",
+            "example": "Rising fuel prices have pushed many commuters towards public transport."
+          },
+          {
+            "word": "subsidise",
+            "definition": "to pay part of the cost of something to make it cheaper for users",
+            "example": "The government could subsidise bus fares to encourage a shift away from cars."
+          },
+          {
+            "word": "underlying",
+            "definition": "forming the basic cause or foundation of something",
+            "example": "Poor urban planning is often the underlying reason behind chronic congestion."
+          }
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "struct": "Intro",
+              "text": "Traffic jam is a big problem in many cities in the world today. There are many reasons for this and also some ways to fix it.",
+              "lexical": "'traffic jam' is informal for 'traffic congestion'; 'ways to fix it' is conversational.",
+              "grammar": "Two disconnected simple sentences.",
+              "cohesion": "Minimal paraphrase, staying close to the original wording of the prompt.",
+              "idea_development": "Names the topic and previews two parts, causes and solutions, but with no specifics."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will talk about the causes and the solutions of traffic problem.",
+              "lexical": "'talk about' is conversational; 'traffic problem' should be 'traffic congestion' or 'this problem'.",
+              "grammar": "Minor preposition slip -- 'solutions of' should be 'solutions to'.",
+              "cohesion": "Functions as a basic but clear preview of the essay's structure.",
+              "idea_development": "Correctly signals a two-part essay, showing basic awareness of the task type."
+            },
+            {
+              "struct": "Body 1",
+              "text": "One reason is that too many people have cars now, so there are more cars on the road.",
+              "lexical": "'too many people have cars' is simple, repetitive phrasing.",
+              "grammar": "Correct cause-result sentence with 'so'.",
+              "cohesion": "'One reason is that' is a clear, functional topic sentence.",
+              "idea_development": "States a plausible cause but doesn't explain why more people have cars, e.g. income growth or poor alternatives."
+            },
+            {
+              "struct": "Body 2",
+              "text": "A solution is that government can build more public transport like bus and train.",
+              "lexical": "'like bus and train' should be 'buses and trains'; vocabulary stays basic.",
+              "grammar": "Article error -- 'government' needs 'the government'.",
+              "cohesion": "'A solution is that' clearly matches the structure of Body 1.",
+              "idea_development": "Proposes a solution that logically follows from Body 1's cause, a genuine strength even at this band."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, traffic congestion is a serious problem, but it can be solved if government take action.",
+              "lexical": "'take action' is a reasonable, if generic, closing phrase.",
+              "grammar": "Subject-verb agreement error -- 'government take' should be 'the government takes'.",
+              "cohesion": "'In conclusion' appropriately closes the essay.",
+              "idea_development": "Restates the problem and gestures at a solution but doesn't recap the specific cause or solution given above."
+            }
+          ],
+          "6.0": [
+            {
+              "struct": "Intro",
+              "text": "Traffic congestion has become a major issue in many large cities around the world, caused by several factors and requiring a range of possible solutions.",
+              "lexical": "'major issue', 'a range of possible solutions' show improved range over 'big problem'.",
+              "grammar": "Single sentence using two coordinated participial clauses ('caused by...', 'requiring...').",
+              "cohesion": "Reasonable paraphrase that varies both vocabulary and structure from the prompt.",
+              "idea_development": "Previews both causes and solutions within one sentence, a more efficient introduction than band 5.5's two-sentence version."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will examine the main causes of this problem before suggesting some practical solutions.",
+              "lexical": "'examine', 'practical solutions' are more precise, academic word choices.",
+              "grammar": "Correct complex sentence with an infinitive purpose clause.",
+              "cohesion": "Clearly signposts the essay's structure in a natural, flowing sentence.",
+              "idea_development": "Previews the essay's logical order, causes first, then solutions, showing clear task awareness."
+            },
+            {
+              "struct": "Body 1",
+              "text": "One major cause is the growing number of private vehicles on the road, which happens because public transport in many cities is often unreliable or does not cover certain areas.",
+              "lexical": "'private vehicles', 'unreliable' are more precise than 'cars'.",
+              "grammar": "Relative clause ('which happens because...') correctly extends the sentence to explain the cause.",
+              "cohesion": "'One major cause' clearly opens the causes paragraph.",
+              "idea_development": "Goes further than band 5.5 by explaining why people rely on cars, unreliable public transport, not just stating that they do."
+            },
+            {
+              "struct": "Body 2",
+              "text": "One effective solution would be for city governments to invest in reliable public transport systems, such as expanding bus routes and building new train lines.",
+              "lexical": "'invest in', 'expanding bus routes' are more precise, natural collocations.",
+              "grammar": "'Such as' correctly introduces two parallel examples.",
+              "cohesion": "'One effective solution' mirrors Body 1's 'One major cause', creating a clear cause-solution link.",
+              "idea_development": "Directly addresses the cause named in Body 1, unreliable public transport, rather than proposing an unrelated fix."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, traffic congestion is mainly caused by increasing car use, but this can be reduced through better public transport and effective government planning.",
+              "lexical": "'effective government planning' is a reasonable closing addition.",
+              "grammar": "Correct sentence combining cause and solution with 'but... through'.",
+              "cohesion": "'In conclusion' correctly summarises both the cause and solution discussed.",
+              "idea_development": "Briefly recaps both the specific cause and solution, unlike band 5.5's vaguer closing."
+            }
+          ],
+          "6.5": [
+            {
+              "struct": "Intro",
+              "text": "In many of the world's major cities, traffic congestion has grown from an occasional inconvenience into a daily and costly problem, driven by a combination of factors that this essay will examine alongside some realistic solutions.",
+              "lexical": "'occasional inconvenience', 'costly', 'realistic solutions' show a wider, more natural register.",
+              "grammar": "Participial clause ('driven by a combination of factors') smoothly extends a long, correctly formed sentence.",
+              "cohesion": "The contrast between 'occasional' and 'daily' effectively signals that the problem has worsened over time, adding depth.",
+              "idea_development": "Frames congestion as having intensified, giving the introduction a sense of trajectory rather than a static description."
+            },
+            {
+              "struct": "Thesis",
+              "text": "While several factors contribute to this problem, urban planning and public transport quality appear to be the most significant, and addressing both could substantially ease congestion.",
+              "lexical": "'contribute to', 'substantially ease' are precise, natural academic phrasing.",
+              "grammar": "Concessive clause followed by a coordinated main clause, both correctly formed.",
+              "cohesion": "Names the two specific factors, urban planning and public transport, the body paragraphs will explore, giving the thesis real direction.",
+              "idea_development": "Narrows a broad topic down to the two the essay will actually argue matter most, a genuinely focused thesis."
+            },
+            {
+              "struct": "Body 1",
+              "text": "A key cause is poor urban planning, particularly the way many cities have developed with residential areas far from workplaces, forcing most residents to commute long distances, usually by car.",
+              "lexical": "'residential areas', 'commute long distances' are precise, topic-specific phrases.",
+              "grammar": "Participial clause ('forcing most residents...') correctly extends the sentence to show consequence.",
+              "cohesion": "'A key cause' functions as a strong, specific topic sentence tied directly to the thesis.",
+              "idea_development": "Traces a clear chain from urban design to commuting behaviour to car dependence, rather than a single flat statement."
+            },
+            {
+              "struct": "Body 2",
+              "text": "A correspondingly effective solution, therefore, would be to design future developments so that homes, workplaces and amenities are closer together, reducing the need for long car journeys in the first place.",
+              "lexical": "'amenities', 'in the first place' add precision and a natural closing flourish.",
+              "grammar": "'So that' clause correctly expresses purpose, followed by a participial consequence clause.",
+              "cohesion": "'A correspondingly effective solution, therefore' explicitly signals that this solution answers Body 1's specific cause, not a generic fix.",
+              "idea_development": "Proposes a solution that addresses the root cause, urban design, rather than only treating the symptom of too many cars."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Overall, since much of today's congestion stems from decades of car-centred urban planning, redesigning cities around shorter commutes offers a more lasting solution than simply building more roads.",
+              "lexical": "'car-centred', 'more lasting solution' show a confident, precise closing register.",
+              "grammar": "Causal 'since' clause combined with a comparative final clause, correctly formed.",
+              "cohesion": "'Overall, since...' signals genuine synthesis of the cause and solution discussed in the body paragraphs.",
+              "idea_development": "Adds a meaningful comparison, a lasting solution versus simply building more roads, showing evaluative thinking, not just restatement."
+            }
+          ],
+          "7.0": [
+            {
+              "struct": "Intro",
+              "text": "As cities across the world continue to expand, traffic congestion has evolved from a minor daily nuisance into one of urban planning's most persistent challenges, with causes ranging from population growth to inadequate infrastructure, and this essay will consider both the roots of the problem and some workable remedies.",
+              "lexical": "'persistent challenges', 'inadequate infrastructure', 'workable remedies' are precise and current.",
+              "grammar": "Long sentence combining a participial opening, a prepositional list, and a coordinated signposting clause, all correctly formed.",
+              "cohesion": "'From... to...' structure economically signals both the scale and range of causes before the essay even begins its body paragraphs.",
+              "idea_development": "Situates the problem within the broader context of urban expansion, giving the introduction real analytical framing rather than a flat description."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Although congestion has multiple interacting causes, this essay will focus on the two most influential -- rising car ownership and insufficient public transport investment -- since addressing these would likely yield the greatest overall improvement.",
+              "lexical": "'interacting causes', 'yield the greatest overall improvement' show precise, natural academic phrasing.",
+              "grammar": "Concessive clause followed by a dash-inserted list and a 'since' clause justifying the essay's focus.",
+              "cohesion": "Explicitly justifies why these two causes were chosen over others, a genuinely sophisticated move for a thesis statement.",
+              "idea_development": "Narrows the topic with an explicit rationale, the greatest overall improvement, rather than simply asserting importance."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Firstly, as household incomes have risen in many developing cities, car ownership has increased rapidly, and because these cities were often not designed with such volumes of traffic in mind, existing roads quickly become overwhelmed.",
+              "lexical": "'household incomes', 'overwhelmed' are precise, natural word choices for this context.",
+              "grammar": "Complex sentence coordinating a causal clause with a second causal clause, fully controlled.",
+              "cohesion": "'Firstly' clearly opens the first cause while the sentence traces a full chain from income growth to road capacity.",
+              "idea_development": "Connects an economic trend, rising incomes, to an infrastructure mismatch, roads not designed for the volume, a genuinely multi-layered explanation."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Secondly, because public transport in many of these cities remains limited, slow or unreliable, driving often remains the only practical option, meaning that expanding and modernising transport networks is likely to be the single most effective long-term solution.",
+              "lexical": "'modernising transport networks', 'practical option' are precise and appropriately formal.",
+              "grammar": "Causal clause followed by a participial 'meaning that' clause proposing the solution within the same sentence.",
+              "cohesion": "'Secondly' signals the second cause while the sentence smoothly transitions into a solution, showing tight cause-solution integration.",
+              "idea_development": "Merges cause and solution economically, demonstrating that the writer sees them as directly linked rather than as separate lists."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In summary, while traffic congestion stems from several interacting pressures, tackling the twin issues of car dependency and weak public transport is likely to offer cities their best chance of lasting improvement.",
+              "lexical": "'interacting pressures', 'twin issues', 'lasting improvement' add precision to the final judgement.",
+              "grammar": "Concessive clause combined with a confident evaluative final clause, correctly formed.",
+              "cohesion": "'In summary, while...' signals genuine synthesis of both causes discussed rather than a simple restatement.",
+              "idea_development": "Explicitly frames the two causes as 'twin issues', reinforcing the essay's chosen focus one final time."
+            }
+          ],
+          "7.5": [
+            {
+              "struct": "Intro",
+              "text": "Traffic congestion, once dismissed as an inevitable side effect of urban life, is increasingly understood by planners as a symptom of deeper structural choices -- how cities are built, and for whom -- and this essay examines both that underlying diagnosis and the solutions it points towards.",
+              "lexical": "'structural choices', 'underlying diagnosis' are precise, sophisticated phrases well-suited to the topic.",
+              "grammar": "Dash-inserted clause adds a rhetorical flourish within a long, well-controlled sentence.",
+              "cohesion": "The metaphor of 'diagnosis' frames congestion as a symptom rather than a standalone problem, giving the introduction real conceptual depth.",
+              "idea_development": "Reframes the topic from a simple 'problem needing solutions' into a symptom of something deeper, an unusually sophisticated opening move."
+            },
+            {
+              "struct": "Thesis",
+              "text": "My contention is that most conventional fixes -- wider roads, more parking -- treat symptoms rather than causes, whereas policies that reduce the actual need to drive tend to offer more durable relief.",
+              "lexical": "'conventional fixes', 'durable relief' are precise, natural, and slightly figurative in a controlled way.",
+              "grammar": "Dash-inserted examples followed by a 'whereas' contrast clause, both correctly formed.",
+              "cohesion": "Explicitly critiques a common but flawed approach, wider roads, before proposing an alternative principle, giving the thesis genuine argumentative edge.",
+              "idea_development": "Distinguishes between symptom-treatment and cause-treatment, a conceptual distinction that will organise both body paragraphs."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Widening roads, for instance, is a classic symptom-focused response: it briefly eases congestion by increasing capacity, but by making driving more convenient it often attracts precisely the additional traffic needed to fill that new capacity within a few years.",
+              "lexical": "'symptom-focused response', 'attracts... additional traffic' are precise and demonstrate real subject knowledge.",
+              "grammar": "Colon-introduced elaboration followed by a 'but' contrast clause containing an embedded consequence -- sustained complexity throughout.",
+              "cohesion": "'For instance' grounds the thesis's abstract distinction in a concrete, well-known example.",
+              "idea_development": "Explains a specific, counter-intuitive mechanism, induced demand, rather than a generic claim, demonstrating genuine understanding of the topic."
+            },
+            {
+              "struct": "Body 2",
+              "text": "A cause-focused alternative, by contrast, is investment in dense, well-connected public transport combined with policies such as congestion pricing, both of which reduce the actual demand for car journeys rather than simply accommodating it.",
+              "lexical": "'congestion pricing', 'accommodating' are precise, topic-specific terms used accurately.",
+              "grammar": "'By contrast' opening balanced against a relative clause explaining the shared mechanism of both proposed policies.",
+              "cohesion": "'By contrast' explicitly mirrors Body 1's structure, reinforcing the symptom-versus-cause distinction established in the thesis.",
+              "idea_development": "Names two specific, complementary policies and explains the shared logic behind them, reducing demand, a genuinely integrated solution rather than a list."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Congestion, then, is unlikely to be solved by adding capacity alone; it is more effectively addressed by policies that make driving less necessary in the first place, a shift in thinking that this essay has tried to justify rather than simply assert.",
+              "lexical": "'in the first place', 'justify rather than simply assert' close the essay with precise, self-aware phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in a relative clause reflecting on the essay's own argumentative method.",
+              "cohesion": "'Then' signals this is the direct consequence of the symptom-versus-cause distinction developed throughout.",
+              "idea_development": "Closes by reflecting on the essay's own reasoning process, a mark of genuinely mature, top-tier argumentation."
+            }
+          ],
+          "8.0": [
+            {
+              "struct": "Intro",
+              "text": "That traffic congestion keeps worsening despite decades of road expansion is, on reflection, less paradoxical than it first appears: cities have consistently treated a demand problem as though it were a capacity problem, and this essay argues that only reversing that framing will produce lasting relief.",
+              "lexical": "'on reflection', 'less paradoxical than it first appears' are natural, sophisticated framing devices.",
+              "grammar": "Long sentence with a colon introducing the essay's central diagnostic claim, followed by a forward-signalling final clause.",
+              "cohesion": "The colon structure lets the sentence perform diagnosis and thesis-preview simultaneously, an efficient, advanced technique.",
+              "idea_development": "Names the precise conceptual error, treating demand as capacity, that the whole essay will unpack, a genuinely original analytical framing."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will show that congestion persists not because cities lack road space but because the true price of driving -- in time, fuel and public infrastructure -- is rarely reflected in what an individual driver actually pays, and that correcting this mismatch is the most effective available solution.",
+              "lexical": "'the true price of driving', 'mismatch' are precise, economically-informed phrases used with real sophistication.",
+              "grammar": "'Not X but Y' structure followed by a dash-inserted list and a coordinated final claim -- sustained complexity across a long sentence.",
+              "cohesion": "Explicitly names the mechanism, price mismatch, that both body paragraphs will need to demonstrate, giving the thesis real analytical rigour.",
+              "idea_development": "Introduces an economic concept, externalised cost, as the essay's central explanatory tool, elevating the argument beyond a simple causes-and-solutions list."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Because drivers rarely bear the full cost of the congestion, pollution and infrastructure wear they generate, each additional car trip appears cheaper to the individual than it truly is to the city as a whole, which removes any natural incentive to choose an alternative.",
+              "lexical": "'bear the full cost', 'natural incentive' are precise, economically precise phrases.",
+              "grammar": "Causal clause followed by a comparative clause and a final relative clause -- sustained, accurate complexity throughout.",
+              "cohesion": "Directly operationalises the thesis's 'price mismatch' concept, applying it to explain the specific behavioural cause of congestion.",
+              "idea_development": "Explains why individually rational choices, driving, produce a collectively harmful outcome, gridlock, a genuinely systemic explanation rather than a simple cause statement."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Congestion pricing schemes, already used successfully in cities such as London and Singapore, correct this mismatch directly by attaching a real cost to driving in the busiest areas at the busiest times, which reliably shifts a meaningful share of journeys onto public transport or off-peak hours.",
+              "lexical": "'correct this mismatch directly', 'a meaningful share of journeys' are precise and demonstrate genuine command of the topic.",
+              "grammar": "Appositive clause naming real examples, followed by a relative clause explaining the mechanism of effect -- fully controlled, advanced structure.",
+              "cohesion": "'This mismatch' explicitly references the thesis's central concept, keeping the essay's logic transparent and unified.",
+              "idea_development": "Supports the claim with real-world precedent, London, Singapore, rather than a purely hypothetical solution, strengthening its credibility considerably."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Ultimately, no amount of new road capacity can resolve a problem rooted in mispriced incentives; only by making the true cost of driving visible to drivers themselves are cities likely to see congestion ease in any lasting way.",
+              "lexical": "'mispriced incentives', 'in any lasting way' close the essay with precise, economically literate phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in an inverted structure ('only by... are cities likely to...') -- an advanced, native-like construction.",
+              "cohesion": "'Ultimately' signals this is the essay's final synthesis, directly derived from the price-mismatch logic developed throughout.",
+              "idea_development": "Closes by restating the thesis's central mechanism in its most concentrated form, giving the essay a tight, unified argumentative arc."
+            }
+          ],
+          "8.5": [
+            {
+              "struct": "Intro",
+              "text": "Ask any city planner why congestion keeps returning despite new lanes, new bypasses, new ring roads, and the honest answer is rarely that more capacity failed to help -- it is that capacity, on its own, was never going to be the fix, since demand for road space expands quietly to fill whatever room is made for it.",
+              "lexical": "'ring roads', 'expands quietly to fill' are precise, vivid, and demonstrate genuine command of urban-planning discourse.",
+              "grammar": "Long sentence built from a rhetorical imperative, a triadic list, and a final 'since' clause -- exceptionally fluent, native-like control.",
+              "cohesion": "The rhetorical-question framing draws the reader into the essay's central paradox before naming it explicitly, a genuinely sophisticated opening technique.",
+              "idea_development": "Introduces the concept of induced demand through vivid, concrete imagery rather than abstract terminology alone, making a technical idea immediately accessible and persuasive."
+            },
+            {
+              "struct": "Thesis",
+              "text": "What follows, then, is not a case against infrastructure investment as such, but an argument that any lasting solution must shrink the incentive to drive alone at peak times, whether through pricing, better alternatives, or -- most plausibly -- both together.",
+              "lexical": "'as such', 'most plausibly' show precise, restrained hedging typical of highly controlled academic prose.",
+              "grammar": "'Not X, but Y' structure followed by a dash-inserted qualifier offering a nuanced, combined recommendation.",
+              "cohesion": "Explicitly clarifies what the essay is not arguing before stating its actual claim, pre-empting a likely misreading.",
+              "idea_development": "Proposes a combined solution, pricing and alternatives together, rather than forcing a false choice between them, a genuinely mature analytical stance."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Pricing alone can feel punitive without a credible alternative already in place, which is why cities that have implemented congestion charges successfully -- Stockholm among them -- typically phased in improved public transport first, giving commuters a genuine, rather than theoretical, choice before the cost of driving rose.",
+              "lexical": "'punitive', 'a genuine, rather than theoretical, choice' are precise and show nuanced ethical as well as practical awareness.",
+              "grammar": "Relative clause naming a real example, followed by a participial clause and a final contrast pair -- sustained, advanced complexity.",
+              "cohesion": "Builds directly on the thesis's 'both together' claim by explaining the necessary sequence, not just the combination.",
+              "idea_development": "Adds a genuinely original point about implementation order, alternatives before pricing, moving beyond what the solution is to how it should be introduced."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Equally, better alternatives alone rarely shift entrenched habits quickly enough, since driving typically remains marginally more convenient even once decent public transport exists, unless that convenience gap is narrowed by making the true cost of driving, in time as well as money, more visible at the point of decision.",
+              "lexical": "'entrenched habits', 'the point of decision' are precise, behaviourally-informed phrases used with real sophistication.",
+              "grammar": "Causal clause followed by an 'unless' conditional containing an embedded prepositional list -- sustained accuracy across a demanding structure.",
+              "cohesion": "'Equally' signals that this is the necessary complement to Body 1's point, not a repetition, maintaining the essay's 'both together' logic.",
+              "idea_development": "Introduces a behavioural-economics insight, convenience gap, point of decision, that adds real explanatory depth beyond a simple 'build more transport' claim."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Congestion, in short, is less a roads problem than a decision-architecture problem, and cities that redesign the incentives commuters face -- not merely the incentives, but the sequence and visibility of those incentives -- stand the best chance of loosening a grip that road-building alone has never managed to release.",
+              "lexical": "'decision-architecture problem', 'loosening a grip' close the essay with original, precise, and vivid final phrasing.",
+              "grammar": "Dash-inserted clarification followed by a relative clause containing a final figurative image -- sophisticated to the last word.",
+              "cohesion": "'In short' signals a genuine, compressed synthesis of the whole essay's argument, not merely the final paragraph.",
+              "idea_development": "Reprises both body paragraphs' key terms, sequence and visibility, within a single closing sentence, giving the essay unusually tight internal coherence."
+            }
+          ],
+          "9.0": [
+            {
+              "struct": "Intro",
+              "text": "Every major city that has tried to build its way out of congestion has eventually rediscovered the same uncomfortable finding: new road capacity does not so much solve traffic as invite it, since drivers who had previously avoided a route, or a time of day, or driving altogether return the moment friction is removed, restoring the very congestion the new capacity was meant to relieve.",
+              "lexical": "'rediscovered', 'invite it', 'restoring' are deployed with complete precision and genuine rhetorical control.",
+              "grammar": "Semicolon-linked clauses followed by a triadic list and a final participial clause -- flawless, sustained, native-level control across an unusually long sentence.",
+              "cohesion": "The phrase 'does not so much solve traffic as invite it' compresses the entire concept of induced demand into a single, memorable formulation.",
+              "idea_development": "Opens with a claim general enough to cover many cities' experience, then narrows precisely to the mechanism, an exceptionally efficient piece of argumentative architecture."
+            },
+            {
+              "struct": "Thesis",
+              "text": "The task that follows, then, is not to catalogue every contributing factor -- population growth, land-use patterns, fuel prices all play some part -- but to isolate the single lever most within a city's control: the price, in the broadest sense, that a driver perceives at the moment of choosing to take the car.",
+              "lexical": "'catalogue', 'the broadest sense', 'the moment of choosing' show exceptional precision and rhetorical restraint.",
+              "grammar": "'Not X, but Y' structure containing a dash-inserted list of dismissed alternatives, followed by an appositive defining the chosen focus -- sustained, flawless complexity.",
+              "cohesion": "Explicitly narrows an enormous topic to one tractable lever, justifying the exclusion of other factors rather than simply ignoring them.",
+              "idea_development": "The thesis performs genuine intellectual triage, acknowledging complexity while still committing to a focused, defensible claim, the hallmark of the very highest-level argumentation."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Congestion pricing succeeds where it has been tried seriously, not merely because it raises the monetary cost of driving, but because it makes visible, at the one moment a decision is actually being made, a cost that had previously been diffused across fuel bills, lost hours and collectively borne infrastructure spending that no individual driver ever directly confronted.",
+              "lexical": "'diffused', 'collectively borne', 'directly confronted' form a precise, cohesive argument about cost perception rather than cost existence.",
+              "grammar": "'Not merely because... but because...' structure sustained across a long sentence with an embedded relative clause -- exceptional grammatical control maintained throughout.",
+              "cohesion": "Directly operationalises the thesis's 'price... at the moment of choosing' concept, demonstrating rather than merely restating it.",
+              "idea_development": "Distinguishes between a cost existing and a cost being visible at the decision point, a genuinely subtle and original analytical distinction."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Where such pricing has failed or provoked backlash, by contrast, it has typically been introduced in isolation, without the credible alternatives that convert a newly visible cost into a genuine choice rather than a simple penalty, confirming that the lever this essay identifies works only when paired with the capacity to actually choose differently.",
+              "lexical": "'provoked backlash', 'a genuine choice rather than a simple penalty' are precise, socially aware, and idiomatically natural.",
+              "grammar": "'By contrast' opening balanced against a long relative clause culminating in a participial clause that explicitly confirms the thesis -- sustained accuracy to the sentence's end.",
+              "cohesion": "'By contrast' directly mirrors Body 1's structure while explicitly testing the thesis against a negative case, a genuinely rigorous analytical move.",
+              "idea_development": "Strengthens the thesis by showing what happens when its central condition is absent, a falsification-style test rarely attempted even at the highest bands."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Congestion, in the end, is less a failure of infrastructure than a failure of pricing information, and cities that grasp this distinction -- treating the goal not as building more road, nor merely charging for it, but as making its true cost legible at the point of decision -- are the ones most likely to loosen a grip that a century of road-building has only ever tightened.",
+              "lexical": "'pricing information', 'legible at the point of decision' close the essay with the same conceptual precision as the opening.",
+              "grammar": "Dash-inserted clarification containing a 'not X, nor Y, but Z' triadic structure, culminating in a final relative clause -- flawless control sustained to the final word.",
+              "cohesion": "'In the end' signals the essay's fully synthesised final judgement, directly recalling the introduction's 'invite it' claim for a circular, unified structure.",
+              "idea_development": "Closes by naming the essay's precise conceptual contribution, legibility of true cost, rather than a generic restated recommendation, the clearest possible mark of sustained, top-band originality."
+            }
+          ]
+        }
+      },
+      {
+        "scenarioLabel": "Fast Food & Obesity",
+        "prompt": "In many countries, the consumption of fast food has increased, leading to health issues such as obesity. What are the causes of this trend, and what measures can be taken to solve it?",
+        "diagnostics": {
+          "question_analysis": "This is a PROBLEM/SOLUTION essay. Keywords: 'consumption of fast food', 'health issues', 'obesity', 'causes', 'measures'. You must discuss why this is happening and how to fix it.",
+          "structure": "1. Intro: Paraphrase the trend and state that the essay will discuss causes and solutions. 2. Body 1: Causes (convenience, aggressive marketing, cheap prices). 3. Body 2: Solutions (taxation, education, stricter advertising laws). 4. Conclusion: Summarize the main causes and proposed solutions.",
+          "grammar_focus": "Language of cause and effect (due to, as a result of, consequently), and modal verbs for solutions (should, must, could).",
+          "cohesion": "Sequencing points (Firstly, Another reason is), linking causes to solutions (To tackle this issue, Therefore)."
+        },
+        "vocabulary": [
+          "sedentary lifestyle - sitting down a lot, not active",
+          "aggressive marketing campaigns - intense advertising",
+          "time-poor - not having enough free time",
+          "implement a sugar tax - put a tax on unhealthy foods",
+          "caloric intake - the amount of calories consumed",
+          "public health crisis - a major medical issue affecting society"
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "label": "Introduction",
+              "text": "Nowadays, many people eat fast food and become very fat. There are some reasons why people do this, and governments can take some actions to fix the problem.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The main reason people eat fast food is because they are very busy. They do not have time to cook at home, so they buy burgers and pizza. Also, fast food is very cheap and tastes good, so children like it very much.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "To solve this problem, the government should make fast food more expensive by adding taxes. Also, schools should teach children how to eat healthy food like fruits and vegetables instead of junk food.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, being busy and cheap prices cause people to eat fast food. However, higher taxes and education can help people become healthy again.",
+              "type": "struct"
+            }
+          ],
+          "6.0": [
+            {
+              "label": "Introduction",
+              "text": "The rising popularity of fast food has caused a major health problem, specifically an increase in obesity. This essay will discuss the main causes behind this trend and suggest possible solutions to address it.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "There are two main causes for the increase in fast food consumption. Firstly, modern life is very busy, meaning many people are 'time-poor' and rely on quick meals instead of cooking healthy food at home. Secondly, fast food companies use aggressive marketing campaigns to target children, making their products seem very attractive.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "There are several measures that can be taken to solve this problem. Governments should introduce a tax on unhealthy foods to make them less affordable. In addition, schools must provide better education about nutrition so that young people understand the dangers of a poor diet and a sedentary lifestyle.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To sum up, the fast food epidemic is primarily caused by busy lifestyles and clever advertising. However, through government taxation and better school education, this public health issue can be solved.",
+              "type": "struct"
+            }
+          ],
+          "6.5": [
+            {
+              "label": "Introduction",
+              "text": "In recent years, the widespread consumption of fast food has led to severe health consequences, most notably a dramatic rise in obesity rates. This essay will examine the primary causes of this unhealthy trend and propose viable solutions to mitigate its impact.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The surge in fast food popularity can be attributed to a combination of lifestyle changes and corporate strategies. Firstly, the fast-paced nature of modern life means that many working professionals simply lack the time and energy to prepare nutritious home-cooked meals. Consequently, they turn to the convenience of cheap, ready-made junk food. Furthermore, the aggressive marketing campaigns employed by multinational food corporations heavily influence consumer behavior, particularly among young children who are easily swayed by colorful advertisements.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "To tackle this growing public health crisis, a multi-faceted approach is required. Governments should take decisive action by implementing a 'fat tax' on foods that are high in sugar and trans fats, thereby discouraging their purchase. Simultaneously, public health campaigns and school curricula must place a stronger emphasis on nutritional education, teaching individuals how to manage their caloric intake and maintain a healthy lifestyle.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while the convenience of fast food and persuasive advertising are the root causes of the current obesity crisis, effective government intervention through taxation and education can successfully reverse this alarming trend.",
+              "type": "struct"
+            }
+          ],
+          "7.0": [
+            {
+              "label": "Introduction",
+              "text": "The escalating consumption of fast food globally has precipitated a significant public health crisis, characterized by soaring rates of obesity. This essay will explore the underlying factors driving this dietary shift and suggest effective measures to combat the problem.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The fundamental causes of this trend relate to modern socioeconomic pressures and pervasive corporate advertising. In today's fast-paced society, an increasing number of individuals are 'time-poor', leading them to prioritize the convenience of highly processed meals over the time-consuming preparation of nutritious food. Compounding this issue is the relentless and aggressive marketing campaigns launched by the fast-food industry. By intentionally targeting younger demographics with appealing advertisements and toy promotions, these companies establish unhealthy eating habits early in life.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Addressing this issue requires coordinated action from both policymakers and educational institutions. A highly effective deterrent would be the implementation of a 'sugar and fat tax', artificially inflating the price of unhealthy foods to suppress consumer demand. Furthermore, governments must enact stricter regulations on how junk food is advertised, particularly during children's television programming. Alongside these legislative measures, schools must urgently integrate comprehensive nutritional education into their core curriculum to foster better dietary awareness.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In summary, the obesity epidemic is primarily fueled by the demands of modern lifestyles and predatory marketing tactics. However, by leveraging financial disincentives and prioritizing dietary education, society can effectively curb the overconsumption of fast food.",
+              "type": "struct"
+            }
+          ],
+          "7.5": [
+            {
+              "label": "Introduction",
+              "text": "The exponential rise in fast food consumption across many nations has inadvertently triggered a severe public health crisis, primarily manifesting as widespread obesity. This essay will analyze the principal catalysts behind this phenomenon and outline comprehensive strategies to mitigate its detrimental effects.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The proliferation of junk food is largely driven by a convergence of societal shifts and aggressive corporate practices. Predominantly, the intensification of modern working hours has resulted in a 'time-poor' population that frequently relies on the instantaneous convenience of fast food, sacrificing nutritional value for expediency. Furthermore, this trend is heavily exacerbated by the sophisticated and ubiquitous marketing campaigns orchestrated by multinational food conglomerates. These campaigns often exploit psychological triggers to target vulnerable demographics, particularly children, thereby normalizing excessive caloric intake from a very young age.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "To effectively combat this escalating health emergency, a robust and multi-pronged intervention is essential. Primarily, governments must intervene economically by levying a substantial 'fat tax' on highly processed products, simultaneously using the generated revenue to subsidize fresh, organic produce. In tandem with economic measures, legislative action is required to strictly curtail the advertising of junk food in spaces frequented by minors. Finally, grassroots educational initiatives must be expanded to empower individuals with the knowledge required to make informed, healthier dietary choices.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, while the modern reliance on fast food is deeply rooted in contemporary time constraints and predatory advertising, it is not an insurmountable problem. Through assertive government taxation, stringent advertising regulations, and widespread public education, this obesity crisis can be effectively resolved.",
+              "type": "struct"
+            }
+          ],
+          "8.0": [
+            {
+              "label": "Introduction",
+              "text": "The exponential surge in fast food consumption globally has acted as the primary catalyst for a deeply concerning public health crisis, most notably characterized by a pandemic of obesity. This essay will dissect the multifaceted causes driving this dietary deterioration and propose robust, structural interventions to reverse the trend.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The normalization of fast food is inextricably linked to the demands of contemporary urban lifestyles and the predatory tactics of the food industry. As modern professionals grapple with increasingly demanding work schedules, the resulting 'time-poverty' makes the instant gratification and convenience of highly processed meals highly alluring, often overriding concerns regarding long-term health. Crucially, this behavioral shift is aggressively cultivated by the fast-food sector's pervasive marketing machinery. By deploying scientifically engineered flavor profiles and psychologically manipulative advertising campaigns—often aimed directly at children—these corporations systematically foster an environment conducive to chronic overconsumption.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Mitigating this systemic issue necessitates decisive, top-down governmental action combined with educational reform. The most immediate solution involves the implementation of a punitive 'sugar and fat tax', which would correct market failures by factoring the subsequent healthcare costs into the retail price of unhealthy foods. Concurrently, lawmakers must introduce draconian restrictions on junk food marketing, effectively banning such advertisements across all media platforms accessible to minors. To ensure long-term behavioral change, these legislative deterrents must be paired with mandatory, comprehensive nutritional literacy programs within the education system.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "To summarize, the contemporary obesity epidemic is the foreseeable consequence of time-pressured lifestyles intersecting with unchecked corporate marketing. However, by enacting stringent fiscal penalties, curbing advertising practices, and fostering nutritional awareness, governments can effectively dismantle the dominance of the fast-food industry.",
+              "type": "struct"
+            }
+          ],
+          "8.5": [
+            {
+              "label": "Introduction",
+              "text": "The ubiquitous spread of the fast-food industry has inadvertently precipitated a catastrophic public health crisis, serving as the primary driver behind spiraling global obesity rates. This essay will deconstruct the socioeconomic and corporate catalysts responsible for this dietary shift, before delineating pragmatic, systemic countermeasures to arrest the decline in public health.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The pervasive reliance on highly processed foods is fundamentally a symptom of modern socioeconomic pressures, heavily compounded by unchecked corporate machinations. The intensification of the contemporary work culture has engineered a chronically 'time-poor' demographic, for whom the logistical convenience and caloric density of fast food present an irresistible, albeit hazardous, solution to daily sustenance. More insidiously, this reliance is actively engineered by multinational food conglomerates through relentless, highly sophisticated marketing campaigns. By weaponizing psychological insights to aggressively target impressionable youth, the industry succeeds in normalizing hyper-caloric diets, effectively ensuring a lifetime of detrimental consumption habits.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Arresting this trajectory demands an aggressive, multi-tiered response from policymakers, prioritizing public welfare over corporate profits. Foremost, the introduction of a substantial 'Pigouvian tax' on trans-fats and added sugars is imperative; such fiscal deterrents simultaneously depress demand for deleterious products while generating revenue that can be redirected to subsidize the agricultural sector's production of fresh, organic produce. In parallel, stringent legislative frameworks must be erected to completely prohibit the marketing of junk food to minors, severely curtailing the industry's ability to manipulate future generations. Ultimately, embedding advanced nutritional literacy into national curricula will equip citizens with the agency to reject the fast-food paradigm.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, the escalating obesity crisis is the toxic byproduct of demanding modern lifestyles interacting with predatory corporate marketing. Nevertheless, through the rigorous application of targeted taxation, uncompromising advertising bans, and educational empowerment, society can systematically eradicate this pervasive health threat.",
+              "type": "struct"
+            }
+          ],
+          "9.0": [
+            {
+              "label": "Introduction",
+              "text": "The ubiquitous proliferation of the fast-food industry has inadvertently precipitated a catastrophic public health crisis, acting as the undisputed primary driver behind spiraling global obesity rates. This essay will deconstruct the socioeconomic and corporate catalysts responsible for this deeply ingrained dietary shift, before delineating pragmatic, systemic countermeasures required to arrest the decline in public health.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 1",
+              "text": "The pervasive reliance on highly processed, calorically dense foods is fundamentally a symptom of modern socioeconomic pressures, which are heavily compounded by unchecked corporate machinations. The relentless intensification of contemporary work culture has engineered a chronically 'time-poor' demographic, for whom the logistical convenience of fast food presents an irresistible, albeit hazardous, solution to daily sustenance. More insidiously, this reliance is actively engineered by multinational food conglomerates through highly sophisticated, ubiquitous marketing campaigns. By weaponizing psychological insights to aggressively target impressionable youth, the industry succeeds in normalizing hyper-caloric diets, effectively guaranteeing a lifetime of detrimental consumption habits.",
+              "type": "struct"
+            },
+            {
+              "label": "Body Paragraph 2",
+              "text": "Arresting this alarming trajectory demands an aggressive, multi-tiered response from policymakers, unequivocally prioritizing long-term public welfare over short-term corporate profits. Foremost, the introduction of a substantial 'Pigouvian tax' on trans-fats and added sugars is imperative; such fiscal deterrents naturally depress consumer demand for deleterious products while generating vital revenue that can be strategically redirected to subsidize fresh, organic produce. In parallel, stringent legislative frameworks must be erected to completely prohibit the marketing of junk food to minors, severely curtailing the industry's ability to manipulate future generations. Ultimately, embedding advanced nutritional literacy into national curricula will equip citizens with the enduring agency to reject the fast-food paradigm.",
+              "type": "struct"
+            },
+            {
+              "label": "Conclusion",
+              "text": "In conclusion, the escalating obesity epidemic is the toxic byproduct of excessively demanding modern lifestyles inextricably linked with predatory corporate marketing. Nevertheless, through the rigorous application of targeted taxation, uncompromising advertising bans, and widespread educational empowerment, society possesses the tools to systematically eradicate this pervasive health threat.",
+              "type": "struct"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "two_part": {
+    "essayType": "two_part",
+    "label": "Two-Part Question",
+    "scenarios": [
+      {
+        "scenarioLabel": "Aging Population",
+        "prompt": "In many countries, the proportion of elderly people in the population is steadily increasing. Why is this happening, and what problems does it create for society?",
+        "diagnostics": {
+          "question_analysis": "This is a TWO-PART (direct question) essay. There are two distinct questions: (1) WHY is the elderly proportion increasing, and (2) WHAT PROBLEMS does this create. Both need a full body paragraph -- don't merge them into one shallow paragraph or add a third, unrelated question.",
+          "position": "No explicit opinion is required by the wording, but a brief, low-risk evaluative comment in the conclusion (e.g. which problem seems most urgent) shows engagement without overreaching the task.",
+          "paragraph_plan": "4 paragraphs: Intro (paraphrase + preview both questions) -> Body 1 (answer question 1: reasons) -> Body 2 (answer question 2: problems) -> Conclusion (brief summary of both answers).",
+          "central_argument": "Keep the two paragraphs genuinely distinct question-answers, not cause-then-effect-of-the-same-point. Body 1 explains why populations are ageing; Body 2 explains what problems this creates -- don't let Body 2 just restate Body 1's causes."
+        },
+        "vocabulary": [
+          {
+            "word": "life expectancy",
+            "definition": "the average number of years a person is expected to live",
+            "example": "Advances in medicine have significantly increased life expectancy in most countries."
+          },
+          {
+            "word": "dependency ratio",
+            "definition": "the number of dependents, young and old, compared to the working-age population",
+            "example": "A rising dependency ratio means fewer workers are supporting more retirees."
+          },
+          {
+            "word": "strain",
+            "definition": "excessive pressure or demand placed on a system or resource",
+            "example": "An ageing population places considerable strain on public healthcare systems."
+          },
+          {
+            "word": "workforce",
+            "definition": "the total number of people available to work in a country or industry",
+            "example": "A shrinking workforce can slow down a country's economic growth."
+          }
+        ],
+        "bands": {
+          "5.5": [
+            {
+              "struct": "Intro",
+              "text": "In many countries, there are more old people than before. This essay will talk about why this happens and what problems it makes.",
+              "lexical": "'old people' and 'makes' (problems) are informal, imprecise word choices.",
+              "grammar": "Two short simple sentences with no connection.",
+              "cohesion": "'There are more old people than before' is a weak, informal paraphrase of the prompt.",
+              "idea_development": "Previews both questions but with extremely generic phrasing."
+            },
+            {
+              "struct": "Thesis",
+              "text": "There are two main reasons for this, and it also creates some serious problems for the country.",
+              "lexical": "'serious problems for the country' is vague, general phrasing.",
+              "grammar": "Correct compound sentence joined by 'and'.",
+              "cohesion": "Gives a basic preview but doesn't name the reasons or problems specifically yet.",
+              "idea_development": "Signals structure, two reasons, some problems, without content, a functional but underdeveloped roadmap."
+            },
+            {
+              "struct": "Body 1",
+              "text": "One reason is that people live longer now because of better medicine, and another reason is that fewer babies are born.",
+              "lexical": "'better medicine', 'fewer babies are born' are simple but accurate.",
+              "grammar": "Two clauses joined by 'and', each internally correct.",
+              "cohesion": "'One reason... another reason' clearly signals two separate points within the same paragraph.",
+              "idea_development": "Correctly names two real causes, longer life and lower birth rate, but doesn't explain the mechanism behind either."
+            },
+            {
+              "struct": "Body 2",
+              "text": "This creates problems because there are not enough young people to work, and the government must spend more money on old people's healthcare.",
+              "lexical": "'not enough young people to work', 'spend more money' are simple, functional phrasing.",
+              "grammar": "Correct sentence with two coordinated 'because' outcomes.",
+              "cohesion": "'This creates problems because' clearly transitions from causes in Body 1 to problems in Body 2.",
+              "idea_development": "Names two genuine consequences, workforce shortage and healthcare cost, but each remains a single flat statement."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, populations are getting older because of medicine and low birth rate, and this creates problems for the economy and healthcare system.",
+              "lexical": "Repeats 'medicine', 'birth rate' and 'healthcare' from earlier without variation.",
+              "grammar": "Correct, if long, compound sentence.",
+              "cohesion": "'In conclusion' correctly signals the final paragraph.",
+              "idea_development": "Successfully recaps both questions, reasons and problems, a genuine structural strength even at this band."
+            }
+          ],
+          "6.0": [
+            {
+              "struct": "Intro",
+              "text": "In many countries around the world, the elderly now make up a larger proportion of the population than in the past, a trend with several causes and a number of resulting problems for society.",
+              "lexical": "'elderly', 'proportion of the population' are more precise, academic terms.",
+              "grammar": "Single sentence with an appositive clause ('a trend with several causes...').",
+              "cohesion": "Solid paraphrase using different vocabulary and structure from the prompt.",
+              "idea_development": "Previews both parts of the question within a single, well-formed sentence."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will first explain the main reasons behind this trend before discussing the problems it creates for society.",
+              "lexical": "'behind this trend' is a natural, functional phrase.",
+              "grammar": "Correct complex sentence with a 'before' clause.",
+              "cohesion": "Clearly signals the essay's two-part order, helping the reader anticipate the structure.",
+              "idea_development": "Correctly previews the logical order, reasons then problems, rather than just listing two topics."
+            },
+            {
+              "struct": "Body 1",
+              "text": "The main reason for this shift is that medical advances have allowed people to live much longer, while at the same time many couples are choosing to have fewer children than previous generations.",
+              "lexical": "'medical advances', 'previous generations' are more precise than 'better medicine'.",
+              "grammar": "'While at the same time' correctly links two parallel causes within one sentence.",
+              "cohesion": "'The main reason for this shift' functions as a clear, specific topic sentence.",
+              "idea_development": "Connects two causes, longer life and fewer children, as parts of the same demographic shift, rather than two disconnected facts."
+            },
+            {
+              "struct": "Body 2",
+              "text": "As a result, countries face a shrinking workforce to support a growing number of retirees, which places significant pressure on pension systems and public healthcare services.",
+              "lexical": "'shrinking workforce', 'pension systems' are precise, topic-specific terms.",
+              "grammar": "Relative clause ('which places significant pressure...') correctly extends the sentence to show consequence.",
+              "cohesion": "'As a result' clearly signals the shift from Body 1's causes to Body 2's problems.",
+              "idea_development": "Links the workforce problem and the pension and healthcare problem as two connected effects of the same demographic shift, adding coherence."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, this demographic shift is mainly caused by longer life expectancy and falling birth rates, and it presents governments with serious economic and healthcare challenges.",
+              "lexical": "'demographic shift', 'economic and healthcare challenges' show a more precise closing vocabulary.",
+              "grammar": "Correct, well-formed compound sentence.",
+              "cohesion": "'In conclusion' appropriately summarises both parts of the question.",
+              "idea_development": "Recaps both causes and problems with slightly more precision than band 5.5's version."
+            }
+          ],
+          "6.5": [
+            {
+              "struct": "Intro",
+              "text": "Across much of the developed world, the share of elderly citizens within the population has been rising steadily for several decades, a demographic shift driven by identifiable causes and carrying significant consequences that this essay will address in turn.",
+              "lexical": "'demographic shift', 'identifiable causes', 'in turn' show a wider, more academic register.",
+              "grammar": "Appositive clause ('a demographic shift driven by...') smoothly extends a long, correctly formed sentence.",
+              "cohesion": "'In turn' signals that the essay will treat the two questions sequentially and clearly, not blend them together.",
+              "idea_development": "Frames the topic with real specificity, developed world, several decades, rather than a generic 'many countries' statement."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will argue that the trend stems primarily from medical progress and changing family patterns, and that its most pressing consequence is the growing strain on healthcare and pension systems.",
+              "lexical": "'medical progress', 'changing family patterns', 'pressing consequence' are precise and natural.",
+              "grammar": "Correct compound sentence with two parallel 'that' clauses after 'argue'.",
+              "cohesion": "Previews the specific content of both body paragraphs, not just their general topics.",
+              "idea_development": "Names the two causes and identifies which problem the essay considers most pressing, adding a layer of evaluation."
+            },
+            {
+              "struct": "Body 1",
+              "text": "The primary cause is twofold: advances in medicine and nutrition have significantly extended average life expectancy, while rising living costs and changing social attitudes have led many couples to delay having children or have smaller families.",
+              "lexical": "'nutrition', 'living costs', 'social attitudes' add precision and range beyond the previous band.",
+              "grammar": "Colon introduces a two-part explanation, each part internally complex and correctly formed.",
+              "cohesion": "'The primary cause is twofold' explicitly signals that two related sub-causes will follow, keeping the paragraph tightly organised.",
+              "idea_development": "Adds an economic and social dimension, living costs and attitudes, to the birth-rate cause, rather than a flat 'fewer babies are born'."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Consequently, societies must support a growing elderly population with a proportionally smaller working-age population, which not only strains pension and healthcare budgets but can also slow overall economic growth.",
+              "lexical": "'proportionally smaller', 'slow overall economic growth' are precise, economically-aware phrases.",
+              "grammar": "'Not only... but also' structure correctly links two related consequences within one sentence.",
+              "cohesion": "'Consequently' clearly signals the shift from Body 1's causes to Body 2's effects.",
+              "idea_development": "Extends beyond the immediate problem, budget strain, to a broader, longer-term consequence, slower economic growth."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In summary, while longer life expectancy is generally something to celebrate, its combination with falling birth rates presents real economic and healthcare challenges that societies will need to plan for carefully.",
+              "lexical": "'something to celebrate', 'plan for carefully' add a natural, thoughtful closing tone.",
+              "grammar": "Concessive 'while' clause correctly combined with the final evaluative statement.",
+              "cohesion": "'In summary, while...' signals genuine synthesis rather than a flat restatement of both parts.",
+              "idea_development": "Adds a meaningful nuance, celebrating longevity while acknowledging its challenges, that shows evaluative maturity."
+            }
+          ],
+          "7.0": [
+            {
+              "struct": "Intro",
+              "text": "As healthcare and living standards have improved across much of the world, a growing share of the population in many countries now consists of older citizens, a shift whose causes are relatively well understood but whose consequences for society remain a pressing concern this essay will explore.",
+              "lexical": "'living standards', 'pressing concern' are precise and current.",
+              "grammar": "Long sentence with a participial opening clause and an appositive containing an embedded contrast.",
+              "cohesion": "The appositive clause efficiently previews both parts of the question while also signalling their relative difficulty, causes understood, consequences concerning.",
+              "idea_development": "Subtly distinguishes between the two parts of the question in terms of how settled or urgent each is, adding analytical framing."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay will show that the trend is driven chiefly by rising life expectancy and declining fertility, and that its most significant impact lies in the growing economic burden placed on a shrinking working-age population.",
+              "lexical": "'declining fertility', 'economic burden' are precise, demographic-register terms.",
+              "grammar": "Correct compound sentence with two parallel 'that' clauses, both grammatically accurate.",
+              "cohesion": "Clearly previews the specific causal and consequential claims the essay will defend, not just the general topics.",
+              "idea_development": "Identifies the specific mechanism connecting cause to consequence, a shrinking working-age population, unifying both body paragraphs around one idea."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Life expectancy has risen sharply due to improvements in medical care, sanitation and nutrition, while fertility rates have fallen as more women pursue higher education and careers, and as the cost of raising children continues to increase in urban areas.",
+              "lexical": "'sanitation', 'pursue higher education and careers' are precise, natural, and sociologically informed.",
+              "grammar": "Complex sentence coordinating two causal clauses, each internally accurate, joined by 'while'.",
+              "cohesion": "Presents both causes with genuine explanatory depth rather than a single flat sentence per cause.",
+              "idea_development": "Connects the fertility decline to specific social changes, education, career, cost of raising children, a substantially richer explanation than lower bands."
+            },
+            {
+              "struct": "Body 2",
+              "text": "This demographic imbalance creates a shrinking ratio of workers to retirees, meaning that pension systems designed for an earlier era face mounting financial pressure, while healthcare systems must simultaneously absorb rising demand from an ageing population with more complex medical needs.",
+              "lexical": "'demographic imbalance', 'mounting financial pressure', 'complex medical needs' are precise and topic-appropriate.",
+              "grammar": "Participial 'meaning that' clause followed by a coordinated 'while' clause, both correctly formed within a long sentence.",
+              "cohesion": "'This demographic imbalance' explicitly links back to the causes described in Body 1, keeping the two paragraphs connected rather than isolated.",
+              "idea_development": "Identifies two distinct systemic pressures, pension design mismatch and rising healthcare demand, rather than one general 'strain' claim."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "In conclusion, this shift is driven primarily by medical and social progress, yet its consequences -- particularly for pension and healthcare systems designed for a younger population -- require urgent policy attention.",
+              "lexical": "'urgent policy attention' closes with a precise, appropriately formal recommendation.",
+              "grammar": "Concessive 'yet' clause with an inserted dash clause, all correctly formed.",
+              "cohesion": "'In conclusion' synthesises both causes and consequences, referencing the specific systems named in Body 2.",
+              "idea_development": "Closes with a forward-looking evaluative comment, urgent policy attention, rather than a flat restatement."
+            }
+          ],
+          "7.5": [
+            {
+              "struct": "Intro",
+              "text": "Population ageing, long treated as a distant statistical curiosity, has become one of the defining demographic realities of the twenty-first century, and while its causes are by now fairly well documented, the strain it places on the institutions built around an earlier, younger population deserves closer attention.",
+              "lexical": "'statistical curiosity', 'defining demographic realities' are natural, sophisticated phrases used with confidence.",
+              "grammar": "Long sentence with a participial clause and a concessive 'while' structure containing an embedded relative clause.",
+              "cohesion": "Contrasting 'well documented' causes with consequences 'deserving closer attention' subtly signals where the essay's real analytical weight will fall.",
+              "idea_development": "Frames the topic historically, once a curiosity, now defining, before distinguishing the two parts of the question by their relative novelty, a genuinely sophisticated opening move."
+            },
+            {
+              "struct": "Thesis",
+              "text": "While declining fertility and rising longevity are the two undisputed drivers of this trend, this essay will argue that its most consequential effect is not simply financial strain but a fundamental mismatch between institutions designed for a young population and the demographic reality they now serve.",
+              "lexical": "'undisputed drivers', 'fundamental mismatch' are precise, original phrases that go beyond stock vocabulary.",
+              "grammar": "Concessive clause followed by a 'not simply X but Y' structure, sustained across a long, complex sentence.",
+              "cohesion": "Explicitly reframes the 'problem' beyond a simple financial claim, giving Body 2 a more original angle to develop.",
+              "idea_development": "Distinguishes between a surface-level effect, financial strain, and a deeper one, institutional mismatch, setting up a more sophisticated analysis than a simple list of problems."
+            },
+            {
+              "struct": "Body 1",
+              "text": "The causes are, by now, well established: medical advances have added years to the average lifespan, while urbanisation, rising education levels and the increasing cost of childcare have together made smaller families the norm across much of the industrialised world.",
+              "lexical": "'lifespan', 'the norm', 'industrialised world' are precise and used with natural confidence.",
+              "grammar": "Colon-introduced elaboration followed by a long coordinated clause listing three interacting social causes.",
+              "cohesion": "'By now, well established' signals that this paragraph will move quickly through settled ground to leave more room for Body 2's original argument.",
+              "idea_development": "Groups three distinct social causes, urbanisation, education, childcare cost, under a single explanatory sentence, demonstrating command of the topic's complexity."
+            },
+            {
+              "struct": "Body 2",
+              "text": "The deeper problem, however, is that pension systems, healthcare provision and even urban infrastructure were largely designed around a population pyramid that no longer exists, meaning that incremental funding increases may treat the symptoms of ageing without addressing the structural mismatch beneath them.",
+              "lexical": "'population pyramid', 'structural mismatch', 'incremental funding increases' are precise, sophisticated, and topic-specific.",
+              "grammar": "'However' signals contrast mid-sentence, followed by a participial 'meaning that' clause containing a further embedded contrast -- sustained, advanced complexity.",
+              "cohesion": "'The deeper problem, however' explicitly returns to and develops the thesis's 'institutional mismatch' claim, rather than simply listing a new problem.",
+              "idea_development": "Distinguishes between treating symptoms and addressing structural causes, directly extending the thesis's central distinction into concrete policy terms."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "Population ageing, then, is less a temporary funding challenge than a long-term design problem, and treating it as the latter -- rather than searching for short-term financial fixes -- is likely to determine how well societies adapt to a demographic reality now largely locked in.",
+              "lexical": "'design problem', 'locked in' close the essay with precise, original, and confident phrasing.",
+              "grammar": "'Less X than Y' comparative structure followed by a dash-inserted clarification and a final relative clause.",
+              "cohesion": "'Then' signals this is the direct consequence of the thesis's central distinction, not a fresh claim.",
+              "idea_development": "Closes by reasserting the thesis's original framing, design problem, not funding problem, in a way that ties both body paragraphs together."
+            }
+          ],
+          "8.0": [
+            {
+              "struct": "Intro",
+              "text": "That an ageing population is often discussed primarily as a fiscal problem -- how will pensions be paid for? -- says less about the true scale of the challenge than about which of its consequences happen to be easiest to put a number on, and this essay attempts a fuller account of both its causes and its costs.",
+              "lexical": "'fiscal problem', 'easiest to put a number on' are precise, sophisticated, and slightly wry in tone.",
+              "grammar": "Long sentence with an embedded rhetorical question inside dashes, followed by a comparative clause -- genuinely advanced, fluent control.",
+              "cohesion": "Critiques the conventional framing of the topic, fiscal problem, before promising a fuller account, an unusually confident opening move.",
+              "idea_development": "Implies that non-financial consequences are being under-discussed simply because they're harder to quantify, a genuinely original observation."
+            },
+            {
+              "struct": "Thesis",
+              "text": "This essay contends that while medical and social causes of ageing are well understood, its full costs extend well beyond pensions to include a quieter erosion of intergenerational balance -- in caregiving, in political representation, and in the distribution of economic opportunity -- that deserves equal attention.",
+              "lexical": "'quieter erosion', 'intergenerational balance', 'distribution of economic opportunity' are precise, sophisticated, and genuinely original phrases.",
+              "grammar": "Long sentence with a concessive clause and a dash-inserted triadic list, sustained complexity throughout.",
+              "cohesion": "Explicitly broadens the scope of 'problems' beyond the expected financial framing, giving Body 2 much richer material to develop.",
+              "idea_development": "Introduces three specific, non-obvious dimensions of the problem, caregiving, representation, economic opportunity, that most essays on this topic never reach."
+            },
+            {
+              "struct": "Body 1",
+              "text": "The causes require little elaboration: falling fertility and rising life expectancy are well-documented consequences of medical progress, urbanisation and changing gender roles, and this essay's real contribution lies not in restating them but in tracing their fuller consequences.",
+              "lexical": "'require little elaboration', 'this essay's real contribution' show unusual rhetorical self-awareness and confidence.",
+              "grammar": "Colon-adjacent structure followed by a 'not X but Y' clause explicitly framing the paragraph's purpose.",
+              "cohesion": "Deliberately compresses the causes paragraph, explicitly justifying why, a sophisticated way to allocate space toward the essay's real argument.",
+              "idea_development": "Uses the causes paragraph itself to pivot toward the essay's more original contribution, a genuinely advanced structural choice."
+            },
+            {
+              "struct": "Body 2",
+              "text": "Beyond the familiar strain on pensions and healthcare, an ageing population quietly redistributes caregiving responsibilities onto a shrinking cohort of working-age adults, often women, while simultaneously shifting political incentives towards policies that serve older, more reliably voting demographics over younger generations who will live longest with the consequences.",
+              "lexical": "'redistributes', 'reliably voting demographics' are precise and demonstrate genuine sociopolitical insight.",
+              "grammar": "Long sentence coordinating two distinct consequences joined by 'while simultaneously', fully controlled.",
+              "cohesion": "'Beyond the familiar strain' explicitly signals that this paragraph goes further than the expected financial argument, delivering on the thesis's promise.",
+              "idea_development": "Introduces genuinely under-discussed consequences, gendered caregiving burden, political incentive distortion, that substantially deepen the essay beyond a standard answer."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "An ageing population, then, is not merely an accounting challenge to be solved with higher contributions or later retirement ages, but a broader renegotiation of responsibility and representation between generations, one that current policy debates have only begun to address.",
+              "lexical": "'accounting challenge', 'renegotiation of responsibility and representation' close the essay with precise, original, and conceptually rich phrasing.",
+              "grammar": "'Not merely X but Y' structure followed by a relative clause delivering the final judgement -- sustained sophistication to the last word.",
+              "cohesion": "'Then' signals this is the essay's synthesised conclusion, directly derived from the broadened scope established in Body 2.",
+              "idea_development": "Closes by naming the essay's central reframing, renegotiation of responsibility, rather than a restated list of problems, unifying the whole essay."
+            }
+          ],
+          "8.5": [
+            {
+              "struct": "Intro",
+              "text": "Ageing populations are typically introduced with a single, familiar statistic -- the ratio of workers to retirees -- as though the entire phenomenon could be captured in one number; this essay treats that number as a starting point rather than a conclusion, tracing both where it comes from and what it obscures.",
+              "lexical": "'obscures', 'a starting point rather than a conclusion' are original, precise, and rhetorically confident.",
+              "grammar": "Dash-inserted clause followed by a semicolon-linked independent clause containing a parallel infinitive structure -- genuinely advanced, fluent control.",
+              "cohesion": "Critiques the standard single-statistic framing before proposing a more thorough treatment, an unusually sophisticated and self-aware opening.",
+              "idea_development": "Distinguishes between a statistic's origin, causes, and its blind spots, what it obscures, giving the introduction a precise dual structure that maps directly onto the two-part question."
+            },
+            {
+              "struct": "Thesis",
+              "text": "The ratio's origins lie squarely in demographic transition theory -- falling mortality followed, with a generational lag, by falling fertility -- but what it obscures is that the resulting pressures fall unevenly: on certain professions, certain generations within the workforce, and certain regions far more than on the aggregate economy the headline number implies.",
+              "lexical": "'demographic transition theory', 'a generational lag', 'the aggregate economy' show complete command of precise, discipline-specific vocabulary.",
+              "grammar": "Dash-inserted technical explanation followed by a 'but' contrast clause containing a triadic list -- sustained, exceptional complexity.",
+              "cohesion": "Explicitly names the academic framework behind the causes while previewing the uneven-distribution argument Body 2 will develop.",
+              "idea_development": "Introduces a genuinely sophisticated claim, that the problem is unevenly distributed rather than uniform, reframing the standard 'aggregate burden' narrative."
+            },
+            {
+              "struct": "Body 1",
+              "text": "Demographic transition theory explains the sequence precisely: as healthcare and sanitation improve, mortality falls first, temporarily accelerating population growth, before fertility eventually falls too as parents no longer need many children to ensure some survive to adulthood, and as education and urban living reduce both the need and the desire for large families.",
+              "lexical": "'accelerating population growth', 'reduce both the need and the desire' are precise, technically accurate, and confidently deployed.",
+              "grammar": "Long sentence with a temporal sequence sustained across multiple coordinated causal clauses -- exceptional grammatical control.",
+              "cohesion": "'Precisely' signals genuine engagement with the mechanism, not just a restated fact, fulfilling the thesis's promise to explain the ratio's origins.",
+              "idea_development": "Explains the full demographic-transition sequence, including its counter-intuitive first stage, temporary acceleration, a level of technical accuracy rarely seen even at high bands."
+            },
+            {
+              "struct": "Body 2",
+              "text": "The unevenness this essay anticipated is already visible: rural regions losing working-age residents to cities face a starker ratio than national averages suggest, care professions dominated by women absorb a disproportionate share of the additional labour ageing demands, and younger workers now entering a labour market are asked to fund pension promises made under demographic assumptions that no longer hold.",
+              "lexical": "'a starker ratio', 'disproportionate share', 'demographic assumptions that no longer hold' are precise and demonstrate real analytical sophistication.",
+              "grammar": "Long sentence with three parallel independent clauses, each internally complex, joined by commas in a controlled triadic structure.",
+              "cohesion": "'The unevenness this essay anticipated' explicitly confirms the thesis's central claim, giving the essay a clear sense of follow-through.",
+              "idea_development": "Delivers on the thesis's promise with three concrete, distinct examples of unevenness, rural regions, gendered care labour, generational unfairness, substantially enriching the standard answer."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "A single ratio can summarise an ageing population, but it cannot represent one; policy built only around the aggregate number risks solving an average problem while leaving its most affected -- rural communities, care workers, the young who inherit the bill -- comparatively unaddressed.",
+              "lexical": "'represent', 'the young who inherit the bill' close the essay with precise, vivid, and original phrasing.",
+              "grammar": "Semicolon-linked clauses culminating in a dash-inserted list functioning as a final appositive -- sophisticated to the last word.",
+              "cohesion": "'Summarise... but... cannot represent' directly echoes the introduction's 'starting point rather than a conclusion' framing, giving the essay circular unity.",
+              "idea_development": "Closes by naming the specific groups left behind by aggregate policy, a concrete, memorable final image that reinforces the essay's central, original argument."
+            }
+          ],
+          "9.0": [
+            {
+              "struct": "Intro",
+              "text": "The statistic used to introduce population ageing -- so many workers for every retiree -- functions less as a description of a demographic fact than as a policy argument already smuggled into the framing, since it implicitly treats support for the elderly as a burden divided among the young rather than, say, an investment made collectively across a lifetime; this essay tries to separate the fact from the argument riding inside it.",
+              "lexical": "'smuggled into the framing', 'riding inside it' are original, precise, and rhetorically incisive at a level rarely attempted.",
+              "grammar": "Semicolon-linked independent clauses, the second containing an embedded aside and a final metaphor -- flawless, native-level control sustained across an unusually demanding sentence.",
+              "cohesion": "The central metaphor, an argument 'riding inside' a statistic, does substantial conceptual work, previewing the essay's entire critical stance in one image.",
+              "idea_development": "Exposes an ideological assumption embedded in how the topic is conventionally framed before even answering the set question, a genuinely exceptional analytical opening."
+            },
+            {
+              "struct": "Thesis",
+              "text": "Separating fact from framing, this essay will show that the demographic causes -- falling mortality followed by falling fertility -- are genuinely well understood and largely uncontroversial, whereas the 'problems' an ageing population creates are, on closer inspection, less inherent to ageing itself than to policy choices about how its costs and care are distributed across generations.",
+              "lexical": "'largely uncontroversial', 'inherent to ageing itself' demonstrate exceptional precision in distinguishing description from evaluation.",
+              "grammar": "Participial opening clause followed by a long 'whereas' contrast containing an embedded comparative structure -- sustained, flawless complexity across the sentence's full length.",
+              "cohesion": "Explicitly separates the two parts of the question along a fact/framing axis, giving the essay an unusually rigorous organising principle.",
+              "idea_development": "The thesis makes the genuinely sophisticated claim that the 'problems' are partly constructed by policy choices rather than being natural consequences of ageing, the essay's most original contribution."
+            },
+            {
+              "struct": "Body 1",
+              "text": "On the causal side, little is genuinely contested: as mortality falls, populations initially grow before fertility adjusts downward over a generation, a well-modelled sequence driven by improved healthcare, urbanisation, and the changing economic calculus of raising children in societies where child mortality is low and education is prolonged.",
+              "lexical": "'well-modelled sequence', 'changing economic calculus' show complete command of precise, discipline-appropriate vocabulary deployed with total naturalness.",
+              "grammar": "Long sentence with a temporal causal chain and a final appositive containing two coordinated explanatory clauses -- exceptional sustained accuracy.",
+              "cohesion": "'On the causal side' explicitly signals the fact-versus-framing structure established in the thesis, keeping the essay's logic transparent.",
+              "idea_development": "Compresses a genuinely technical demographic explanation into a single, precise sentence, demonstrating real subject mastery rather than restating a simplified version."
+            },
+            {
+              "struct": "Body 2",
+              "text": "On the framing side, however, whether a rising number of retirees constitutes a 'burden' depends heavily on choices already made elsewhere: how pension systems are funded, whether older adults remain economically active by choice or necessity, and whether productivity gains from technology are allowed to offset a smaller workforce -- none of which follows automatically from the demographic fact of ageing itself.",
+              "lexical": "'constitutes a burden', 'productivity gains... offset', 'follows automatically' are precise, economically literate, and confidently deployed.",
+              "grammar": "'However' signals contrast, followed by a long sentence containing three parallel embedded questions and a final negative relative clause -- sustained, exceptional grammatical control.",
+              "cohesion": "'On the framing side' directly mirrors Body 1's structure, making the fact-versus-framing distinction from the thesis structurally explicit rather than merely asserted.",
+              "idea_development": "Demonstrates, through three concrete policy variables, that the 'problem' is contingent rather than inevitable, the essay's central and most sophisticated claim fully realised."
+            },
+            {
+              "struct": "Conclusion",
+              "text": "An ageing population is therefore best described not as a problem with a fixed size, but as a demographic fact whose consequences are still, in large part, a matter of policy choice; societies that recognise this distinction retain considerably more room to manoeuvre than the standard worker-to-retiree ratio ever suggests.",
+              "lexical": "'a matter of policy choice', 'room to manoeuvre' close the essay with precise, original, and quietly confident phrasing.",
+              "grammar": "'Not X, but Y' structure followed by a semicolon-linked final clause -- flawless control maintained to the very last word.",
+              "cohesion": "Directly recalls the introduction's critique of the worker-to-retiree ratio, giving the essay a fully circular, unified structure from first sentence to last.",
+              "idea_development": "Closes by restating the essay's central and most original claim, that the 'problem' is partly a policy artefact, rather than a generic summary, the clearest possible signal of sustained, top-band critical originality."
+            }
+          ]
+        }
+      }
+    ]
+  }
+};

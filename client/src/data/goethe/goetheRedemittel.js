@@ -1,0 +1,140 @@
+/**
+ * Official Redemittel (Speech patterns & connectors) for Goethe-Zertifikat B1
+ * Directly taken from the examiner handbook and B1 preparation criteria.
+ */
+
+export const REDEMITTEL_CATEGORIES = [
+  {
+    id: 'meinung',
+    category: 'Meinung äußern',
+    icon: 'MessageSquare',
+    phrases: [
+      { de: 'Ich bin der Meinung, dass …', en: 'I am of the opinion that …', level: 'B1' },
+      { de: 'Meiner Meinung nach (+ Verb + Subjekt) …', en: 'In my opinion …', level: 'B1' },
+      { de: 'Ich denke / glaube / finde, dass …', en: 'I think / believe / find that …', level: 'A2-B1' },
+      { de: 'Ich halte … für sehr wichtig / problematisch.', en: 'I consider … to be very important / problematic.', level: 'B1' },
+      { de: 'Aus meiner Sicht …', en: 'From my perspective …', level: 'B1' },
+      { de: 'Für mich persönlich spielt … eine große Rolle.', en: 'For me personally, … plays a big role.', level: 'B1' },
+    ],
+  },
+  {
+    id: 'zustimmen',
+    category: 'Zustimmen & Beipflichten',
+    icon: 'CheckCircle2',
+    phrases: [
+      { de: 'Da hast du / haben Sie völlig recht.', en: 'You are completely right there.', level: 'B1' },
+      { de: 'Ich stimme dieser Aussage voll und ganz zu.', en: 'I completely agree with this statement.', level: 'B1' },
+      { de: 'Das sehe ich ganz genauso.', en: 'I see that exactly the same way.', level: 'B1' },
+      { de: 'Ich bin ganz deiner / Ihrer Meinung.', en: 'I am entirely of your opinion.', level: 'B1' },
+      { de: 'Das ist ein sehr wichtiges Argument.', en: 'That is a very important argument.', level: 'B1' },
+    ],
+  },
+  {
+    id: 'widersprechen',
+    category: 'Höflich widersprechen & Einschränken',
+    icon: 'AlertCircle',
+    phrases: [
+      { de: 'Das sehe ich etwas anders.', en: 'I see that somewhat differently.', level: 'B1' },
+      { de: 'Da bin ich mir nicht ganz sicher.', en: 'I am not quite sure about that.', level: 'B1' },
+      { de: 'Das stimmt zwar teilweise, aber …', en: 'That is partially true, but …', level: 'B1' },
+      { de: 'Einerseits kann ich das verstehen, andererseits …', en: 'On the one hand I understand, on the other …', level: 'B1' },
+      { de: 'Ich bin nicht der Ansicht, dass …', en: 'I am not of the view that …', level: 'B1' },
+    ],
+  },
+  {
+    id: 'vor_nachteile',
+    category: 'Vor- und Nachteile abwägen',
+    icon: 'Scale',
+    phrases: [
+      { de: 'Ein wesentlicher Vorteil ist, dass …', en: 'A major advantage is that …', level: 'B1' },
+      { de: 'Dafür spricht, dass …', en: 'In favour of this is that …', level: 'B1' },
+      { de: 'Ein großer Nachteil besteht darin, dass …', en: 'A big disadvantage consists of …', level: 'B1' },
+      { de: 'Dagegen spricht jedoch, dass …', en: 'Against this, however, speaks that …', level: 'B1' },
+      { de: 'Man muss hier abwägen zwischen … und …', en: 'One must weigh between … and …', level: 'B1' },
+    ],
+  },
+  {
+    id: 'folien_praesentation',
+    category: 'Sprechen Teil 2: Die 5 Folien',
+    icon: 'Presentation',
+    phrases: [
+      { de: 'Folie 1: Guten Tag, ich möchte heute über das Thema „…“ sprechen.', en: 'Slide 1: Intro topic', level: 'B1' },
+      { de: 'Folie 1: Meine Präsentation besteht aus vier Teilen: Zuerst…, dann…, danach… und am Ende…', en: 'Slide 1: Structure overview', level: 'B1' },
+      { de: 'Folie 2: Ich beginne mit meiner persönlichen Erfahrung: Als ich…', en: 'Slide 2: Personal experience', level: 'B1' },
+      { de: 'Folie 3: Damit komme ich zur Situation in meinem Heimatland (Usbekistan)…', en: 'Slide 3: Home country', level: 'B1' },
+      { de: 'Folie 4: Nun möchte ich auf die Vor- und Nachteile eingehen.', en: 'Slide 4: Pros and cons', level: 'B1' },
+      { de: 'Folie 5: Ich komme jetzt zum Schluss. Zusammenfassend kann man sagen…', en: 'Slide 5: Conclusion', level: 'B1' },
+      { de: 'Folie 5: Vielen Dank für Ihre Aufmerksamkeit! Haben Sie noch Fragen?', en: 'Slide 5: Thanking & opening for Q&A', level: 'B1' },
+    ],
+  },
+  {
+    id: 'teil1_planen',
+    category: 'Sprechen Teil 1: Etwas planen',
+    icon: 'Calendar',
+    phrases: [
+      { de: 'Wollen wir anfangen? Wir müssen … planen.', en: 'Shall we start? We need to plan …', level: 'B1' },
+      { de: 'Ich schlage vor, dass wir …', en: 'I suggest that we …', level: 'B1' },
+      { de: 'Wie wäre es, wenn wir …?', en: 'How about if we …?', level: 'B1' },
+      { de: 'Wir könnten doch …', en: 'We could certainly …', level: 'B1' },
+      { de: 'Das ist eine gute Idee, aber hast du bedacht, dass…?', en: 'Good idea, but have you considered that…?', level: 'B1' },
+      { de: 'Also, halten wir fest: Dann machen wir das so!', en: 'So let us summarise: we will do it like that!', level: 'B1' },
+    ],
+  },
+  {
+    id: 'teil3_feedback',
+    category: 'Sprechen Teil 3: Feedback & Fragen',
+    icon: 'HelpCircle',
+    phrases: [
+      { de: 'Vielen Dank für deine interessante Präsentation.', en: 'Thank you for your interesting presentation.', level: 'B1' },
+      { de: 'Besonders spannend fand ich das Beispiel aus deinem Heimatland.', en: 'I found the home country example especially exciting.', level: 'B1' },
+      { de: 'Ich hätte da noch eine Frage: Warum hast du dich für … entschieden?', en: 'I have one question: Why did you decide on …?', level: 'B1' },
+      { de: 'Das ist eine interessante Frage. Bei mir war es so, dass…', en: 'That is an interesting question. In my case it was…', level: 'B1' },
+    ],
+  },
+  {
+    id: 'brief_informell',
+    category: 'Schreiben 1: Informelle E-Mail (du)',
+    icon: 'Mail',
+    phrases: [
+      { de: 'Liebe Anna, / Lieber Lukas, (Komma danach!)', en: 'Dear Anna / Lukas (comma followed by small letter!)', level: 'A2-B1' },
+      { de: 'wie geht es dir? Danke für deine E-Mail!', en: 'How are you? Thanks for your email!', level: 'A2-B1' },
+      { de: 'Ich habe mich lange nicht gemeldet, weil …', en: 'I haven\'t gotten in touch for a while because …', level: 'B1' },
+      { de: 'Stell dir vor: Am Wochenende habe ich …', en: 'Just imagine: On the weekend I …', level: 'B1' },
+      { de: 'Hast du Lust, mich nächste Woche zu besuchen?', en: 'Do you fancy visiting me next week?', level: 'B1' },
+      { de: 'Schreib mir bald! / Ich freue mich auf deine Antwort.', en: 'Write to me soon! / Looking forward to your reply.', level: 'A2-B1' },
+      { de: 'Liebe Grüße / Viele Grüße (kein Komma nach dem Gruß!)', en: 'Warm regards (no comma after greeting in German!)', level: 'A2-B1' },
+    ],
+  },
+  {
+    id: 'brief_formell',
+    category: 'Schreiben 3: Formelle E-Mail (Sie)',
+    icon: 'FileText',
+    phrases: [
+      { de: 'Sehr geehrte Damen und Herren,', en: 'Dear Sir or Madam,', level: 'B1' },
+      { de: 'Sehr geehrte Frau Müller, / Sehr geehrter Herr Schmidt,', en: 'Dear Ms. Müller / Dear Mr. Schmidt (-r for male!)', level: 'B1' },
+      { de: 'ich schreibe Ihnen, weil ich leider morgen nicht kommen kann.', en: 'I am writing to you because unfortunately I cannot come tomorrow.', level: 'B1' },
+      { de: 'Es tut mir sehr leid, dass ich den Termin kurzfristig absagen muss.', en: 'I am very sorry that I have to cancel the appointment on short notice.', level: 'B1' },
+      { de: 'Könnten Sie mir freundlicherweise einen Ersatztermin vorschlagen?', en: 'Could you kindly suggest an alternative date?', level: 'B1' },
+      { de: 'Ich wäre Ihnen sehr dankbar, wenn Sie mir kurz Bescheid geben könnten.', en: 'I would be very grateful if you could let me know briefly.', level: 'B1' },
+      { de: 'Vielen Dank im Voraus für Ihr Verständnis.', en: 'Thank you in advance for your understanding.', level: 'B1' },
+      { de: 'Mit freundlichen Grüßen (kein Komma danach!) + Vor- und Nachname', en: 'Yours sincerely (no comma) + Full Name', level: 'B1' },
+    ],
+  },
+  {
+    id: 'konnektoren',
+    category: 'Wichtige B1-Konnektoren (Satzverbindungen)',
+    icon: 'GitBranch',
+    phrases: [
+      { de: 'weil / da (+ Subjekt ... + konjugiertes Verb am ENDE)', en: 'because (subordinate clause, verb at end)', level: 'A2-B1' },
+      { de: 'denn (Position 0: Hauptsatz mit Verb auf Position 2)', en: 'for/because (coordinating connector)', level: 'A2' },
+      { de: 'deshalb / deswegen / darum (Position 1: danach folgt direkt das Verb!)', en: 'therefore (adverbial linker, causes verb inversion)', level: 'B1' },
+      { de: 'obwohl (+ Verb am Ende) vs. trotzdem (Position 1 + Verb)', en: 'although (verb at end) vs nevertheless (verb 2nd)', level: 'B1' },
+      { de: 'um … zu (+ Infinitiv am Ende; nur bei gleichem Subjekt!)', en: 'in order to (infinitive with zu)', level: 'B1' },
+      { de: 'damit (+ Verb am Ende; bei verschiedenen Subjekten!)', en: 'so that / in order that (subordinate clause)', level: 'B1' },
+      { de: 'zwar … aber …', en: 'it is true that … but …', level: 'B1' },
+      { de: 'sowohl … als auch …', en: 'as well as / both … and …', level: 'B1' },
+      { de: 'weder … noch …', en: 'neither … nor …', level: 'B1' },
+      { de: 'je … desto / umso (je + Verb am Ende, desto + Verb auf Position 2)', en: 'the … the … (proportional connector)', level: 'B1-B2' },
+    ],
+  },
+];

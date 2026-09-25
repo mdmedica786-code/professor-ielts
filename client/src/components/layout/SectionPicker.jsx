@@ -53,7 +53,7 @@ const SECTIONS = [
 ];
 
 export default function SectionPicker() {
-  const { setSection, setCurrentView, setCurrentEvaluation, setTestMode } = useApp();
+  const { setSection, setCurrentView, setCurrentEvaluation, setTestMode, switchExam } = useApp();
   const [expandedSection, setExpandedSection] = useState(null);
   const { isPremium, loaded } = useEntitlements();
 
@@ -76,8 +76,17 @@ export default function SectionPicker() {
         </div>
 
         {/* Module toggle (applies to Writing & Reading) */}
-        <div className="flex justify-center mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
           <ModuleToggle />
+          <button
+            type="button"
+            onClick={() => switchExam('goethe')}
+            className="group flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border border-amber-200/80 shadow-2xs text-xs font-semibold text-amber-950 transition-all hover:scale-[1.01]"
+          >
+            <span className="text-sm">🇩🇪</span>
+            <span>Goethe-Zertifikat B1 Deutsch</span>
+            <ArrowRight className="w-3 h-3 text-amber-700 group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </div>
 
         {/* Section cards */}

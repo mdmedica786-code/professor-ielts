@@ -37,6 +37,7 @@ const historyRouter = require("./routes/history");
 const feedbackRouter = require("./routes/feedback");
 const cronRouter = require("./routes/cronRoutes");
 const accountRouter = require("./routes/account");
+const goetheRouter = require("./routes/goethe");
 
 // ─── Services (imported for the /health endpoint) ───────────────
 const { getFirebaseInitError, getAppsLength } = require("./services/firebaseAdmin");
@@ -189,6 +190,16 @@ app.use("/api/history", historyRouter);
 app.use("/api/feedback", feedbackRouter);
 app.use("/api/cron", cronRouter);
 app.use("/api/account", accountRouter);
+
+// Goethe German Exam Prep (Speaking, Writing, Scoring)
+app.use(
+  "/api/goethe",
+  verifyAuth,
+  checkUsage,
+  upload.single("audio"),
+  validateAudio,
+  goetheRouter
+);
 
 // ─── Gamification / Streak stats ────────────────────────────────
 app.get("/api/stats", verifyAuth, async (req, res) => {

@@ -20,14 +20,14 @@ const VERBATIM_PROMPT =
  * @param {string} filename - Original filename with extension
  * @returns {Promise<Object>} Transcription result with text, words[], duration
  */
-async function transcribeAudio(audioBuffer, mimeType, filename) {
+async function transcribeAudio(audioBuffer, mimeType, filename, language = "en") {
   const file = await toFile(audioBuffer, filename, { type: mimeType });
 
   const transcription = await openai.audio.transcriptions.create({
     file: file,
     model: "whisper-1",
-    language: "en",
-    prompt: VERBATIM_PROMPT,
+    language: language || "en",
+    prompt: language === "de" ? "Transkribiere genau wie gesprochen, inklusive aller Füllwörter wie äh, ähm, hm, Wortwiederholungen und Satzabbrüchen." : VERBATIM_PROMPT,
     response_format: "verbose_json",
     // "segment" granularity gives us per-segment avg_logprob (recognition
     // confidence) which we use as an intelligibility-based pronunciation signal.
