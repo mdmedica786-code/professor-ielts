@@ -20,6 +20,25 @@ const BAND_STYLE = {
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[.,;:!?„“"'()]/g, '').replace(/\s+/g, ' ').trim();
 
+/** Azure measurement chips for one utterance (or a whole Teil). */
+function PronunciationChips({ p }) {
+  if (!p) return null;
+  const chip = 'px-2 py-0.5 rounded-md border text-[11px] font-semibold tabular-nums';
+  return (
+    <span className="flex flex-wrap gap-1.5">
+      {p.source === 'azure' && (
+        <>
+          <span className={`${chip} bg-violet-50 border-violet-200 text-violet-900`}>Aussprache {Math.round(p.accuracy)}/100</span>
+          <span className={`${chip} bg-sky-50 border-sky-200 text-sky-900`}>Flüssigkeit {Math.round(p.fluency)}/100</span>
+          {p.wordsPerMinute ? <span className={`${chip} bg-slate-50 border-slate-200 text-slate-700`}>{p.wordsPerMinute} Wörter/Min.</span> : null}
+          {p.longPauses ? <span className={`${chip} bg-amber-50 border-amber-200 text-amber-900`}>{p.longPauses} lange Pause{p.longPauses === 1 ? '' : 'n'}</span> : null}
+        </>
+      )}
+      {p.fillerCount > 0 && <span className={`${chip} bg-amber-50 border-amber-200 text-amber-900`}>{p.fillerCount} {p.fillerCount === 1 ? 'Füllwort' : 'Füllwörter'}</span>}
+    </span>
+  );
+}
+
 /** Corrections from the examiner that quote this utterance. */
 function correctionsFor(text, evaluation) {
   const t = norm(text);
@@ -94,6 +113,19 @@ export default function SpeakingReport({ level, sprechen, evaluations, histories
                       ))}
                     </tbody>
                   </table>
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    {ev.ausspracheSource === 'azure'
+                      ? 'Aussprache akustisch gemessen (Azure-Ausspracheanalyse, Deutsch).'
+                      : 'Aussprache aus der Transkription geschätzt (keine akustische Messung verfügbar).'}
+                  </p>
+                  {ev.pronunciationMetrics && (
+                    <div className="mt-2">
+                      <PronunciationChips p={ev.pronunciationMetrics} />
+                      {ev.pronunciationMetrics.fillersPer100Words > 0 && (
+                        <p className="mt-1 text-[11px] text-slate-500">{ev.pronunciationMetrics.fillersPer100Words} Füllwörter pro 100 Wörter</p>
+                      )}
+                    </div>
+                  )}
                   {ev.verdict && <p className="mt-3 text-sm text-slate-700 leading-relaxed">{ev.verdict}</p>}
                   {ev.slideBreakdown?.length > 0 && (
                     <ul className="mt-3 space-y-1 text-xs">
@@ -172,7 +204,20 @@ export default function SpeakingReport({ level, sprechen, evaluations, histories
                             ) : (
                               <span className="w-8" />
                             )}
-                            <p className="text-sm text-slate-800 leading-relaxed">{turn.text}</p>
+                            <div className="flex flex-col gap-1.5">
+                              <p className="text-sm text-slate-800 leading-relaxed">{turn.text}</p>
+                              <PronunciationChips p={turn.pronunciation} />
+                              {turn.pronunciation?.mispronounced?.length > 0 && (
+                                <p className="text-xs text-slate-600">
+                                  Auffällig ausgesprochen:{' '}
+                                  {turn.pronunciation.mispronounced.map((w) => (
+                                    <span key={w.word} className="inline-block mr-1.5 px-1.5 rounded bg-rose-50 text-rose-800 font-semibold">
+                                      {w.word} <span className="font-normal text-rose-600">{w.accuracy}</span>
+                                    </span>
+                                  ))}
+                                </p>
+                              )}
+                            </div>
                           </div>
                           {fixes.map((f) => (
                             <p key={f.spoken} className="mt-2 ml-11 text-xs">
@@ -189,7 +234,7 @@ export default function SpeakingReport({ level, sprechen, evaluations, histories
             </section>
           );
         })}
-      <p className="text-xs text-slate-500">Partner in dieser Prüfung: {partnerName}. Die Aussprache wird aus der Transkription geschätzt.</p>
+      <p className="text-xs text-slate-500">Partner in dieser Prüfung: {partnerName}.</p>
     </div>
   );
 }

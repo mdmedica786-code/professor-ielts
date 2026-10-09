@@ -4,7 +4,9 @@ const {
   evaluateGoetheWriting,
   evaluateGoetheSpeaking,
   getGoethePraedikat,
+  summarizePronunciation,
 } = require("../services/goetheService");
+const { scorePronunciation } = require("../services/pronunciationService");
 const {
   generateGoetheReading,
   evaluateGoetheReading,
@@ -471,6 +473,7 @@ router.post("/evaluate-speaking", async (req, res, next) => {
       }
     }
 
+    let pronunciation = null;
     if (req.file) {
       const mimeType = getMimeType(req.file.originalname);
       const transcriptionResult = await transcribeAudio(
@@ -480,6 +483,13 @@ router.post("/evaluate-speaking", async (req, res, next) => {
         "de"
       );
       transcript = transcriptionResult.text;
+      if (transcript && transcript.trim()) {
+        const azure = await scorePronunciation(req.file.buffer, transcript, req.file.originalname, null, {
+          language: "de-DE",
+          continuous: true,
+        }).catch(() => null);
+        pronunciation = summarizePronunciation(azure, transcript);
+      }
     }
 
     if (!transcript.trim()) {
@@ -498,6 +508,7 @@ router.post("/evaluate-speaking", async (req, res, next) => {
       topic,
       transcript,
       slideNotes,
+      pronunciation,
       studentName,
       model: evalModelName,
     });

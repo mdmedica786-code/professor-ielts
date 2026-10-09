@@ -24,7 +24,8 @@ const {
   getSpeakingTeil,
   scaleReceptive,
 } = require("../config/goetheExamFormat");
-const { getGoethePraedikat, evaluateGoetheSpeaking } = require("./goetheService");
+const { getGoethePraedikat, evaluateGoetheSpeaking, summarizePronunciation } = require("./goetheService");
+const { scorePronunciation } = require("./pronunciationService");
 const { transcribeAudio } = require("./openaiService");
 const { callWithRetry, parseJsonContent, LlmValidationError } = require("../utils/llmRetry");
 
@@ -896,6 +897,18 @@ async function interactGoetheExamTurn({
     });
   }
 
+  // Acoustic pronunciation assessment of the recording (Azure, de-DE), in
+  // parallel with the examiner/partner reply. Never fails the turn.
+  const pronunciationP =
+    audioBuffer && audioBuffer.length && recognizedText
+      ? scorePronunciation(audioBuffer, recognizedText, filename, null, { language: "de-DE", continuous: true })
+          .catch((err) => {
+            console.warn("Goethe pronunciation assessment failed:", err.message);
+            return null;
+          })
+          .then((azure) => summarizePronunciation(azure, recognizedText))
+      : Promise.resolve(recognizedText ? summarizePronunciation(null, recognizedText) : null);
+
   const userMessage = `EREIGNIS: ${EXAM_EVENTS[event] || "kandidat"}
 ersterTeil: ${Boolean(firstTeil)} · nachVorbereitung: ${Boolean(afterPreparation)}
 VERSTRICHENE ZEIT IN DIESEM TEIL: ${Math.round(elapsedSeconds)} von ca. ${speakingTeil.durationSeconds} Sekunden
@@ -955,6 +968,7 @@ Antworte jetzt als PRÜFERIN und/oder PARTNER. Gib NUR valides JSON zurück.`;
 
   return {
     studentTranscript: recognizedText,
+    pronunciation: await pronunciationP,
     turns,
     replyText: turns.map((t) => t.text).join(" "),
     redemittelTips: asStringList(parsed.redemittelTips).slice(0, 4),

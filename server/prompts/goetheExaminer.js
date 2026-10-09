@@ -282,7 +282,7 @@ Vergib für JEDES Kriterium genau ein Band A–E. Die Punkte ergeben sich aussch
 ${rubricBlock(allCriteria, ctx)}
 
 KNOCK-OUT-REGEL: Wird "erfuellung" mit Band E bewertet (Aufgabe nicht bearbeitet oder nicht bewertbar), erhält Teil ${t.teil} 0 Punkte.
-Aussprache: Du hast nur ein Transkript. Leite die Aussprache vorsichtig aus Hinweisen der automatischen Transkription ab (falsch erkannte Wörter, Lautverwechslungen); im Zweifel Band B.
+Aussprache: Liegt eine akustische Aussprachemessung vor, richte dich nach ihr. Sonst hast du nur ein Transkript: Leite die Aussprache vorsichtig aus Hinweisen der automatischen Transkription ab (falsch erkannte Wörter, Lautverwechslungen); im Zweifel Band B.
 Bewerte immer das Niveau ${lvl}; Leistungen unter dem Zielniveau erhalten bei Wortschatz/Strukturen höchstens Band C.
 
 ${PRAEDIKAT_BLOCK}

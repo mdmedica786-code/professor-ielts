@@ -41,6 +41,104 @@ function countGermanWords(text) {
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
+// ─── Acoustic pronunciation (Azure, de-DE) ──────────────────────────
+
+// German hesitation sounds as Whisper writes them (it is prompted to keep them).
+const FILLER_RE = /(?<!\p{L})(?:äh+m*|öh+m*|eh+m+|hm+|mhm)(?!\p{L})/giu;
+
+function countFillers(text) {
+  return (String(text || '').match(FILLER_RE) || []).length;
+}
+
+/**
+ * Compact per-utterance summary of an Azure pronunciation result, safe to
+ * send to the client and back with the transcript.
+ */
+function summarizePronunciation(azure, transcript) {
+  const words = countGermanWords(transcript);
+  const fillers = countFillers(transcript);
+  if (!azure) return { source: 'transcript', wordCount: words, fillerCount: fillers };
+  const pauses = azure.timing?.longPauses || [];
+  return {
+    source: 'azure',
+    accuracy: azure.accuracy,
+    fluency: azure.fluency,
+    completeness: azure.completeness,
+    wordCount: azure.wordCount || words,
+    fillerCount: fillers,
+    wordsPerMinute: azure.timing?.wordsPerMinute || null,
+    longPauses: pauses.length,
+    longestPause: pauses.reduce((m, p) => Math.max(m, p.seconds), 0),
+    mispronounced: (azure.mispronounced || [])
+      .slice()
+      .sort((a, b) => a.accuracy - b.accuracy)
+      .slice(0, 8)
+      .map((w) => ({ word: w.word, accuracy: Math.round(w.accuracy) })),
+  };
+}
+
+/** Word-weighted totals over all candidate utterances of a Teil. */
+function aggregatePronunciation(summaries) {
+  const list = (summaries || []).filter(Boolean);
+  if (!list.length) return null;
+  const measured = list.filter((p) => p.source === 'azure' && p.wordCount > 0);
+  const words = list.reduce((n, p) => n + (p.wordCount || 0), 0);
+  const fillers = list.reduce((n, p) => n + (p.fillerCount || 0), 0);
+  const base = { words, fillerCount: fillers, fillersPer100Words: words ? round2((fillers / words) * 100) : 0 };
+  if (!measured.length) return { ...base, source: 'transcript' };
+  const mw = measured.reduce((n, p) => n + p.wordCount, 0);
+  const avg = (key) => Math.round((measured.reduce((sum, p) => sum + (p[key] || 0) * p.wordCount, 0) / mw) * 10) / 10;
+  const wordScores = new Map();
+  measured.forEach((p) => (p.mispronounced || []).forEach((w) => {
+    if (!wordScores.has(w.word) || wordScores.get(w.word) > w.accuracy) wordScores.set(w.word, w.accuracy);
+  }));
+  return {
+    ...base,
+    source: 'azure',
+    accuracy: avg('accuracy'),
+    fluency: avg('fluency'),
+    longPauses: measured.reduce((n, p) => n + (p.longPauses || 0), 0),
+    mispronounced: [...wordScores.entries()]
+      .sort((a, b) => a[1] - b[1])
+      .slice(0, 10)
+      .map(([word, accuracy]) => ({ word, accuracy })),
+  };
+}
+
+/**
+ * Aussprache band from the acoustic measurement. Heuristic calibration:
+ * 60 % segmental accuracy + 40 % fluency, thresholds chosen so that clear,
+ * easily understandable learner German reaches A/B and listener effort
+ * (frequent errors, halting speech) drops to D/E.
+ */
+const AUSSPRACHE_THRESHOLDS = [
+  ['A', 85],
+  ['B', 72],
+  ['C', 58],
+  ['D', 42],
+];
+function ausspracheBandFromAzure(agg) {
+  const score = 0.6 * agg.accuracy + 0.4 * agg.fluency;
+  return (AUSSPRACHE_THRESHOLDS.find(([, min]) => score >= min) || ['E'])[0];
+}
+
+function pronunciationPromptBlock(agg) {
+  if (!agg) return '';
+  const fillerLine = `Füllwörter (äh, ähm, hm …): ${agg.fillerCount} bei ${agg.words} Wörtern (${agg.fillersPer100Words} pro 100 Wörter).`;
+  if (agg.source !== 'azure') {
+    return `\nSPRECHFLUSS (aus der Transkription): ${fillerLine}\n`;
+  }
+  const words = agg.mispronounced.length ? agg.mispronounced.map((w) => `${w.word} (${w.accuracy})`).join(', ') : 'keine auffälligen Wörter';
+  return `
+AKUSTISCHE AUSSPRACHEMESSUNG (Azure, Deutsch):
+- Lautliche Genauigkeit: ${agg.accuracy}/100 · Flüssigkeit: ${agg.fluency}/100
+- Auffällig ausgesprochene Wörter (Genauigkeit 0–100): ${words}
+- Lange Pausen (≥ 1 s): ${agg.longPauses}
+- ${fillerLine}
+Das Band für "aussprache" wird aus dieser Messung berechnet (${ausspracheBandFromAzure(agg)}). Begründe es in criteriaAnalysis.aussprache und gib in pronunciationTips konkrete Hinweise zu den auffälligen Wörtern.
+`;
+}
+
 /**
  * Read one band per criterion from the model output (top-level "bands" or
  * criteriaAnalysis[key].band). Throws a retryable error if any is missing.
@@ -168,6 +266,7 @@ async function evaluateGoetheSpeaking({
   transcript = "",
   history = null,
   slideNotes = null,
+  pronunciation = null,
   studentName = "Student",
   model = "gpt-4o",
 }) {
@@ -178,6 +277,14 @@ async function evaluateGoetheSpeaking({
   const allCriteria = [...teil.criteria, aussprache];
   const teilMax = teil.criteria.reduce((s, c) => s + c.max, 0);
   const isDialogue = Array.isArray(history) && history.length > 0;
+
+  // Acoustic measurements travel with each candidate turn (dialogue) or come
+  // directly from the route (monologue upload); filler words always come
+  // from the transcript.
+  const candidateTurns = isDialogue ? history.filter((t) => t.speaker === "candidate" || t.role === "user") : [];
+  const pronAgg = isDialogue
+    ? aggregatePronunciation(candidateTurns.map((t) => t.pronunciation || summarizePronunciation(null, t.text)))
+    : aggregatePronunciation([pronunciation || summarizePronunciation(null, transcript)]);
 
   const spoken = isDialogue
     ? history
@@ -200,7 +307,7 @@ ${isDialogue ? "VOLLSTÄNDIGER DIALOGABLAUF" : "GESPROCHENER TEXT (TRANSKRIPT)"}
 """
 ${spoken || "Keine Äußerung erfasst."}
 """
-
+${pronunciationPromptBlock(pronAgg)}
 Bewerte diese mündliche Leistung jetzt streng nach den Kriterien für Teil ${teil.teil}. Gib NUR valides JSON zurück.`;
 
   const { parsed, bands } = await callWithRetry(async () => {
@@ -216,6 +323,10 @@ Bewerte diese mündliche Leistung jetzt streng nach den Kriterien für Teil ${te
     const json = parseJsonContent(completion);
     return { parsed: json, bands: extractBands(json, allCriteria) };
   }, 2, "Goethe Sprechen-Bewertung");
+
+  // A measured Aussprache band replaces the model's estimate from the transcript.
+  const ausspracheSource = pronAgg?.source === "azure" ? "azure" : "transcript";
+  if (ausspracheSource === "azure") bands.aussprache = ausspracheBandFromAzure(pronAgg);
 
   // Knock-out applies to the Teil criteria; Aussprache is rated for the whole exam.
   const teilResult = scoreFromBands(teil.criteria, bands);
@@ -238,6 +349,8 @@ Bewerte diese mündliche Leistung jetzt streng nach den Kriterien für Teil ${te
     teilPoints: teilResult.totalPoints,
     teilMaxPoints: teilMax,
     ausspracheBand: bands.aussprache,
+    ausspracheSource,
+    pronunciationMetrics: pronAgg,
     totalPoints,
     maxPoints,
     scaledPoints100,
@@ -254,6 +367,10 @@ Bewerte diese mündliche Leistung jetzt streng nach den Kriterien für Teil ${te
 module.exports = {
   getGoethePraedikat,
   countGermanWords,
+  countFillers,
+  summarizePronunciation,
+  aggregatePronunciation,
+  ausspracheBandFromAzure,
   evaluateGoetheWriting,
   evaluateGoetheSpeaking,
 };

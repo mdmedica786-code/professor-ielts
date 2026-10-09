@@ -1,5 +1,5 @@
 const express = require("express");
-const { scorePronunciation } = require("../services/pronunciationService");
+const { scorePronunciation, sanitizeLanguage } = require("../services/pronunciationService");
 const { getMimeType } = require("../utils/audioUtils");
 
 const router = express.Router();
@@ -9,7 +9,7 @@ const router = express.Router();
 
 /**
  * POST /api/pronunciation
- * Proxy request to the Python pronunciation pipeline.
+ * Azure pronunciation assessment. Body: audio file + transcript, optional language.
  */
 router.post("/", async (req, res, next) => {
   try {
@@ -22,10 +22,15 @@ router.post("/", async (req, res, next) => {
       return res.status(400).json({ success: false, error: "No transcript provided" });
     }
 
+    // Optional locale ('en-US' default, 'en-GB', 'de-DE'). German answers are
+    // free speech of several sentences, so they are assessed continuously.
+    const language = sanitizeLanguage(req.body.language);
     const result = await scorePronunciation(
       req.file.buffer,
       transcript,
-      req.file.originalname
+      req.file.originalname,
+      null,
+      { language, continuous: language === "de-DE" || String(req.body.continuous) === "true" }
     );
 
     if (!result) {

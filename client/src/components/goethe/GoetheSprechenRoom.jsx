@@ -172,7 +172,7 @@ export function SprechenExam({ level, onLevelChange, mock = null }) {
             teil,
             topic,
             taskSheet: sheets[teil],
-            history: (historiesRef.current[teil] || []).map(({ speaker, text }) => ({ speaker, text })),
+            history: (historiesRef.current[teil] || []).map(({ speaker, text, pronunciation }) => ({ speaker, text, pronunciation })),
             studentName: studentName || 'Student',
           })
           .then((res) => [teil, res.data?.data])
@@ -232,7 +232,14 @@ export function SprechenExam({ level, onLevelChange, mock = null }) {
 
     const newTurns = [];
     if (event === 'candidate') {
-      newTurns.push({ id: nextId('cand'), speaker: 'candidate', text: data.studentTranscript || text, audioUrl: recording?.url || null });
+      newTurns.push({
+        id: nextId('cand'),
+        speaker: 'candidate',
+        text: data.studentTranscript || text,
+        audioUrl: recording?.url || null,
+        // Azure (de-DE) measurement of this recording; feeds the Aussprache band.
+        pronunciation: data.pronunciation || null,
+      });
     }
     data.turns.forEach((t) => newTurns.push({ id: nextId(t.role), speaker: t.role, name: t.name, text: t.text }));
     pushTurns(teil, newTurns);
