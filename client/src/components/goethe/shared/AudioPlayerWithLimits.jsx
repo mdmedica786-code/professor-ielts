@@ -32,7 +32,8 @@ function speakUtterances(utterances, level) {
  * Plays the server-rendered Hörtext (base64 mp3) like in the exam room:
  * announcement gong, strict maxPlays, a timed pause between plays
  * ("Sie haben 30 Sekunden Zeit …") and a live level visualizer.
- * Pausing mid-play is only allowed in Lernmodus. Remount (key) per Hörtext.
+ * Pausing mid-play is only allowed in Lernmodus. Remount (key) per Hörtext;
+ * pass initialPlaysUsed so leaving and re-entering a Teil cannot reset the count.
  */
 export default function AudioPlayerWithLimits({
   audioData,
@@ -42,10 +43,12 @@ export default function AudioPlayerWithLimits({
   utterances = [],
   level = 'B1',
   pauseSeconds = 30,
+  initialPlaysUsed = 0,
   onStatusChange,
 }) {
-  const [phase, setPhase] = useState('ready'); // ready | gong | playing | paused | between | done
-  const [playsUsed, setPlaysUsed] = useState(0);
+  // Plays already used survive remounts (tab switches) via initialPlaysUsed.
+  const [phase, setPhase] = useState(initialPlaysUsed >= maxPlays ? 'done' : 'ready'); // ready | gong | playing | paused | between | done
+  const [playsUsed, setPlaysUsed] = useState(initialPlaysUsed);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [countdown, setCountdown] = useState(0);
@@ -55,7 +58,7 @@ export default function AudioPlayerWithLimits({
   const analyserRef = useRef(null);
   const canvasRef = useRef(null);
   const rafRef = useRef(0);
-  const playsRef = useRef(0);
+  const playsRef = useRef(initialPlaysUsed);
   const statusRef = useRef(onStatusChange);
 
   useEffect(() => {

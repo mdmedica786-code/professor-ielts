@@ -1,584 +1,413 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { GOETHE_LISTENING_TESTS } from '../../data/goethe/goetheListeningTests';
-import { calculateGoetheReadingListeningScore, GOETHE_LEVEL_SPECS } from '../../data/goethe/goetheGradingRules';
-import { GOETHE_TOPICS } from '../../data/goethe/goetheTopics';
-import api from '../../api/client';
-import {
-  Headphones,
-  Play,
-  Pause,
-  RotateCcw,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Send,
-  Volume2,
-  FileText,
-  AlertCircle,
-  Sparkles,
-  Loader2,
-  Users,
-} from 'lucide-react';
+import { getPraedikat } from '../../data/goethe/goetheGradingRules';
+import { Headphones, Send, RotateCcw, Loader2, AlertCircle, ChevronRight, FileSpreadsheet, CheckCheck, ScrollText } from 'lucide-react';
+import ExamModeToggle from './shared/ExamModeToggle';
+import ExamTimer from './shared/ExamTimer';
+import { useCountdown } from './shared/useCountdown';
+import ExamSetupBar from './shared/ExamSetupBar';
+import ExamInstructionScreen from './shared/ExamInstructionScreen';
+import BilingualInstructionBanner from './shared/BilingualInstructionBanner';
+import TeilTabs from './shared/TeilTabs';
+import QuestionPalette from './shared/QuestionPalette';
+import QuestionRenderer, { WerSagtWasMatrix } from './shared/QuestionRenderer';
+import AnswerSheet from './shared/AnswerSheet';
+import ModuleResultCard from './shared/ModuleResultCard';
+import AudioPlayerWithLimits from './shared/AudioPlayerWithLimits';
+import { useExamMode } from './shared/useExamMode';
+import { useGoetheFormat } from './shared/useGoetheFormat';
+import { useReceptiveExam, summarizeModule } from './shared/useReceptiveExam';
 
-export default function GoetheHoerenRoom() {
-  const { studentName, saveEvaluation, goetheLevel } = useApp();
+/** Groups questions by Hörtext (segment) for multi-text parts. */
+function groupBySegment(questions, segments) {
+  if (!segments || segments.length <= 1) return [{ label: null, questions }];
+  return segments.map((seg, i) => ({
+    label: `${seg.label}${seg.context ? ` · ${seg.context}` : ''}`,
+    questions: questions.filter((q) => q.segment === i + 1),
+  }));
+}
 
-  // Mode: 'dynamic' (AI Generated) or 'official' (Standard Modellsatz)
-  const [testSource, setTestSource] = useState('dynamic');
+function Transcript({ test }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-sm font-bold text-slate-800"
+      >
+        <span className="flex items-center gap-2">
+          <ScrollText className="w-4 h-4 text-slate-500" /> Transkript
+        </span>
+        <span className="text-xs text-slate-500">{open ? 'ausblenden' : 'anzeigen'}</span>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 space-y-2 text-sm">
+          {test.utterances.map((u, i) => {
+            const newSegment = i === 0 || u.segment !== test.utterances[i - 1].segment;
+            return (
+              <div key={i}>
+                {newSegment && test.segments?.length > 1 && (
+                  <p className="mt-3 mb-1 text-xs font-extrabold uppercase tracking-wider text-slate-400">{test.segments[u.segment - 1]?.label}</p>
+                )}
+                <p className="leading-relaxed">
+                  <span className="font-bold text-slate-900">{u.speaker}: </span>
+                  <span className="text-slate-700">{u.text}</span>
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
-  // Generator parameters
-  const [selectedLevel, setSelectedLevel] = useState(goetheLevel || 'B1');
-  const [selectedTopic, setSelectedTopic] = useState('Reisen und Verkehr');
-  const [customTopic, setCustomTopic] = useState('');
-  const [selectedPartNum, setSelectedPartNum] = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [genError, setGenError] = useState(null);
+function HoerenExam({ level, onLevelChange }) {
+  const { saveEvaluation } = useApp();
+  const { isExam, isLearn } = useExamMode();
+  const { format, error: formatError } = useGoetheFormat(level);
+  const hoeren = format?.hoeren;
+  const exam = useReceptiveExam('hoeren', level);
 
-  // Dynamic test state
-  const [dynamicTest, setDynamicTest] = useState(null);
-  const [dynamicEvalResult, setDynamicEvalResult] = useState(null);
-  const [isEvaluatingDynamic, setIsEvaluatingDynamic] = useState(false);
+  const [topic, setTopic] = useState('');
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [activeTeil, setActiveTeil] = useState(1);
+  const [showSheet, setShowSheet] = useState(false);
+  const [playsUsed, setPlaysUsed] = useState({});
+  const [audioPlaying, setAudioPlaying] = useState(false);
 
-  // Interactive answer state
-  const [answers, setAnswers] = useState({});
-  const [playCount, setPlayCount] = useState(0);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [activeUtteranceIndex, setActiveUtteranceIndex] = useState(-1);
-  const [showTranscripts, setShowTranscripts] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const part = hoeren?.parts.find((p) => p.teil === activeTeil);
+  const test = exam.tests[activeTeil];
+  const teilAnswers = exam.answers[activeTeil] || {};
+  const teilResult = exam.results[activeTeil];
+  const summary = useMemo(() => summarizeModule(hoeren, exam.results, { final: finished }), [hoeren, exam.results, finished]);
 
-  // Speech synthesis reference (fallback when the server sent no audio)
-  const currentUtteranceRef = useRef(null);
-  // Server-rendered tts-1-hd audio for the whole Teil
-  const serverAudioRef = useRef(null);
-
-  const stopAllAudio = () => {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    if (serverAudioRef.current) {
-      serverAudioRef.current.pause();
-      serverAudioRef.current = null;
-    }
-  };
-
-  // Sync level with app context
-  useEffect(() => {
-    if (goetheLevel) setSelectedLevel(goetheLevel);
-  }, [goetheLevel]);
-
-  // Clean up audio on unmount
-  useEffect(() => {
-    return () => stopAllAudio();
-  }, []);
-
-  // Auto-generate initial test if none loaded
-  useEffect(() => {
-    if (testSource === 'dynamic' && !dynamicTest && !isGenerating) {
-      handleGenerateDynamicTest();
-    }
-  }, []);
-
-  const handleGenerateDynamicTest = async () => {
-    stopAllAudio();
-    setIsPlayingAudio(false);
-    setActiveUtteranceIndex(-1);
-    setIsGenerating(true);
-    setGenError(null);
-    setDynamicEvalResult(null);
-    setAnswers({});
-    setPlayCount(0);
-    setIsSubmitted(false);
-    setShowTranscripts(false);
-
-    const topicToUse = customTopic.trim() || selectedTopic;
+  const handleSubmitAll = async () => {
+    if (!hoeren || finished) return;
     try {
-      const res = await api.post('/goethe/listening/generate', {
-        level: selectedLevel,
-        topic: topicToUse,
-        partNumber: selectedPartNum,
-      });
-
-      if (res.data?.success && res.data.data) {
-        setDynamicTest(res.data.data);
-      } else {
-        setGenError(res.data?.error || 'Fehler beim Erstellen des Hörtests.');
-      }
+      await exam.submit(hoeren.parts.map((p) => p.teil));
     } catch (err) {
-      console.error('Error generating listening test:', err);
-      setGenError(err.response?.data?.error || 'Verbindung zum Server fehlgeschlagen.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const playUtteranceSequence = (utterances, startIndex = 0) => {
-    if (!window.speechSynthesis || !utterances || utterances.length === 0) {
-      alert('Ihr Browser unterstützt keine Audio-Synthese. Bitte nutzen Sie die Transkript-Ansicht.');
+      alert(err.response?.data?.error || err.message || 'Fehler bei der Auswertung.');
       return;
     }
+    setFinished(true);
+    setShowSheet(false);
+  };
 
-    if (startIndex >= utterances.length) {
-      setIsPlayingAudio(false);
-      setActiveUtteranceIndex(-1);
-      setPlayCount((prev) => prev + 1);
-      return;
+  const timer = useCountdown((hoeren?.timeMinutes || 40) * 60, {
+    running: started && !finished && !(isLearn && paused),
+    onExpire: () => {
+      if (isExam) handleSubmitAll();
+    },
+  });
+
+  useEffect(() => {
+    if (!finished || !summary) return;
+    saveEvaluation(
+      {
+        kind: 'goethe-hoeren',
+        level,
+        rawScore: summary.raw,
+        maxRaw: summary.maxRaw,
+        scaledPoints100: summary.points100,
+        praedikat: summary.passed ? getPraedikat(summary.points100).label : 'Nicht bestanden',
+        passed: summary.passed,
+      },
+      { kind: 'goethe-hoeren', module: level, question: `Goethe Hören ${level}` }
+    );
+    // Save once per finished exam.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
+  // Generate the active Teil (audio is rendered on the server) and prefetch the next one.
+  useEffect(() => {
+    if (!started || !hoeren) return;
+    const { tests, loading, errors, generate } = exam;
+    if (!tests[activeTeil] && !loading[activeTeil] && !errors[activeTeil]) generate(activeTeil, topic);
+    const next = hoeren.parts.find((p) => p.teil === activeTeil + 1);
+    if (tests[activeTeil] && next && !tests[next.teil] && !loading[next.teil] && !errors[next.teil] && !finished) {
+      generate(next.teil, topic);
     }
+  }, [started, activeTeil, hoeren, exam, topic, finished]);
 
-    setActiveUtteranceIndex(startIndex);
-    setIsPlayingAudio(true);
-
-    const u = utterances[startIndex];
-    const synthUtterance = new SpeechSynthesisUtterance(u.text);
-    synthUtterance.lang = 'de-DE';
-    synthUtterance.rate = selectedLevel === 'A2' ? 0.88 : selectedLevel === 'B1' ? 0.95 : 1.0;
-    synthUtterance.pitch = u.voice === 'nova' || u.speaker.toLowerCase().includes('frau') || u.speaker.toLowerCase().includes('moderatorin') ? 1.15 : 0.95;
-
-    synthUtterance.onend = () => {
-      // Pause slightly between speakers for authentic pacing
-      setTimeout(() => {
-        playUtteranceSequence(utterances, startIndex + 1);
-      }, 550);
-    };
-
-    synthUtterance.onerror = (e) => {
-      console.warn('Speech synthesis error:', e);
-      setIsPlayingAudio(false);
-      setActiveUtteranceIndex(-1);
-    };
-
-    currentUtteranceRef.current = synthUtterance;
-    window.speechSynthesis.speak(synthUtterance);
+  const start = () => {
+    timer.reset((hoeren?.timeMinutes || 40) * 60);
+    setStarted(true);
+    setFinished(false);
+    setActiveTeil(1);
   };
 
-  const handleTogglePlayAudio = () => {
-    if (!dynamicTest?.utterances) return;
-
-    const maxPlays = dynamicTest.maxPlays || 2;
-    if (playCount >= maxPlays && !isPlayingAudio && !isSubmitted) {
-      alert(`Dieser Prüfungsteil darf laut Goethe-Prüfungsordnung maximal ${maxPlays}× gehört werden.`);
-      return;
-    }
-
-    if (isPlayingAudio) {
-      stopAllAudio();
-      setIsPlayingAudio(false);
-      setActiveUtteranceIndex(-1);
-    } else if (dynamicTest.audioData) {
-      const audio = new Audio(`data:${dynamicTest.audioMimeType || 'audio/mpeg'};base64,${dynamicTest.audioData}`);
-      serverAudioRef.current = audio;
-      audio.onended = () => {
-        serverAudioRef.current = null;
-        setIsPlayingAudio(false);
-        setPlayCount((prev) => prev + 1);
-      };
-      audio.onerror = () => {
-        serverAudioRef.current = null;
-        setIsPlayingAudio(false);
-      };
-      setIsPlayingAudio(true);
-      audio.play().catch((err) => {
-        console.warn('Server audio playback failed, falling back to browser speech:', err);
-        serverAudioRef.current = null;
-        playUtteranceSequence(dynamicTest.utterances, 0);
-      });
-    } else {
-      playUtteranceSequence(dynamicTest.utterances, 0);
-    }
+  const restart = () => {
+    exam.reset();
+    setPlaysUsed({});
+    setStarted(false);
+    setFinished(false);
+    setShowSheet(false);
   };
 
-  const handleSelectAnswer = (itemKey, val) => {
-    if (isSubmitted) return;
-    setAnswers((prev) => ({ ...prev, [itemKey]: val }));
+  const confirmSubmit = () => {
+    const open = hoeren.parts.reduce((sum, p) => sum + (p.count - Object.values(exam.answers[p.teil] || {}).filter((v) => String(v).trim()).length), 0);
+    if (open > 0 && !window.confirm(`Sie haben noch ${open} Aufgaben ohne Antwort. Wirklich abgeben?`)) return;
+    handleSubmitAll();
   };
 
-  const handleSubmitDynamic = async () => {
-    if (!dynamicTest?.token) return;
-    stopAllAudio();
-    setIsPlayingAudio(false);
-    setIsEvaluatingDynamic(true);
-
-    try {
-      const res = await api.post('/goethe/listening/evaluate', {
-        token: dynamicTest.token,
-        answers,
-        level: selectedLevel,
-      });
-
-      if (res.data?.success && res.data.data) {
-        setDynamicEvalResult(res.data.data);
-        setIsSubmitted(true);
-        setShowTranscripts(true);
-
-        saveEvaluation(
-          {
-            kind: 'goethe-hoeren',
-            level: selectedLevel,
-            rawScore: res.data.data.correctCount,
-            maxRaw: res.data.data.totalQuestions,
-            scaledPoints100: res.data.data.points100,
-            praedikat: res.data.data.praedikat,
-            passed: res.data.data.passed,
-            answers,
-          },
-          {
-            kind: 'goethe-hoeren',
-            module: selectedLevel,
-            question: dynamicTest.title,
-          }
-        );
-      }
-    } catch (err) {
-      console.error('Error evaluating listening test:', err);
-      alert('Fehler bei der Auswertung.');
-    } finally {
-      setIsEvaluatingDynamic(false);
-    }
+  const switchTeil = (teil) => {
+    if (audioPlaying) return;
+    setActiveTeil(teil);
+    setShowSheet(false);
   };
 
-  const handleReset = () => {
-    stopAllAudio();
-    setIsPlayingAudio(false);
-    setActiveUtteranceIndex(-1);
-    setAnswers({});
-    setPlayCount(0);
-    setIsSubmitted(false);
-    setDynamicEvalResult(null);
-    setShowTranscripts(false);
-  };
+  if (formatError) {
+    return (
+      <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2">
+        <AlertCircle className="w-4 h-4" /> {formatError}
+      </div>
+    );
+  }
+  if (!hoeren) {
+    return (
+      <div className="flex items-center gap-2 text-slate-500 text-sm p-6">
+        <Loader2 className="w-4 h-4 animate-spin" /> Prüfungsformat wird geladen …
+      </div>
+    );
+  }
+
+  const tabs = hoeren.parts.map((p) => ({
+    key: p.teil,
+    label: `Teil ${p.teil}`,
+    title: `${p.title} · ${p.maxPlays}×`,
+    status: exam.results[p.teil] ? 'done' : exam.loading[p.teil] ? 'loading' : 'idle',
+    answered: Object.values(exam.answers[p.teil] || {}).filter((v) => String(v).trim()).length,
+    total: p.count,
+  }));
+
+  const playsDone = (playsUsed[activeTeil] || 0) >= (part?.maxPlays || 1);
+  const isWerSagtWas = part?.qType === 'wer_sagt_was';
 
   return (
-    <div className="min-h-full px-3 md:px-6 py-6 max-w-6xl mx-auto flex flex-col gap-6 animate-fade-in text-left">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-800 text-xs font-bold mb-1.5 border border-amber-200">
-            <span>🇩🇪 Goethe-Zertifikat {selectedLevel}</span>
-            <span>·</span>
-            <span>Hörverstehen ({testSource === 'dynamic' ? 'KI-Aufgabe' : 'Modellsatz'})</span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">
-            {dynamicTest?.title || `Goethe Hören ${selectedLevel}`}
-          </h1>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-violet-50 text-violet-800 text-xs font-bold border border-violet-200">
+            <Headphones className="w-3.5 h-3.5" /> Goethe-Zertifikat {level} · Hören
+          </span>
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1">Hörverstehen</h1>
         </div>
-
-        {/* Submit Controls */}
-        <div className="flex items-center gap-2.5">
-          {!isSubmitted ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <ExamModeToggle locked={started && !finished} />
+          {started && (
+            <ExamTimer secondsLeft={timer.secondsLeft} running={!paused && !finished} canPause={isLearn && !finished} onToggle={() => setPaused((p) => !p)} />
+          )}
+          {started && !finished && (
             <button
-              onClick={handleSubmitDynamic}
-              disabled={isEvaluatingDynamic || isGenerating}
-              className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs md:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all disabled:opacity-50"
+              type="button"
+              onClick={confirmSubmit}
+              disabled={exam.submitting || audioPlaying}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center gap-1.5 shadow-md disabled:opacity-50"
             >
-              {isEvaluatingDynamic ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Wird ausgewertet...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  <span>Hörtest abgeben</span>
-                </>
-              )}
+              {exam.submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Abgeben
             </button>
-          ) : (
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs md:text-sm flex items-center gap-1.5"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Neu starten</span>
+          )}
+          {started && (
+            <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
+              <RotateCcw className="w-4 h-4" /> Neu
             </button>
           )}
         </div>
       </div>
 
-      {/* Generator Control Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>KI-Hörtest Generator:</span>
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            {/* Level Selector */}
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className="p-2 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-800"
-            >
-              <option value="A2">Niveau A2</option>
-              <option value="B1">Niveau B1</option>
-              <option value="B2">Niveau B2</option>
-              <option value="C1">Niveau C1</option>
-            </select>
-
-            {/* Topic Selector */}
-            <select
-              value={selectedTopic}
-              onChange={(e) => {
-                setSelectedTopic(e.target.value);
-                setCustomTopic('');
-              }}
-              className="p-2 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800 max-w-[200px] truncate"
-            >
-              {GOETHE_TOPICS.map((t) => (
-                <option key={t.id} value={t.title}>
-                  {t.code}: {t.title}
-                </option>
-              ))}
-            </select>
-
-            {/* Teil Selector */}
-            <select
-              value={selectedPartNum}
-              onChange={(e) => setSelectedPartNum(Number(e.target.value))}
-              className="p-2 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800"
-            >
-              <option value="1">Teil 1: Durchsagen &amp; Alltagsgespräche</option>
-              <option value="2">Teil 2: Führung &amp; Präsentation</option>
-              <option value="3">Teil 3: Dialog / Unterhaltung</option>
-              <option value="4">Teil 4: Radiosendung &amp; Experteninterview</option>
-            </select>
-
-            <button
-              onClick={handleGenerateDynamicTest}
-              disabled={isGenerating}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center gap-1.5 shadow-xs disabled:opacity-50"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Generiere Audio...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Neuer Hörtest</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Custom topic prompt input */}
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-          <span className="font-bold text-slate-500 whitespace-nowrap">Eigenes Thema:</span>
-          <input
-            type="text"
-            placeholder="z.B. Interview über Elektromobilität, WG-Suche in München, Berufserfahrung im Handwerk..."
-            value={customTopic}
-            onChange={(e) => setCustomTopic(e.target.value)}
-            className="flex-1 p-1.5 px-3 rounded-lg border border-slate-200 text-slate-800 text-xs"
+      {!started ? (
+        <>
+          <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />
+          <ExamInstructionScreen
+            level={level}
+            moduleName="Hören"
+            timeMinutes={hoeren.timeMinutes}
+            parts={hoeren.parts.map((p) => ({
+              key: p.teil,
+              label: `Teil ${p.teil}`,
+              title: p.title,
+              detail: `Aufgaben ${p.from}–${p.to} · ${p.maxPlays === 1 ? 'einmal' : 'zweimal'} hören`,
+            }))}
+            rules={[
+              `${hoeren.maxRaw} Aufgaben in ${hoeren.parts.length} Teilen, ca. ${hoeren.timeMinutes} Minuten.`,
+              'Jeder Hörtext darf nur so oft gehört werden, wie angegeben. Zurückspulen ist nicht möglich.',
+              'Lösen Sie die Aufgaben während des Hörens. Nach jedem Durchgang haben Sie 30 Sekunden Zeit.',
+              `Bestanden ab 60 Punkten und mindestens ${hoeren.passRaw} richtigen Aufgaben.`,
+              'Benutzen Sie Kopfhörer und stellen Sie die Lautstärke vorher ein.',
+            ]}
+            onStart={start}
           />
-        </div>
-      </div>
-
-      {/* Error alert */}
-      {genError && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{genError}</span>
-        </div>
-      )}
-
-      {/* EVALUATION BANNER */}
-      {dynamicEvalResult && (
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md animate-fade-in">
-          <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-              Ergebnis · Goethe Hören {dynamicEvalResult.level}
-            </span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-extrabold text-white">
-                {dynamicEvalResult.points100} / 100 Punkte
-              </span>
-              <span className="text-slate-400 text-sm">
-                ({dynamicEvalResult.correctCount} von {dynamicEvalResult.totalQuestions} richtig)
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className={`px-4 py-2 rounded-xl text-xs font-bold border ${
-              dynamicEvalResult.passed
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-            }`}>
-              Prädikat: {dynamicEvalResult.praedikat} ({dynamicEvalResult.passed ? 'Bestanden' : 'Nicht bestanden'})
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* AUDIO PLAYER & QUESTIONS */}
-      {dynamicTest && (
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
-          {/* Audio Player Column (5 cols) */}
-          <div className="lg:col-span-5 p-6 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                <Volume2 className="w-4 h-4 text-amber-600" />
-                <span>Audio-Wiedergabe</span>
-              </span>
-              <span className="px-2.5 py-1 rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
-                Gehört: {playCount} / {dynamicTest.maxPlays || 2}×
-              </span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 text-xs text-amber-950 flex flex-col gap-2">
-              <span className="font-bold">Anweisung für Prüfungsteilnehmer:</span>
-              <p className="leading-relaxed text-[11px]">
-                {dynamicTest.instructions || "Sie hören den Text zweimal. Lösen Sie die Aufgaben beim Hören."}
-              </p>
-            </div>
-
-            {/* Play/Stop Audio Button */}
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 border border-slate-200 gap-3 text-center">
-              <button
-                onClick={handleTogglePlayAudio}
-                disabled={playCount >= (dynamicTest.maxPlays || 2) && !isPlayingAudio && !isSubmitted}
-                className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 ${
-                  isPlayingAudio
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse'
-                    : 'bg-amber-500 hover:bg-amber-600 text-white'
-                } disabled:opacity-40 disabled:cursor-not-allowed`}
-              >
-                {isPlayingAudio ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
-              </button>
-
-              <span className="text-xs font-bold text-slate-800">
-                {isPlayingAudio ? 'Audio läuft (Klicken zum Stoppen)' : 'Audio jetzt abspielen'}
-              </span>
-              <span className="text-[11px] text-slate-400">
-                Authentische deutsche Sprachausgabe mit Sprecherwechsel
-              </span>
-            </div>
-
-            {/* Speakers preview */}
-            <div className="flex flex-col gap-1.5 text-xs text-slate-600">
-              <span className="font-bold text-slate-700 text-[11px] uppercase tracking-wider">
-                Beteiligte Sprecher:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {dynamicTest.speakers?.map((sp, idx) => (
-                  <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-semibold text-[11px]">
-                    {sp.label}
-                  </span>
-                ))}
+        </>
+      ) : (
+        <>
+          {finished && (
+            <ModuleResultCard moduleLabel="Hören" level={level} summary={summary}>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowSheet((v) => !v)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-bold"
+                >
+                  <FileSpreadsheet className="w-4 h-4" /> {showSheet ? 'Aufgaben anzeigen' : 'Antwortbogen anzeigen'}
+                </button>
               </div>
-            </div>
+            </ModuleResultCard>
+          )}
 
-            {/* Transcript Reveal Button */}
-            <div className="pt-2 border-t border-slate-100">
-              <button
-                onClick={() => setShowTranscripts(!showTranscripts)}
-                className="w-full py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5"
-              >
-                <FileText className="w-4 h-4 text-slate-500" />
-                <span>{showTranscripts ? 'Audioskript verbergen' : 'Audioskript anzeigen'}</span>
-              </button>
+          <TeilTabs items={tabs} activeKey={activeTeil} onChange={switchTeil} />
+          {audioPlaying && <p className="text-xs font-semibold text-slate-500">Während der Hörtext läuft, können Sie den Teil nicht wechseln.</p>}
 
-              {showTranscripts && (
-                <div className="mt-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 max-h-72 overflow-y-auto space-y-2 text-xs leading-relaxed">
-                  {dynamicTest.utterances?.map((u, uIdx) => (
-                    <div
-                      key={uIdx}
-                      className={`p-2 rounded-lg transition-colors ${
-                        activeUtteranceIndex === uIdx ? 'bg-amber-100/90 font-semibold' : ''
-                      }`}
-                    >
-                      <span className="font-bold text-slate-900 block mb-0.5">{u.speaker}:</span>
-                      <p className="text-slate-700">{u.text}</p>
-                    </div>
-                  ))}
+          {showSheet ? (
+            <AnswerSheet moduleLabel={`Hören ${level}`} parts={hoeren.parts} tests={exam.tests} answers={exam.answers} results={exam.results} />
+          ) : (
+            <>
+              {exam.errors[activeTeil] && (
+                <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex flex-wrap items-center gap-3">
+                  <AlertCircle className="w-4 h-4" /> {exam.errors[activeTeil]}
+                  <button type="button" onClick={() => exam.generate(activeTeil, topic)} className="px-3 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold">
+                    Erneut versuchen
+                  </button>
                 </div>
               )}
-            </div>
-          </div>
 
-          {/* Questions Column (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="font-bold text-sm text-slate-900">
-                  Prüfungsfragen ({dynamicTest.questions?.length || 0})
-                </span>
-                <span className="text-xs text-slate-500 font-semibold">
-                  {Object.keys(answers).length} / {dynamicTest.questions?.length || 0} beantwortet
-                </span>
-              </div>
+              {!test && !exam.errors[activeTeil] && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-10 flex flex-col items-center gap-3 text-slate-500">
+                  <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+                  <p className="text-sm font-semibold text-center">
+                    Teil {activeTeil} ({part?.title}) wird erstellt und vertont … das dauert etwa 30–60 Sekunden.
+                  </p>
+                </div>
+              )}
 
-              <div className="space-y-4">
-                {dynamicTest.questions?.map((q, idx) => {
-                  const userAns = answers[q.number] || answers[q.id] || '';
-                  const evalItem = dynamicEvalResult?.breakdown?.find(
-                    (b) => b.number === q.number || b.id === q.id
-                  );
-
-                  return (
-                    <div
-                      key={q.id || idx}
-                      className={`p-4 rounded-2xl border transition-all ${
-                        evalItem
-                          ? evalItem.isCorrect
-                            ? 'bg-emerald-50/70 border-emerald-300'
-                            : 'bg-rose-50/70 border-rose-300'
-                          : 'bg-slate-50 border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2 font-bold text-xs md:text-sm text-slate-900">
-                        <span>{q.number}. {q.prompt}</span>
-                        {evalItem && (
-                          evalItem.isCorrect ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          ) : (
-                            <XCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                          )
-                        )}
+              {test && part && (
+                <div className="grid gap-5 lg:grid-cols-[2fr_3fr] items-start">
+                  <section className="flex flex-col gap-4 lg:sticky lg:top-4">
+                    <BilingualInstructionBanner
+                      level={level}
+                      module="hoeren"
+                      teil={part.teil}
+                      title={part.title}
+                      instruction={part.instruction}
+                      from={part.from}
+                      to={part.to}
+                    />
+                    <AudioPlayerWithLimits
+                      key={test.token}
+                      audioData={test.audioData}
+                      mimeType={test.audioMimeType || 'audio/mpeg'}
+                      maxPlays={part.maxPlays}
+                      isLearn={isLearn}
+                      utterances={test.utterances}
+                      level={level}
+                      initialPlaysUsed={playsUsed[activeTeil] || 0}
+                      onStatusChange={({ playsUsed: used, playing }) => {
+                        setAudioPlaying(playing);
+                        setPlaysUsed((s) => ({ ...s, [activeTeil]: used }));
+                      }}
+                    />
+                    {test.optionBank?.length > 0 && (
+                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Auswahl a–{test.optionBank.at(-1).label}</p>
+                        <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                          {test.optionBank.map((o) => (
+                            <li key={o.label} className="flex gap-2">
+                              <span className="font-extrabold w-4">{o.label}</span>
+                              <span className="text-slate-700">{o.text}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
+                    )}
+                    <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                      <QuestionPalette questions={test.questions} answers={teilAnswers} flags={exam.flags[activeTeil]} results={teilResult?.breakdown} onJump={(n) => document.getElementById(`goethe-q-${n}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
+                    </div>
+                    {(teilResult || (isLearn && playsDone)) && test.utterances?.length > 0 && <Transcript test={test} />}
+                  </section>
 
-                      {/* Options */}
-                      <div className="space-y-1.5 mt-2">
-                        {q.options?.map((opt, oIdx) => {
-                          const isSelected = userAns === opt;
-                          return (
-                            <button
-                              key={oIdx}
-                              disabled={isSubmitted}
-                              onClick={() => handleSelectAnswer(q.number || q.id, opt)}
-                              className={`w-full p-2.5 rounded-xl text-left text-xs font-semibold border transition-all ${
-                                isSelected
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
-                              }`}
-                            >
-                              <span>{opt}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Explanation when submitted */}
-                      {evalItem && (
-                        <div className="mt-3 pt-2.5 border-t border-slate-200/80 text-[11px] text-slate-700">
-                          <p className="font-bold text-slate-900 mb-0.5">
-                            Richtige Lösung: <span className="text-emerald-700">{evalItem.correctAnswer}</span>
-                          </p>
-                          <p className="text-slate-600">{evalItem.explanation}</p>
+                  <section className="flex flex-col gap-4">
+                    {teilResult && (
+                      <p className="text-sm font-bold text-slate-700">
+                        Teil {part.teil}: {teilResult.correctCount} von {teilResult.totalQuestions} richtig
+                      </p>
+                    )}
+                    {isWerSagtWas ? (
+                      <WerSagtWasMatrix
+                        questions={test.questions}
+                        answers={teilAnswers}
+                        onChange={(n, v) => exam.setAnswer(activeTeil, n, v)}
+                        disabled={Boolean(teilResult)}
+                        results={teilResult?.breakdown}
+                      />
+                    ) : (
+                      groupBySegment(test.questions, test.segments).map((group) => (
+                        <div key={group.label || 'all'} className="flex flex-col gap-3">
+                          {group.label && <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mt-1">{group.label}</h3>}
+                          {group.questions.map((q) => (
+                            <QuestionRenderer
+                              key={q.number}
+                              question={q}
+                              value={teilAnswers[q.number]}
+                              onChange={(v) => exam.setAnswer(activeTeil, q.number, v)}
+                              disabled={Boolean(teilResult)}
+                              result={teilResult?.breakdown?.find((r) => r.number === q.number)}
+                              isLearn={isLearn}
+                              optionBank={test.optionBank}
+                              flagged={Boolean(exam.flags[activeTeil]?.[q.number])}
+                              onToggleFlag={() => exam.toggleFlag(activeTeil, q.number)}
+                            />
+                          ))}
                         </div>
+                      ))
+                    )}
+
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {isLearn && !teilResult && (
+                        <button
+                          type="button"
+                          onClick={() => exam.submit([activeTeil]).catch((err) => alert(err.response?.data?.error || 'Fehler bei der Auswertung.'))}
+                          disabled={exam.submitting || audioPlaying}
+                          className="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <CheckCheck className="w-4 h-4" /> Teil {part.teil} prüfen
+                        </button>
+                      )}
+                      {hoeren.parts.some((p) => p.teil === activeTeil + 1) && (
+                        <button
+                          type="button"
+                          disabled={audioPlaying}
+                          onClick={() => {
+                            switchTeil(activeTeil + 1);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          Weiter zu Teil {activeTeil + 1} <ChevronRight className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+                  </section>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+export default function GoetheHoerenRoom() {
+  const { goetheLevel, setGoetheLevel } = useApp();
+  const level = ['A2', 'B1', 'B2', 'C1'].includes(goetheLevel) ? goetheLevel : 'B1';
+  return (
+    <div className="min-h-full px-3 md:px-6 py-6 max-w-7xl mx-auto text-left animate-float-in">
+      <HoerenExam key={level} level={level} onLevelChange={setGoetheLevel} />
     </div>
   );
 }

@@ -1,484 +1,485 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { GOETHE_WRITING_TASKS } from '../../data/goethe/goetheWritingTasks';
-import { GOETHE_TOPICS } from '../../data/goethe/goetheTopics';
 import api from '../../api/client';
-import {
-  PenLine,
-  Clock,
-  Send,
-  Loader2,
-  Sparkles,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  RotateCcw,
-  BookOpen,
-  ArrowRight,
-  ChevronDown,
-  Award,
-  Check,
-  AlertCircle,
-} from 'lucide-react';
+import { getPraedikat } from '../../data/goethe/goetheGradingRules';
+import { redemittelFor } from '../../data/goethe/goetheWritingRedemittel';
+import { PenLine, Send, RotateCcw, Loader2, AlertCircle, AlertTriangle, BookMarked, X, Sparkles, ChevronRight } from 'lucide-react';
+import ExamModeToggle from './shared/ExamModeToggle';
+import ExamTimer from './shared/ExamTimer';
+import { useCountdown } from './shared/useCountdown';
+import ExamSetupBar from './shared/ExamSetupBar';
+import ExamInstructionScreen from './shared/ExamInstructionScreen';
+import BilingualInstructionBanner from './shared/BilingualInstructionBanner';
+import TeilTabs from './shared/TeilTabs';
+import { useExamMode } from './shared/useExamMode';
+import { useGoetheFormat } from './shared/useGoetheFormat';
+import WritingChart from './WritingChart';
+import WritingEvaluation from './WritingEvaluation';
 
-const GERMAN_CHARS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
+const GERMAN_CHARS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü', '„', '“'];
 
-export default function GoetheSchreibenRoom() {
-  const { studentName, saveEvaluation, goetheLevel } = useApp();
+const countWords = (text) => (text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0);
 
-  // Mode: 'dynamic' (AI task generation) or 'preset' (standard Modellsatz tasks)
-  const [taskSource, setTaskSource] = useState('dynamic');
+/** Task text sent to the examiner (everything the candidate saw). */
+function taskPrompt(task) {
+  return [
+    task.scenario,
+    task.stimulus ? `Impuls: ${task.stimulus}` : '',
+    task.chart ? `Grafik: ${task.chart.title} — ${task.chart.description || task.chart.data.map((d) => `${d.label}: ${d.value}`).join(', ')}` : '',
+    task.instructions,
+    ...(task.bulletPoints || []).map((b) => `- ${b}`),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
 
-  // Generator parameters
-  const [selectedLevel, setSelectedLevel] = useState(goetheLevel || 'B1');
-  const [selectedTopic, setSelectedTopic] = useState('Wohnen und Nachbarschaft');
-  const [customTopic, setCustomTopic] = useState('');
-  const [selectedTaskNumber, setSelectedTaskNumber] = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [genError, setGenError] = useState(null);
+function WordCounter({ count, range }) {
+  const [min, max] = range;
+  const knockOut = Math.floor(min * 0.5);
+  const tone = count < knockOut ? 'text-rose-700 bg-rose-50 border-rose-200' : count < min * 0.9 ? 'text-amber-800 bg-amber-50 border-amber-200' : count > max * 1.5 ? 'text-amber-800 bg-amber-50 border-amber-200' : 'text-emerald-800 bg-emerald-50 border-emerald-200';
+  return (
+    <span className={`px-2.5 py-1 rounded-lg border text-xs font-extrabold tabular-nums ${tone}`} aria-live="polite">
+      {count} / {min === max ? `ca. ${min}` : `${min}–${max}`} Wörter
+    </span>
+  );
+}
 
-  // Current active dynamic task
-  const [dynamicTask, setDynamicTask] = useState(null);
+function RedemittelDrawer({ register, level, onInsert, onClose }) {
+  const categories = redemittelFor(register, level);
+  return (
+    <aside className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 animate-float-in" aria-label="Redemittel">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-extrabold text-amber-900 flex items-center gap-2">
+          <BookMarked className="w-4 h-4" /> Redemittel · {register}
+        </p>
+        <button type="button" onClick={onClose} aria-label="Redemittel schließen" className="p-1 rounded-lg hover:bg-amber-100">
+          <X className="w-4 h-4 text-amber-900" />
+        </button>
+      </div>
+      <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+        {categories.map((cat) => (
+          <div key={cat.id}>
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">
+              {cat.title} <span className="font-semibold normal-case text-amber-700/70">· {cat.en}</span>
+            </p>
+            <div className="mt-1 flex flex-col gap-1">
+              {cat.phrases.map((p) => (
+                <button
+                  key={p.de}
+                  type="button"
+                  onClick={() => onInsert(p.de)}
+                  title={`Einfügen · ${p.en}`}
+                  className="text-left px-2.5 py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-200/70 text-sm"
+                >
+                  <span className="font-semibold text-slate-900">{p.de}</span>
+                  <span className="block text-[11px] text-slate-500">{p.en}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </aside>
+  );
+}
 
-  // Preset tasks (B1 fallback)
-  const [activeTaskType, setActiveTaskType] = useState('aufgabe1');
-  const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
+function SchreibenExam({ level, onLevelChange }) {
+  const { saveEvaluation, studentName } = useApp();
+  const { isExam, isLearn } = useExamMode();
+  const { format, error: formatError } = useGoetheFormat(level);
+  const schreiben = format?.schreiben;
 
-  // Writing state
-  const [essay, setEssay] = useState('');
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [evaluation, setEvaluation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(20 * 60);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [showModelAnswer, setShowModelAnswer] = useState(false);
-
+  const [topic, setTopic] = useState('');
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [activeNr, setActiveNr] = useState(1);
+  const [tasks, setTasks] = useState({});
+  const [loading, setLoading] = useState({});
+  const [errors, setErrors] = useState({});
+  const [essays, setEssays] = useState({});
+  const [evaluations, setEvaluations] = useState({});
+  const [evaluating, setEvaluating] = useState({});
+  const [evalErrors, setEvalErrors] = useState({});
+  const [showRedemittel, setShowRedemittel] = useState(false);
   const textareaRef = useRef(null);
+  const inflight = useRef({});
 
-  // Sync level with app context
-  useEffect(() => {
-    if (goetheLevel) setSelectedLevel(goetheLevel);
-  }, [goetheLevel]);
+  const aufgabe = schreiben?.aufgaben.find((a) => a.nr === activeNr);
+  const task = tasks[activeNr];
+  const essay = essays[activeNr] || '';
+  const evaluation = evaluations[activeNr];
+  const wordCount = countWords(essay);
 
-  // Auto-generate initial task on mount
-  useEffect(() => {
-    if (taskSource === 'dynamic' && !dynamicTask && !isGenerating) {
-      handleGenerateTask();
-    }
-  }, []);
+  const moduleTotal = useMemo(() => {
+    if (!schreiben) return null;
+    const done = schreiben.aufgaben.filter((a) => evaluations[a.nr]);
+    if (!done.length) return null;
+    const points = Math.round(done.reduce((s, a) => s + (evaluations[a.nr].totalPoints || 0), 0) * 100) / 100;
+    const max = finished ? 100 : done.reduce((s, a) => s + a.maxPoints, 0);
+    const points100 = Math.round((points / max) * 100);
+    return { points, max, points100, passed: points100 >= 60, complete: finished || done.length === schreiben.aufgaben.length };
+  }, [schreiben, evaluations, finished]);
 
-  const handleGenerateTask = async () => {
-    setIsGenerating(true);
-    setGenError(null);
-    setEvaluation(null);
-    setEssay('');
-    setShowModelAnswer(false);
-
-    const topicToUse = customTopic.trim() || selectedTopic;
-    try {
-      const res = await api.post('/goethe/writing/generate', {
-        level: selectedLevel,
-        topic: topicToUse,
-        taskNumber: selectedTaskNumber,
+  const generate = (nr) => {
+    if (inflight.current[nr]) return;
+    inflight.current[nr] = true;
+    setLoading((s) => ({ ...s, [nr]: true }));
+    setErrors((s) => ({ ...s, [nr]: null }));
+    api
+      .post('/goethe/writing/generate', { level, topic, taskNumber: nr })
+      .then((res) => {
+        if (!res.data?.success) throw new Error(res.data?.error);
+        setTasks((s) => ({ ...s, [nr]: res.data.data }));
+      })
+      .catch((err) =>
+        setErrors((s) => ({ ...s, [nr]: err.response?.data?.error || err.message || 'Die Schreibaufgabe konnte nicht erstellt werden.' }))
+      )
+      .finally(() => {
+        inflight.current[nr] = false;
+        setLoading((s) => ({ ...s, [nr]: false }));
       });
-
-      if (res.data?.success && res.data.data) {
-        setDynamicTask(res.data.data);
-        const mins = res.data.data.timeMinutes || 20;
-        setTimeLeft(mins * 60);
-        setTimerRunning(false);
-      } else {
-        setGenError(res.data?.error || 'Fehler beim Erstellen der Schreibaufgabe.');
-      }
-    } catch (err) {
-      console.error('Error generating writing task:', err);
-      setGenError(err.response?.data?.error || 'Verbindung zum Server fehlgeschlagen.');
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
-  // Countdown timer
   useEffect(() => {
-    let interval = null;
-    if (timerRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [timerRunning, timeLeft]);
+    if (started && schreiben && !tasks[activeNr] && !loading[activeNr] && !errors[activeNr]) generate(activeNr);
+    // generate is recreated each render; the guards above prevent duplicate requests.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started, activeNr, schreiben, tasks, loading, errors]);
 
-  // Insert German character at cursor
-  const insertChar = (char) => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const newText = essay.substring(0, start) + char + essay.substring(end);
-    setEssay(newText);
-    setTimeout(() => {
-      el.focus();
-      el.setSelectionRange(start + 1, start + 1);
-    }, 0);
-  };
-
-  const wordCount = essay.trim() ? essay.trim().split(/\s+/).filter(Boolean).length : 0;
-  const targetWords = taskSource === 'dynamic'
-    ? (dynamicTask?.targetWordCount || 80)
-    : (activeTaskType === 'aufgabe3' ? 40 : 80);
-
-  const handleEvaluate = async () => {
-    if (!essay.trim()) {
-      setErrorMsg('Bitte schreiben Sie zuerst Ihren Text.');
-      return;
-    }
-
-    setIsEvaluating(true);
-    setErrorMsg(null);
-    setTimerRunning(false);
-
-    const promptText = taskSource === 'dynamic' && dynamicTask
-      ? `${dynamicTask.scenario}\n\n${dynamicTask.instructions}\n- ${dynamicTask.bulletPoints?.join('\n- ')}`
-      : 'Standard Goethe B1 Schreibaufgabe';
-
+  const evaluate = async (nr) => {
+    const t = tasks[nr];
+    const text = essays[nr] || '';
+    if (!t || !text.trim()) return null;
+    setEvaluating((s) => ({ ...s, [nr]: true }));
+    setEvalErrors((s) => ({ ...s, [nr]: null }));
     try {
       const res = await api.post('/goethe/evaluate-writing', {
-        taskNumber: taskSource === 'dynamic' ? dynamicTask?.taskNumber || 1 : parseInt(activeTaskType.replace('aufgabe', ''), 10),
-        prompt: promptText,
-        response: essay,
+        level,
+        taskNumber: nr,
+        prompt: taskPrompt(t),
+        response: text,
         studentName: studentName || 'Student',
-        level: selectedLevel,
       });
-
-      if (res.data?.success && res.data.data) {
-        setEvaluation(res.data.data);
-        saveEvaluation(res.data.data, {
-          kind: 'goethe-schreiben',
-          module: selectedLevel,
-          question: dynamicTask?.title || 'Goethe Schreiben',
-        });
-      } else {
-        setErrorMsg(res.data?.error || 'Fehler bei der Textauswertung.');
-      }
+      if (!res.data?.success) throw new Error(res.data?.error);
+      setEvaluations((s) => ({ ...s, [nr]: res.data.data }));
+      saveEvaluation(res.data.data, { kind: 'goethe-schreiben', module: level, question: t.title });
+      return res.data.data;
     } catch (err) {
-      console.error('Writing evaluation error:', err);
-      setErrorMsg(err.response?.data?.error || 'Verbindung zum Server fehlgeschlagen.');
+      setEvalErrors((s) => ({ ...s, [nr]: err.response?.data?.error || err.message || 'Fehler bei der Textauswertung.' }));
+      return null;
     } finally {
-      setIsEvaluating(false);
+      setEvaluating((s) => ({ ...s, [nr]: false }));
     }
   };
 
-  const formatTimer = (sec) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const submitAll = async () => {
+    if (!schreiben || finished) return;
+    const pending = schreiben.aufgaben.filter((a) => !evaluations[a.nr] && (essays[a.nr] || '').trim() && tasks[a.nr]);
+    await Promise.all(pending.map((a) => evaluate(a.nr)));
+    setFinished(true);
   };
 
+  const timer = useCountdown((schreiben?.timeMinutes || 60) * 60, {
+    running: started && !finished && !(isLearn && paused),
+    onExpire: () => {
+      if (isExam) submitAll();
+    },
+  });
+
+  const start = () => {
+    timer.reset((schreiben?.timeMinutes || 60) * 60);
+    setStarted(true);
+    setActiveNr(1);
+  };
+
+  const restart = () => {
+    setTasks({});
+    setErrors({});
+    setEssays({});
+    setEvaluations({});
+    setEvalErrors({});
+    setStarted(false);
+    setFinished(false);
+  };
+
+  const setEssay = (text) => setEssays((s) => ({ ...s, [activeNr]: text }));
+
+  const insertAtCursor = (snippet) => {
+    const el = textareaRef.current;
+    if (!el) return setEssay(essay + snippet);
+    const start = el.selectionStart ?? essay.length;
+    const end = el.selectionEnd ?? essay.length;
+    const needsSpace = start > 0 && !/\s$/.test(essay.slice(0, start)) && snippet.length > 1;
+    const insert = (needsSpace ? ' ' : '') + snippet;
+    setEssay(essay.slice(0, start) + insert + essay.slice(end));
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + insert.length, start + insert.length);
+    });
+  };
+
+  if (formatError) {
+    return (
+      <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2">
+        <AlertCircle className="w-4 h-4" /> {formatError}
+      </div>
+    );
+  }
+  if (!schreiben) {
+    return (
+      <div className="flex items-center gap-2 text-slate-500 text-sm p-6">
+        <Loader2 className="w-4 h-4 animate-spin" /> Prüfungsformat wird geladen …
+      </div>
+    );
+  }
+
+  const tabs = schreiben.aufgaben.map((a) => ({
+    key: a.nr,
+    label: `Aufgabe ${a.nr}`,
+    title: `${a.label} · ${a.maxPoints} P.`,
+    status: evaluations[a.nr] ? 'done' : loading[a.nr] || evaluating[a.nr] ? 'loading' : 'idle',
+  }));
+
+  const [minW] = aufgabe?.words || [0];
+  const belowKnockout = wordCount > 0 && wordCount < Math.floor(minW * 0.5);
+  const locked = Boolean(evaluation) || finished;
+
   return (
-    <div className="min-h-full px-3 md:px-6 py-6 max-w-6xl mx-auto flex flex-col gap-6 animate-fade-in text-left">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-800 text-xs font-bold mb-1.5 border border-sky-200">
-            <span>🇩🇪 Goethe-Zertifikat {selectedLevel}</span>
-            <span>·</span>
-            <span>Schreiben (Schriftlicher Ausdruck)</span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">
-            {dynamicTask?.title || `Goethe Schreiben ${selectedLevel}`}
-          </h1>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-800 text-xs font-bold border border-sky-200">
+            <PenLine className="w-3.5 h-3.5" /> Goethe-Zertifikat {level} · Schreiben
+          </span>
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1">Schriftlicher Ausdruck</h1>
         </div>
-
-        {/* Timer & Controls */}
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setTimerRunning(!timerRunning)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 text-white font-mono text-sm font-bold shadow-xs hover:bg-slate-800"
-          >
-            <Clock className={`w-4 h-4 ${timerRunning ? 'text-sky-400 animate-pulse' : 'text-slate-400'}`} />
-            <span>{formatTimer(timeLeft)}</span>
-          </button>
-
-          <button
-            onClick={handleEvaluate}
-            disabled={isEvaluating || isGenerating || !essay.trim()}
-            className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs md:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all disabled:opacity-50"
-          >
-            {isEvaluating ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Wird bewertet...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span>Text bewerten lassen</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Generator Control Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-sky-500" />
-              <span>Aufgaben-Generator:</span>
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            {/* Level Selector */}
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className="p-2 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-800"
-            >
-              <option value="A2">Niveau A2</option>
-              <option value="B1">Niveau B1</option>
-              <option value="B2">Niveau B2</option>
-              <option value="C1">Niveau C1</option>
-            </select>
-
-            {/* Topic Selector */}
-            <select
-              value={selectedTopic}
-              onChange={(e) => {
-                setSelectedTopic(e.target.value);
-                setCustomTopic('');
-              }}
-              className="p-2 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800 max-w-[200px] truncate"
-            >
-              {GOETHE_TOPICS.map((t) => (
-                <option key={t.id} value={t.title}>
-                  {t.code}: {t.title}
-                </option>
-              ))}
-            </select>
-
-            {/* Task Number Selector */}
-            <select
-              value={selectedTaskNumber}
-              onChange={(e) => setSelectedTaskNumber(Number(e.target.value))}
-              className="p-2 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800"
-            >
-              <option value="1">Aufgabe 1 ({selectedLevel === 'A2' ? 'SMS / Notiz' : selectedLevel === 'B2' ? 'Diskussionsforum' : selectedLevel === 'C1' ? 'Stellungnahme' : 'Informelle E-Mail'})</option>
-              <option value="2">Aufgabe 2 ({selectedLevel === 'A2' ? 'E-Mail' : selectedLevel === 'B2' ? 'Formelle E-Mail' : selectedLevel === 'C1' ? 'Formeller Brief' : 'Meinung im Forum'})</option>
-              {selectedLevel === 'B1' && <option value="3">Aufgabe 3 (Formelle E-Mail ~40 W)</option>}
-            </select>
-
+        <div className="flex flex-wrap items-center gap-2">
+          <ExamModeToggle locked={started && !finished} />
+          {started && (
+            <ExamTimer secondsLeft={timer.secondsLeft} running={!paused && !finished} canPause={isLearn && !finished} onToggle={() => setPaused((p) => !p)} />
+          )}
+          {started && !finished && (
             <button
-              onClick={handleGenerateTask}
-              disabled={isGenerating}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+              type="button"
+              onClick={() => {
+                if (window.confirm('Alle Aufgaben jetzt abgeben und bewerten lassen?')) submitAll();
+              }}
+              disabled={Object.values(evaluating).some(Boolean)}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center gap-1.5 shadow-md disabled:opacity-50"
             >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Generiere...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-sky-300" />
-                  <span>Neue Schreibaufgabe</span>
-                </>
-              )}
+              {Object.values(evaluating).some(Boolean) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Abgeben
             </button>
-          </div>
-        </div>
-
-        {/* Custom topic prompt input */}
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-          <span className="font-bold text-slate-500 whitespace-nowrap">Eigenes Thema:</span>
-          <input
-            type="text"
-            placeholder="z.B. Umweltschutz im Alltag, Homeoffice Vor- und Nachteile, Beschwerde über Sprachkurs..."
-            value={customTopic}
-            onChange={(e) => setCustomTopic(e.target.value)}
-            className="flex-1 p-1.5 px-3 rounded-lg border border-slate-200 text-slate-800 text-xs"
-          />
+          )}
+          {started && (
+            <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
+              <RotateCcw className="w-4 h-4" /> Neu
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Error alert */}
-      {genError && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{genError}</span>
-        </div>
-      )}
-
-      {/* TASK DESCRIPTION & TEXTAREA GRID */}
-      {dynamicTask && (
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
-          {/* Left Column: Task Prompt & Leitpunkte (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-4">
+      {!started ? (
+        <>
+          <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />
+          <ExamInstructionScreen
+            level={level}
+            moduleName="Schreiben"
+            timeMinutes={schreiben.timeMinutes}
+            parts={schreiben.aufgaben.map((a) => ({
+              key: a.nr,
+              label: `Aufgabe ${a.nr}`,
+              title: a.label,
+              detail: `${a.words[0] === a.words[1] ? `ca. ${a.words[0]}` : `${a.words[0]}–${a.words[1]}`} Wörter · ${a.maxPoints} Punkte · ~${a.timeHintMinutes} Min.`,
+            }))}
+            rules={[
+              `${schreiben.aufgaben.length} Aufgaben, ${schreiben.timeMinutes} Minuten, zusammen 100 Punkte.`,
+              'Bearbeiten Sie alle Leitpunkte und achten Sie auf Textsorte und Register.',
+              'Unter 50 % der Mindestwortzahl wird die Aufgabe mit 0 Punkten bewertet (Band E).',
+              isExam ? 'Prüfungsmodus: keine Hilfen, Bewertung erst bei der Abgabe.' : 'Lernmodus: Redemittel, Übersetzungen und sofortige Bewertung pro Aufgabe.',
+            ]}
+            onStart={start}
+          />
+        </>
+      ) : (
+        <>
+          {moduleTotal && (finished || moduleTotal.complete) && (
+            <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                  Aufgabenstellung · Goethe {dynamicTask.level}
-                </span>
-                <h3 className="text-base font-bold text-slate-900 mb-2">
-                  {dynamicTask.scenario}
-                </h3>
-              </div>
-
-              {/* Leitpunkte */}
-              <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200/80 text-xs flex flex-col gap-2">
-                <span className="font-bold text-sky-950">
-                  {dynamicTask.instructions || 'Schreiben Sie zu allen drei Leitpunkten:'}
-                </span>
-                <ul className="space-y-1.5 pl-4 list-disc text-sky-900">
-                  {dynamicTask.bulletPoints?.map((bp, idx) => (
-                    <li key={idx} className="font-medium">{bp}</li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Requirement specs */}
-              <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 font-semibold">
-                <span>Richtzeit: ~{dynamicTask.timeMinutes || 20} Min.</span>
-                <span>Umfang: ca. {dynamicTask.targetWordCount || 80} Wörter</span>
-              </div>
-
-              {/* Rubric highlight tip */}
-              {dynamicTask.rubricHighlight && (
-                <p className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  💡 <span className="font-semibold text-slate-700">Tipp:</span> {dynamicTask.rubricHighlight}
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Ergebnis · Schreiben {level}</p>
+                <p className="text-3xl font-extrabold tabular-nums">
+                  {moduleTotal.points100} <span className="text-base text-slate-300">/ 100 Punkte</span>
                 </p>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column: Writing Pad & Umlaut Bar (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-3">
-              {/* Umlaut quick buttons bar */}
-              <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Umlaute:</span>
-                  {GERMAN_CHARS.map((char) => (
-                    <button
-                      key={char}
-                      type="button"
-                      onClick={() => insertChar(char)}
-                      className="px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors"
-                    >
-                      {char}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Word Counter Pill */}
-                <div className="text-xs font-bold">
-                  <span className={wordCount >= targetWords ? 'text-emerald-600' : 'text-slate-500'}>
-                    {wordCount} / ca. {targetWords} Wörter
-                  </span>
-                </div>
               </div>
-
-              {/* Writing Textarea */}
-              <textarea
-                ref={textareaRef}
-                value={essay}
-                onChange={(e) => setEssay(e.target.value)}
-                rows={12}
-                placeholder="Schreiben Sie hier Ihren Text auf Deutsch..."
-                className="w-full p-4 rounded-2xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 text-sm leading-relaxed text-slate-800 resize-y font-normal"
-              />
-
-              {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+              <span className={`px-4 py-2 rounded-xl text-sm font-extrabold ${moduleTotal.passed ? 'bg-emerald-500/20 text-emerald-200' : 'bg-rose-500/20 text-rose-200'}`}>
+                {moduleTotal.passed ? getPraedikat(moduleTotal.points100).label : 'Nicht bestanden'}
+              </span>
             </div>
+          )}
 
-            {/* Evaluation Results Card */}
-            {evaluation && (
-              <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-md flex flex-col gap-5 animate-fade-in">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      Prüfungsergebnis Schreiben · Goethe {evaluation.level || selectedLevel}
-                    </span>
-                    <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">
-                      {evaluation.scaledPoints100 || evaluation.totalPoints || 0} / 100 Punkte
-                    </h3>
-                  </div>
+          <TeilTabs items={tabs} activeKey={activeNr} onChange={(k) => setActiveNr(k)} />
 
-                  <span className={`px-4 py-1.5 rounded-full text-xs font-bold border ${
-                    evaluation.passed
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                      : 'bg-rose-50 text-rose-800 border-rose-300'
-                  }`}>
-                    Prädikat: {evaluation.praedikat || (evaluation.passed ? 'Bestanden' : 'Nicht bestanden')}
-                  </span>
-                </div>
+          {errors[activeNr] && (
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex flex-wrap items-center gap-3">
+              <AlertCircle className="w-4 h-4" /> {errors[activeNr]}
+              <button type="button" onClick={() => generate(activeNr)} className="px-3 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold">
+                Erneut versuchen
+              </button>
+            </div>
+          )}
 
-                {/* Verdict */}
-                {evaluation.verdict && (
-                  <p className="text-xs text-slate-700 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 leading-relaxed font-medium">
-                    {evaluation.verdict}
+          {!task && !errors[activeNr] && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-10 flex flex-col items-center gap-3 text-slate-500">
+              <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+              <p className="text-sm font-semibold">Aufgabe {activeNr} wird erstellt …</p>
+            </div>
+          )}
+
+          {task && aufgabe && (
+            <div className="grid gap-5 lg:grid-cols-[2fr_3fr] items-start">
+              {/* Task sheet */}
+              <section className="flex flex-col gap-4 lg:sticky lg:top-4">
+                <BilingualInstructionBanner level={level} module="schreiben" teil={aufgabe.nr} title={aufgabe.label} instruction={task.instructions} />
+                <div className="rounded-2xl border border-slate-300 bg-[#fffef9] p-5 flex flex-col gap-3">
+                  <p className="text-[15px] text-slate-800 leading-relaxed">{task.scenario}</p>
+                  {task.stimulus && (
+                    <blockquote className="border-l-4 border-sky-400 bg-white rounded-r-xl px-4 py-3 text-sm text-slate-700 italic leading-relaxed">{task.stimulus}</blockquote>
+                  )}
+                  {task.chart && <WritingChart chart={task.chart} />}
+                  {task.bulletPoints?.length > 0 && (
+                    <ul className="space-y-1.5">
+                      {task.bulletPoints.map((b) => (
+                        <li key={b} className="flex gap-2 text-sm font-semibold text-slate-900">
+                          <span className="text-sky-600">▸</span>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className="text-xs text-slate-500 pt-2 border-t border-slate-200">
+                    Register: {aufgabe.register} · Richtzeit ~{aufgabe.timeHintMinutes} Min. · max. {aufgabe.maxPoints} Punkte
                   </p>
-                )}
-
-                {/* Criteria breakdown */}
-                {evaluation.scores && (
-                  <div className="grid gap-2 sm:grid-cols-2 text-xs">
-                    {Object.entries(evaluation.scores).map(([crit, pts]) => (
-                      <div key={crit} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center font-bold">
-                        <span className="capitalize">{crit}:</span>
-                        <span className="text-sky-700">{pts} Pkt</span>
-                      </div>
+                </div>
+                {isLearn && (task.sampleStarters?.length > 0 || task.rubricHighlight) && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-2">
+                    <p className="font-extrabold text-amber-900 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4" /> Hinweise
+                    </p>
+                    {task.rubricHighlight && <p className="text-amber-900">{task.rubricHighlight}</p>}
+                    {task.sampleStarters?.map((s) => (
+                      <button key={s} type="button" disabled={locked} onClick={() => insertAtCursor(s)} className="block text-left text-slate-800 hover:underline">
+                        „{s}“
+                      </button>
                     ))}
                   </div>
                 )}
+              </section>
 
-                {/* Grammar & vocabulary corrections */}
-                {evaluation.mistakes && evaluation.mistakes.length > 0 && (
-                  <div className="space-y-2 pt-2">
-                    <span className="text-xs font-bold text-slate-900 block">Korrekturen &amp; Grammatik:</span>
-                    {evaluation.mistakes.map((m, idx) => (
-                      <div key={idx} className="p-3 rounded-xl bg-rose-50/60 border border-rose-200 text-xs">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="line-through text-rose-700">{m.original || m.spoken}</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="font-bold text-emerald-700">{m.correction || m.corrected}</span>
-                        </div>
-                        <p className="text-slate-600 text-[11px]">{m.explanation || m.why}</p>
-                      </div>
-                    ))}
+              {/* Editor & feedback */}
+              <section className="flex flex-col gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <WordCounter count={wordCount} range={aufgabe.words} />
+                    <div className="flex flex-wrap items-center gap-1">
+                      {GERMAN_CHARS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          disabled={locked}
+                          onClick={() => insertAtCursor(c)}
+                          className="w-7 h-7 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-sm font-bold text-slate-700"
+                        >
+                          {c}
+                        </button>
+                      ))}
+                      {isLearn && !locked && (
+                        <button
+                          type="button"
+                          onClick={() => setShowRedemittel((v) => !v)}
+                          aria-pressed={showRedemittel}
+                          className="ml-1 px-2.5 h-7 rounded-md border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-900 flex items-center gap-1"
+                        >
+                          <BookMarked className="w-3.5 h-3.5" /> Redemittel
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
 
-                {/* Model answer reveal button */}
-                {evaluation.improvedVersion && (
-                  <div className="pt-2 border-t border-slate-100">
-                    <button
-                      onClick={() => setShowModelAnswer(!showModelAnswer)}
-                      className="text-xs font-bold text-sky-700 hover:text-sky-800 flex items-center gap-1.5"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{showModelAnswer ? 'Musterlösung verbergen' : 'Authentische Goethe-Musterlösung anzeigen'}</span>
-                    </button>
+                  {belowKnockout && !locked && (
+                    <p className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex gap-2">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      Unter 50 % der Mindestwortzahl ({Math.floor(minW * 0.5)} Wörter) führt zum Abbruch der Aufgabe (Band E = 0 Punkte).
+                    </p>
+                  )}
 
-                    {showModelAnswer && (
-                      <div className="mt-3 p-4 rounded-2xl bg-sky-50/60 border border-sky-200 text-xs leading-relaxed text-slate-800 whitespace-pre-line">
-                        {evaluation.improvedVersion}
-                      </div>
+                  <textarea
+                    ref={textareaRef}
+                    value={essay}
+                    readOnly={locked}
+                    onChange={(e) => setEssay(e.target.value)}
+                    spellCheck={false}
+                    lang="de"
+                    rows={14}
+                    placeholder="Schreiben Sie hier Ihren Text …"
+                    aria-label={`Text für Aufgabe ${aufgabe.nr}`}
+                    className="w-full p-4 rounded-xl border border-slate-300 text-[15px] leading-relaxed text-slate-900 font-serif resize-y focus:outline-none focus:ring-2 focus:ring-sky-400 read-only:bg-slate-50"
+                  />
+
+                  {evalErrors[activeNr] && <p className="text-sm text-rose-700 font-semibold">{evalErrors[activeNr]}</p>}
+
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {isLearn && !locked && (
+                      <button
+                        type="button"
+                        onClick={() => evaluate(activeNr)}
+                        disabled={!essay.trim() || evaluating[activeNr]}
+                        className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        {evaluating[activeNr] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        {evaluating[activeNr] ? 'Prüfer bewertet …' : `Aufgabe ${aufgabe.nr} bewerten lassen`}
+                      </button>
+                    )}
+                    {schreiben.aufgaben.some((a) => a.nr === activeNr + 1) && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveNr(activeNr + 1)}
+                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold flex items-center gap-1.5"
+                      >
+                        Weiter zu Aufgabe {activeNr + 1} <ChevronRight className="w-4 h-4" />
+                      </button>
                     )}
                   </div>
+                </div>
+
+                {showRedemittel && isLearn && !locked && (
+                  <RedemittelDrawer register={aufgabe.register} level={level} onInsert={insertAtCursor} onClose={() => setShowRedemittel(false)} />
                 )}
-              </div>
-            )}
-          </div>
-        </div>
+
+                {evaluating[activeNr] && !evaluation && (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-6 flex items-center gap-3 text-sm text-slate-600">
+                    <Loader2 className="w-5 h-5 animate-spin text-sky-600" /> Die Prüferin liest Ihren Text und vergibt Bänder A–E …
+                  </div>
+                )}
+                {evaluation && <WritingEvaluation evaluation={evaluation} essay={essay} />}
+                {finished && !evaluation && (
+                  <p className="text-sm text-slate-500">Zu dieser Aufgabe wurde kein Text abgegeben (0 Punkte).</p>
+                )}
+              </section>
+            </div>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+export default function GoetheSchreibenRoom() {
+  const { goetheLevel, setGoetheLevel } = useApp();
+  const level = ['A2', 'B1', 'B2', 'C1'].includes(goetheLevel) ? goetheLevel : 'B1';
+  return (
+    <div className="min-h-full px-3 md:px-6 py-6 max-w-7xl mx-auto text-left animate-float-in">
+      <SchreibenExam key={level} level={level} onLevelChange={setGoetheLevel} />
     </div>
   );
 }
