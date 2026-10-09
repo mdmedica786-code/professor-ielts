@@ -50,7 +50,7 @@ const PORT = process.env.PORT || 3000;
 // Render/Hostinger sit behind a proxy
 app.set("trust proxy", 1);
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || "https://bandlogic.online,https://www.bandlogic.online,http://bandlogic.online,http://www.bandlogic.online")
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || "https://bandlogic.online,https://www.bandlogic.online,http://bandlogic.online,http://www.bandlogic.online,https://professor-ielts-1.onrender.com")
   .split(",")
   .map((s) => s.trim());
 
@@ -59,7 +59,8 @@ app.use(cors({
     if (!origin || ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost") || origin === "capacitor://localhost") {
       cb(null, true);
     } else {
-      cb(new Error("Not allowed by CORS"));
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      cb(null, false);
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -269,6 +270,19 @@ app.get("/", (req, res) => {
       "POST /api/vocab/generate      — AI-generate a themed deck",
       "GET  /api/stats               — Gamification stats",
       "GET  /api/health              — Server health check",
+      "GET  /api/goethe/format       — Goethe: fetch exam format",
+      "POST /api/goethe/reading/generate — Goethe: reading passage",
+      "POST /api/goethe/reading/evaluate — Goethe: grade reading",
+      "POST /api/goethe/listening/generate — Goethe: listening audio",
+      "POST /api/goethe/listening/evaluate — Goethe: grade listening",
+      "POST /api/goethe/writing/generate — Goethe: writing task",
+      "POST /api/goethe/evaluate-writing — Goethe: grade writing",
+      "POST /api/goethe/speaking/task — Goethe: speaking task",
+      "POST /api/goethe/speaking/partner-turn — Goethe: speaking AI reply",
+      "POST /api/goethe/speaking/finish-dialogue — Goethe: end speaking",
+      "POST /api/goethe/evaluate-speaking — Goethe: grade speaking",
+      "POST /api/goethe/realtime-token — Goethe: realtime voice token",
+      "POST /api/goethe/score-calculator — Goethe: calculate band/points",
     ],
   });
 });

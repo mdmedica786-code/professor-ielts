@@ -72,7 +72,7 @@ function Transcript({ test }) {
 export function HoerenExam({ level, onLevelChange, mock = null }) {
   const { saveEvaluation } = useApp();
   const { isExam, isLearn } = useExamMode();
-  const { format, error: formatError } = useGoetheFormat(level);
+  const { format, error: formatError, retry } = useGoetheFormat(level);
   const hoeren = format?.hoeren;
   const pk = mock?.persistKey || null;
   const keyOf = (name) => (pk ? `${pk}:${name}` : null);
@@ -175,8 +175,13 @@ export function HoerenExam({ level, onLevelChange, mock = null }) {
 
   if (formatError) {
     return (
-      <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2">
-        <AlertCircle className="w-4 h-4" /> {formatError}
+      <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" /> {formatError}
+        </div>
+        <button type="button" onClick={retry} className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs whitespace-nowrap">
+          Erneut versuchen
+        </button>
       </div>
     );
   }

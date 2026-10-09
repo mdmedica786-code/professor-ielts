@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '../../../api/client';
 
 // The exam format is static per level — fetch once per session.
@@ -30,24 +30,34 @@ function loadFormat(level) {
  */
 export function useGoetheFormat(level) {
   const [state, setState] = useState(() => ({ level, format: cache.get(level) || null, error: null }));
+  const [retryCount, setRetryCount] = useState(0);
+
+  const retry = useCallback(() => setRetryCount(c => c + 1), []);
 
   useEffect(() => {
     let alive = true;
+    setState(s => ({ ...s, error: null }));
     loadFormat(level)
       .then((format) => alive && setState({ level, format, error: null }))
-      .catch((err) =>
-        alive &&
+      .catch((err) => {
+        if (!alive) return;
+        let errMsg = 'Das Prüfungsformat konnte nicht geladen werden.';
+        if (!err.response) {
+          errMsg = 'Server nicht erreichbar oder Zugriff blockiert (CORS).';
+        } else if (err.response.status) {
+          errMsg = `Das Prüfungsformat konnte nicht geladen werden (Status ${err.response.status}).`;
+        }
         setState({
           level,
           format: null,
-          error: err.response?.data?.error || 'Das Prüfungsformat konnte nicht geladen werden.',
-        })
-      );
+          error: err.response?.data?.error || errMsg,
+        });
+      });
     return () => {
       alive = false;
     };
-  }, [level]);
+  }, [level, retryCount]);
 
   const current = state.level === level ? state : { level, format: cache.get(level) || null, error: null };
-  return { format: current.format, error: current.error, loading: !current.format && !current.error };
+  return { format: current.format, error: current.error, loading: !current.format && !current.error, retry };
 }
