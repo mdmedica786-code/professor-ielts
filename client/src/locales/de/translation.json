@@ -1,0 +1,94 @@
+{
+  "landing": {
+    "title": "Knacke den IELTS-Code.",
+    "subtitle": "Schluss mit Raten. Fang an zu messen. Der einzige KI-Coach, der deine Englischkenntnisse in allen vier Modulen präzise bewertet.",
+    "tryAsGuest": "Als Gast ausprobieren",
+    "signIn": "Anmelden / Registrieren"
+  },
+  "sidebar": {
+    "speaking": "Sprechen",
+    "writing": "Schreiben",
+    "reading": "Lesen",
+    "listening": "Hören",
+    "vocabulary": "Wortschatz",
+    "history": "Verlauf & Fortschritt",
+    "signIn": "Anmelden, um den Fortschritt zu speichern",
+    "signOut": "Abmelden"
+  },
+  "common": {
+    "language": "Sprache",
+    "difficulty": "Schwierigkeit",
+    "topic": "Thema",
+    "startTest": "Test starten",
+    "generating": "Wird erstellt …",
+    "error": "Fehler",
+    "bandScore": "Band-Ergebnis"
+  },
+  "speaking": {
+    "title": "IELTS-Sprechsimulator",
+    "subtitle": "KI-Prüfer in Echtzeit. Dynamische Anschlussfragen. Präzise Band-Bewertung.",
+    "module": "Modul",
+    "academic": "Academic",
+    "general": "General Training",
+    "part1": "Teil 1 (Vertraute Themen)",
+    "part2": "Teil 2 (Themenkarte)",
+    "part3": "Teil 3 (Diskussion)",
+    "fullMock": "Vollständiger Modelltest (Teile 1–3)",
+    "mode": "Modus",
+    "easy": "Leicht (5.0–6.0)",
+    "medium": "Mittel (6.0–7.0)",
+    "hard": "Schwer (7.0–9.0)",
+    "generate": "Sprechtest erstellen"
+  },
+  "writing": {
+    "title": "IELTS-Schreibbewertung",
+    "subtitle": "Sofortige Bewertung von Essays, Briefen und Berichten nach den offiziellen Kriterien.",
+    "task1": "Aufgabe 1",
+    "task2": "Aufgabe 2",
+    "generate": "Schreibaufgabe erstellen"
+  },
+  "reading": {
+    "title": "IELTS-Leseübung",
+    "subtitle": "Authentische Texte. Offizielle Aufgabentypen. Sofortige Leistungsanalyse.",
+    "generate": "Lesetest erstellen"
+  },
+  "listening": {
+    "title": "IELTS-Hörübung",
+    "subtitle": "KI-Audio mit mehreren Stimmen. Nur einmal abgespielt — wie im echten Test. Automatisch nach der offiziellen Band-Skala bewertet.",
+    "testSize": "Testumfang",
+    "singleSection": "Einzelner Teil",
+    "fullTest": "Gesamter Test",
+    "whichSection": "Welcher Teil",
+    "section1": "Teil 1",
+    "section2": "Teil 2",
+    "section3": "Teil 3",
+    "section4": "Teil 4",
+    "officialTests": "Offizielle Tests",
+    "aiGenerator": "KI-Generator",
+    "generate": "Hörtest erstellen",
+    "selectTest": "Test auswählen",
+    "fullTests": "Vollständige Tests",
+    "bySection": "Nach Teil"
+  },
+  "vocab": {
+    "title": "Wortschatz-Decks",
+    "noDecks": "Keine Decks gefunden",
+    "installPrompt": "Installiere das Standard-IELTS-Deck, um sofort loszulegen.",
+    "installDefault": "Standard-IELTS-Deck installieren",
+    "importCustom": "Eigene .apkg importieren",
+    "yourDecks": "Deine Decks",
+    "import": "Importieren"
+  },
+  "history": {
+    "title": "Leistungsanalyse",
+    "subtitle": "Verfolge deinen Fortschritt in allen Modulen.",
+    "speakingTrend": "Entwicklung Sprechen",
+    "writingTrend": "Entwicklung Schreiben",
+    "readingTrend": "Entwicklung Lesen",
+    "listeningTrend": "Entwicklung Hören",
+    "noData": "Noch keine Daten vorhanden.",
+    "recentTests": "Letzte Tests",
+    "band": "Band",
+    "date": "Datum"
+  }
+}

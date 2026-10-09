@@ -5,6 +5,7 @@ import StudentMenu from './StudentMenu';
 import { BrandLogo } from '../common/BrandLogo';
 import StreakBar from '../common/StreakBar';
 import ExamSelector from '../common/ExamSelector';
+import LanguagePicker from '../common/LanguagePicker';
 
 const SUBTITLE = {
   speaking: 'AI Speaking Coach',
@@ -71,6 +72,9 @@ export default function Navbar() {
 
       <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
         <ExamSelector />
+        <div className="hidden md:block">
+          <LanguagePicker />
+        </div>
         <StreakBar />
         {section === 'speaking' && currentEvaluation && (
           <div className="hidden sm:flex items-center gap-2 animate-fade-in">

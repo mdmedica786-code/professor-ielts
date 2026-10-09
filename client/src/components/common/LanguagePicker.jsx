@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 
 export default function LanguagePicker() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
 
   const changeLanguage = (e) => {
     i18n.changeLanguage(e.target.value);
@@ -20,6 +20,7 @@ export default function LanguagePicker() {
         <option value="en">English</option>
         <option value="ru">Русский</option>
         <option value="uz">O'zbek</option>
+        <option value="de">Deutsch 🇩🇪</option>
       </select>
     </div>
   );
