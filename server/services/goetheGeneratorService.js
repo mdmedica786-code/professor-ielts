@@ -28,6 +28,7 @@ const { getGoethePraedikat, evaluateGoetheSpeaking, summarizePronunciation } = r
 const { scorePronunciation } = require("./pronunciationService");
 const { transcribeAudio } = require("./openaiService");
 const { callWithRetry, parseJsonContent, LlmValidationError } = require("../utils/llmRetry");
+const { mixAmbience, sanitizeScene, resolveFfmpegPath } = require("../utils/audioMixer");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -406,7 +407,7 @@ function validateListening(parsed, part) {
   }
 
   const questions = normalizeQuestions(part, parsed.questions, ctx);
-  return { title: parsed.title, speakers: castSpeakers, segments, optionBank, questions };
+  return { title: parsed.title, ambientScene: sanitizeScene(parsed.ambientScene), speakers: castSpeakers, segments, optionBank, questions };
 }
 
 async function mapLimit(items, limit, fn) {
@@ -420,17 +421,6 @@ async function mapLimit(items, limit, fn) {
   });
   await Promise.all(workers);
   return results;
-}
-
-function resolveFfmpegPath() {
-  if (process.env.FFMPEG_PATH) return process.env.FFMPEG_PATH;
-  try {
-    const bundled = require("ffmpeg-static");
-    if (bundled && fs.existsSync(bundled)) return bundled;
-  } catch {
-    /* fall through to system ffmpeg */
-  }
-  return "ffmpeg";
 }
 
 /** Joins mp3 clips into one mp3, padding each with `pauseAfter` seconds of silence. */
@@ -479,7 +469,7 @@ async function mergeClipsWithPauses(clips) {
  * (announced as "Text N" for multi-text parts), with pauses between turns.
  * Returns null if synthesis fails so the client can fall back to browser TTS.
  */
-async function synthesizeListeningAudio({ level, part, speakers, segments }) {
+async function synthesizeListeningAudio({ level, part, speakers, segments, ambientScene = "none" }) {
   const voiceOf = Object.fromEntries(speakers.map((s) => [s.name, s.voice]));
   const plan = [
     { text: `Sie hören jetzt Teil ${part.teil}. ${part.instruction}`, voice: ANNOUNCER_VOICE, pauseAfter: PAUSE_AFTER_INSTRUCTION },
@@ -527,7 +517,8 @@ async function synthesizeListeningAudio({ level, part, speakers, segments }) {
       console.warn("Goethe listening audio merge failed, concatenating clips:", mergeErr.message);
       merged = Buffer.concat(clips.map((c) => c.buffer));
     }
-    return merged.toString("base64");
+    // Real-exam sound: scene ambience at ~12 % plus a slight room reverb.
+    return await mixAmbience(merged.toString("base64"), ambientScene);
   } catch (err) {
     console.warn("Goethe listening TTS failed (client falls back to browser speech):", err.message);
     return null;
@@ -555,7 +546,7 @@ Erstelle jetzt Hören Teil ${part.teil} für das Goethe-Zertifikat ${lvl} exakt 
     seg.utterances.map((u) => ({ ...u, voice: voiceOf[u.speaker], segment: sIdx + 1 }))
   );
   const audioData = withAudio
-    ? await synthesizeListeningAudio({ level: lvl, part, speakers: result.speakers, segments: result.segments })
+    ? await synthesizeListeningAudio({ level: lvl, part, speakers: result.speakers, segments: result.segments, ambientScene: result.ambientScene })
     : null;
 
   return {
@@ -572,6 +563,7 @@ Erstelle jetzt Hören Teil ${part.teil} für das Goethe-Zertifikat ${lvl} exakt 
     segments: result.segments.map(({ label, context }) => ({ label, context })),
     utterances,
     ...(result.optionBank ? { optionBank: result.optionBank } : {}),
+    ambientScene: result.ambientScene,
     audioData,
     audioMimeType: audioData ? "audio/mpeg" : null,
     questions: result.questions,

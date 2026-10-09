@@ -225,6 +225,7 @@ Aufgabenstellung: "${part.instruction}"
 ═══ SKRIPTVORGABE ═══
 ${part.scriptSpec}
 ${listeningScriptRules(part)}
+- "ambientScene" bestimmt die Hintergrundgeräusche der Aufnahme: "cafe" (Café, Kantine, Restaurant), "street" (draußen, Straße, Park), "office" (Büro, Arbeitsplatz, Telefonat), "station" (Bahnhof, Flughafen, Durchsagen) oder "none" (Radiostudio, Interview, Vortrag, Anrufbeantworter). Wähle den Ort, an dem der Hörtext spielt; bei mehreren Texten den häufigsten.
 - Lege in "speakers" ALLE Sprecher an: { "name": "…", "gender": "female|male", "role": "moderator|narrator|guest|speaker" }. Höchstens 4 Sprecher insgesamt.
 - Jede Äußerung in "utterances" nennt in "speaker" exakt einen Namen aus "speakers".
 - Gesprochene Sprache: natürliche Diskursmarker (also, na ja, genau, ach so), Begrüßungen, Rückfragen — aber KEINE Regieanweisungen, Geräusche oder Klammern im Text, denn jeder Text wird wörtlich vorgelesen.
@@ -242,6 +243,7 @@ Fehlerfreies, idiomatisches Deutsch. Fiktive, realistische Namen und Orte aus de
 ═══ JSON-AUSGABEFORMAT (STRENG, KEIN MARKDOWN) ═══
 {
   "title": "Kurzer Thementitel",
+  "ambientScene": "none",
   "speakers": [{ "name": "…", "gender": "female", "role": "moderator" }],
   "segments": [
     {
