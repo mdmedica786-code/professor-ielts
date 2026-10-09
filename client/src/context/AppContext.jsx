@@ -23,8 +23,10 @@ export function AppProvider({ children }) {
   });
   // IELTS module choice (Academic vs General Training) — affects Writing & Reading.
   const [ieltsModule, setIeltsModule] = useLocalStorage('ielts:module', 'academic');
-  // Exam selection ('ielts' for English IELTS, 'goethe' for Goethe-Zertifikat B1 German).
+  // Exam selection ('ielts' for English IELTS, 'goethe' for Goethe-Zertifikat German).
   const [examType, setExamType] = useLocalStorage('app:examType', 'ielts');
+  // Goethe CEFR level selection ('A1' | 'A2' | 'B1' | 'B2' | 'C1'). Default 'B1'.
+  const [goetheLevel, setGoetheLevel] = useLocalStorage('goethe:level', 'B1');
   // Whether the desktop question/task bank is collapsed (preference remembered).
   const [bankCollapsed, setBankCollapsed] = useLocalStorage('ielts:bankCollapsed', false);
 
@@ -204,11 +206,13 @@ export function AppProvider({ children }) {
     selectedWritingTask,
     sidebarOpen,
     testMode,
+    goetheLevel,
 
     // Setters
     setSettings,
     setIeltsModule,
     setExamType,
+    setGoetheLevel,
     switchExam,
     setBankCollapsed,
     toggleBankCollapsed,
@@ -246,6 +250,7 @@ export function AppProvider({ children }) {
     settings,
     ieltsModule,
     examType,
+    goetheLevel,
     bankCollapsed,
     section,
     currentView,
@@ -259,6 +264,7 @@ export function AppProvider({ children }) {
     setSettings,
     setIeltsModule,
     setExamType,
+    setGoetheLevel,
     switchExam,
     setBankCollapsed,
     toggleBankCollapsed,

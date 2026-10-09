@@ -19,6 +19,7 @@ export default function Sidebar() {
     setCurrentEvaluation,
     sidebarOpen,
     closeSidebar,
+    goetheLevel,
   } = useApp();
   const { user, signOut } = useAuth();
 
@@ -73,7 +74,7 @@ export default function Sidebar() {
   ];
 
   const goetheNavItems = [
-    { id: 'goethe-home', icon: Home, label: 'Goethe B1 Übersicht', active: onPractice && !section, onClick: () => goSection(null) },
+    { id: 'goethe-home', icon: Home, label: `Goethe ${goetheLevel} Übersicht`, active: onPractice && !section, onClick: () => goSection(null) },
     { id: 'goethe-sprechen', icon: Mic, label: 'Sprechen (Mündlich)', active: onPractice && section === 'sprechen', onClick: () => goSection('sprechen') },
     { id: 'goethe-schreiben', icon: PenLine, label: 'Schreiben (Schriftlich)', active: onPractice && section === 'schreiben', onClick: () => goSection('schreiben') },
     { id: 'goethe-lesen', icon: BookOpenText, label: 'Lesen (Leseverstehen)', active: onPractice && section === 'lesen', onClick: () => goSection('lesen') },

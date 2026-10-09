@@ -16,76 +16,34 @@ import {
   Info,
   ChevronRight,
   ShieldCheck,
+  GraduationCap,
 } from 'lucide-react';
-import { calculateGoetheReadingListeningScore } from '../../data/goethe/goetheGradingRules';
+import { calculateGoetheReadingListeningScore, GOETHE_LEVEL_SPECS } from '../../data/goethe/goetheGradingRules';
+import { GOETHE_TOPICS } from '../../data/goethe/goetheTopics';
 
-const GOETHE_MODULES = [
-  {
-    id: 'lesen',
-    title: 'Lesen (Leseverstehen)',
-    subtitle: '5 Teile · 30 Aufgaben',
-    time: '65 Minuten',
-    points: '100 Punkte (Bestehen: ≥ 60 Pkt / 18 Richtige)',
-    icon: BookOpenText,
-    accent: 'from-emerald-500 to-teal-700',
-    border: 'border-emerald-200 hover:border-emerald-400',
-    ring: 'hover:shadow-[0_24px_48px_-15px_rgba(16,185,129,0.3)]',
-    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    partsDesc: 'Teil 1: Blog (R/F) · Teil 2: 2 Presseartikel (a/b/c) · Teil 3: Anzeigenzuordnung (A–J) · Teil 4: Meinungen (Ja/Nein) · Teil 5: Hausordnung (a/b/c)',
-  },
-  {
-    id: 'hoeren',
-    title: 'Hören (Hörverstehen)',
-    subtitle: '4 Teile · 30 Aufgaben',
-    time: 'ca. 40 Minuten',
-    points: '100 Punkte (Bestehen: ≥ 60 Pkt / 18 Richtige)',
-    icon: Headphones,
-    accent: 'from-amber-500 to-orange-700',
-    border: 'border-amber-200 hover:border-amber-400',
-    ring: 'hover:shadow-[0_24px_48px_-15px_rgba(245,158,11,0.3)]',
-    badge: 'bg-amber-50 text-amber-700 border-amber-200',
-    partsDesc: 'Teil 1: Durchsagen (2×) · Teil 2: Vortrag/Führung (1×) · Teil 3: Gespräch (1×) · Teil 4: Radiodiskussion „Wer sagt was?“ (2×)',
-  },
-  {
-    id: 'schreiben',
-    title: 'Schreiben (Schriftlicher Ausdruck)',
-    subtitle: '3 Aufgaben · Freies Schreiben',
-    time: '60 Minuten',
-    points: '100 Punkte (40 + 40 + 20 Pkt)',
-    icon: PenLine,
-    accent: 'from-sky-500 to-blue-700',
-    border: 'border-sky-200 hover:border-sky-400',
-    ring: 'hover:shadow-[0_24px_48px_-15px_rgba(14,165,233,0.3)]',
-    badge: 'bg-sky-50 text-sky-700 border-sky-200',
-    partsDesc: 'Aufgabe 1: Informelle E-Mail (~80 W, 40 Pkt) · Aufgabe 2: Forumsbeitrag (~80 W, 40 Pkt) · Aufgabe 3: Formelle E-Mail (~40 W, 20 Pkt)',
-  },
-  {
-    id: 'sprechen',
-    title: 'Sprechen (Mündliche Prüfung)',
-    subtitle: '3 Teile + Aussprache',
-    time: 'ca. 15 Min (+ 15 Min Vorbereitung)',
-    points: '100 Punkte (28 + 40 + 16 + 16 Pkt)',
-    icon: Mic,
-    accent: 'from-rose-500 to-red-700',
-    border: 'border-rose-200 hover:border-rose-400',
-    ring: 'hover:shadow-[0_24px_48px_-15px_rgba(244,63,94,0.3)]',
-    badge: 'bg-rose-50 text-rose-700 border-rose-200',
-    partsDesc: 'Teil 1: Gemeinsam planen (28 Pkt) · Teil 2: 5-Folien-Präsentation (40 Pkt) · Teil 3: Feedback & Fragen (16 Pkt) · Aussprache (16 Pkt)',
-  },
-];
+const LEVEL_COLORS = {
+  A1: { border: 'border-emerald-300', bg: 'bg-emerald-50 text-emerald-800' },
+  A2: { border: 'border-teal-300', bg: 'bg-teal-50 text-teal-800' },
+  B1: { border: 'border-amber-300', bg: 'bg-amber-50 text-amber-800' },
+  B2: { border: 'border-blue-300', bg: 'bg-blue-50 text-blue-800' },
+  C1: { border: 'border-purple-300', bg: 'bg-purple-50 text-purple-800' },
+};
 
 export default function GoetheSectionPicker() {
-  const { setSection, setCurrentView, setCurrentEvaluation } = useApp();
+  const { setSection, setCurrentView, setCurrentEvaluation, goetheLevel, setGoetheLevel } = useApp();
   const [activeTab, setActiveTab] = useState('pruefung'); // 'pruefung' | 'leitfaden' | 'rechner'
 
-  // Calculator states
-  const [calcLesen, setCalcLesen] = useState(21);
-  const [calcHoeren, setCalcHoeren] = useState(19);
-  const [calcSchreiben, setCalcSchreiben] = useState(72);
-  const [calcSprechen, setCalcSprechen] = useState(76);
+  const currentLevel = goetheLevel || 'B1';
+  const spec = GOETHE_LEVEL_SPECS[currentLevel] || GOETHE_LEVEL_SPECS.B1;
 
-  const lesenScore = calculateGoetheReadingListeningScore(calcLesen);
-  const hoerenScore = calculateGoetheReadingListeningScore(calcHoeren);
+  // Calculator states
+  const [calcLesen, setCalcLesen] = useState(spec.lesen?.passRaw || 18);
+  const [calcHoeren, setCalcHoeren] = useState(spec.hoeren?.passRaw || 18);
+  const [calcSchreiben, setCalcSchreiben] = useState(70);
+  const [calcSprechen, setCalcSprechen] = useState(72);
+
+  const lesenScore = calculateGoetheReadingListeningScore(calcLesen, currentLevel);
+  const hoerenScore = calculateGoetheReadingListeningScore(calcHoeren, currentLevel, 'hoeren');
   const schreibenPassed = calcSchreiben >= 60;
   const sprechenPassed = calcSprechen >= 60;
   const allModulesPassed = lesenScore.passed && hoerenScore.passed && schreibenPassed && sprechenPassed;
@@ -97,22 +55,98 @@ export default function GoetheSectionPicker() {
     setSection(secId);
   };
 
+  const dynamicModules = [
+    {
+      id: 'lesen',
+      title: `Lesen (Leseverstehen) · ${currentLevel}`,
+      subtitle: `${spec.lesen.partsCount} Teile · ${spec.lesen.totalQuestions} Aufgaben`,
+      time: `${spec.lesen.timeMinutes} Minuten`,
+      points: `100 Punkte (Bestehen: ≥ 60 Pkt / ${spec.lesen.passRaw} Richtige)`,
+      icon: BookOpenText,
+      accent: 'from-emerald-500 to-teal-700',
+      border: 'border-emerald-200 hover:border-emerald-400',
+      ring: 'hover:shadow-[0_24px_48px_-15px_rgba(16,185,129,0.3)]',
+      badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      partsDesc: spec.lesen.partsDesc,
+    },
+    {
+      id: 'hoeren',
+      title: `Hören (Hörverstehen) · ${currentLevel}`,
+      subtitle: `${spec.hoeren.partsCount} Teile · ${spec.hoeren.totalQuestions} Aufgaben`,
+      time: `ca. ${spec.hoeren.timeMinutes} Minuten`,
+      points: `100 Punkte (Bestehen: ≥ 60 Pkt / ${spec.hoeren.passRaw} Richtige)`,
+      icon: Headphones,
+      accent: 'from-amber-500 to-orange-700',
+      border: 'border-amber-200 hover:border-amber-400',
+      ring: 'hover:shadow-[0_24px_48px_-15px_rgba(245,158,11,0.3)]',
+      badge: 'bg-amber-50 text-amber-700 border-amber-200',
+      partsDesc: spec.hoeren.partsDesc,
+    },
+    {
+      id: 'schreiben',
+      title: `Schreiben (Schriftlicher Ausdruck) · ${currentLevel}`,
+      subtitle: `${spec.schreiben.partsCount} Aufgaben · Freie Textproduktion`,
+      time: `${spec.schreiben.timeMinutes} Minuten`,
+      points: '100 Punkte (Bestehen: ≥ 60 Pkt)',
+      icon: PenLine,
+      accent: 'from-sky-500 to-blue-700',
+      border: 'border-sky-200 hover:border-sky-400',
+      ring: 'hover:shadow-[0_24px_48px_-15px_rgba(14,165,233,0.3)]',
+      badge: 'bg-sky-50 text-sky-700 border-sky-200',
+      partsDesc: spec.schreiben.partsDesc,
+    },
+    {
+      id: 'sprechen',
+      title: `Sprechen (Mündliche Prüfung) · ${currentLevel}`,
+      subtitle: `${spec.sprechen.partsCount} Teile · Interaktiv mit KI-Partner`,
+      time: `ca. ${spec.sprechen.timeMinutes} Minuten`,
+      points: '100 Punkte (Bestehen: ≥ 60 Pkt)',
+      icon: Mic,
+      accent: 'from-rose-500 to-red-700',
+      border: 'border-rose-200 hover:border-rose-400',
+      ring: 'hover:shadow-[0_24px_48px_-15px_rgba(244,63,94,0.3)]',
+      badge: 'bg-rose-50 text-rose-700 border-rose-200',
+      partsDesc: spec.sprechen.partsDesc,
+    },
+  ];
+
   return (
-    <div className="min-h-full flex flex-col items-center px-4 py-8 max-w-6xl mx-auto animate-fade-in">
-      {/* Hero Header with German Banner */}
+    <div className="min-h-full flex flex-col items-center px-4 py-8 max-w-6xl mx-auto animate-fade-in text-left">
+      {/* Hero Header with German Banner & Level Selector */}
       <div className="w-full text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-semibold mb-3 shadow-xs">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 text-amber-900 text-xs font-semibold mb-3 shadow-xs">
           <span className="text-base">🇩🇪</span>
-          <span>Goethe-Zertifikat B1 · Prüfungsstandard Stand September 2025</span>
+          <span>Goethe-Zertifikat {currentLevel} · {spec.label}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
         </div>
 
         <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-          Deutscher B1 Prüfungstrainer
+          Deutscher {currentLevel} Prüfungstrainer
         </h1>
         <p className="text-sm md:text-base text-slate-600 max-w-2xl mx-auto">
-          Prüfungssimulation, KI-Bewertung nach offiziellen Goethe-Kriterien, authentische Aufgaben &amp; Notenberechnung nach dem Gemeinsamen Europäischen Referenzrahmen (GER).
+          Dynamische Prüfungssimulation für jedes GER-Niveau (A2–C1), KI-Prüfungspartner mit Spracheingabe &amp; Sprachausgabe, sowie authentische Themenauswahl.
         </p>
+
+        {/* Level Switcher Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Niveau wählen:</span>
+          {['A2', 'B1', 'B2', 'C1'].map((lvl) => {
+            const isActive = currentLevel === lvl;
+            return (
+              <button
+                key={lvl}
+                onClick={() => setGoetheLevel(lvl)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs ${
+                  isActive
+                    ? 'bg-slate-900 text-white ring-2 ring-amber-400 scale-105'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                {lvl} ({GOETHE_LEVEL_SPECS[lvl]?.subLabel || lvl})
+              </button>
+            );
+          })}
+        </div>
 
         {/* Tab switchers */}
         <div className="flex justify-center mt-6 gap-2">
@@ -150,59 +184,53 @@ export default function GoetheSectionPicker() {
         </div>
       </div>
 
+      {/* TAB 1: 4 Modules Grid */}
       {activeTab === 'pruefung' && (
-        <>
-          {/* Official Pass Rule Banner */}
-          <div className="w-full bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200/90 rounded-2xl p-4 mb-6 flex items-start sm:items-center gap-3 shadow-xs">
-            <Award className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-            <div className="text-xs md:text-sm text-slate-800 leading-relaxed">
-              <span className="font-bold text-amber-900">Modulares Goethe-System:</span> Sie müssen jedes Modul separat mit mindestens <strong className="text-amber-900 font-bold">60 von 100 Punkten</strong> bestehen. Es gibt keinen Notenausgleich zwischen den Modulen. Bestanden wird ab 18/30 Items (Lesen/Hören).
-            </div>
-          </div>
-
-          {/* 4 Core Modules Grid */}
-          <div className="w-full grid gap-4 sm:grid-cols-2 mb-8">
-            {GOETHE_MODULES.map((m) => {
+        <div className="w-full flex flex-col gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {dynamicModules.map((m) => {
               const Icon = m.icon;
               return (
                 <div
                   key={m.id}
                   onClick={() => pickSection(m.id)}
-                  className={`group relative overflow-hidden rounded-2xl border bg-white p-5 cursor-pointer transition-all duration-300 shadow-sm ${m.border} ${m.ring} hover:-translate-y-1 flex flex-col justify-between`}
+                  className={`group relative flex flex-col justify-between p-6 rounded-3xl bg-white border ${m.border} shadow-sm transition-all duration-300 hover:-translate-y-1 ${m.ring} cursor-pointer`}
                 >
-                  {/* Subtle top color bar */}
-                  <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${m.accent}`} />
-
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.accent} flex items-center justify-center text-white shadow-sm`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-base md:text-lg text-slate-900 group-hover:text-slate-950">
-                            {m.title}
-                          </h3>
-                          <span className="text-xs text-slate-500 font-medium">{m.subtitle}</span>
-                        </div>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`p-3 rounded-2xl bg-gradient-to-br ${m.accent} text-white shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon className="w-6 h-6" />
                       </div>
-                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${m.badge}`}>
-                        {m.time}
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${m.badge}`}>
+                        {m.points}
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-600 mb-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-1">
+                      {m.title}
+                    </h2>
+                    <p className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-2">
+                      <span>{m.subtitle}</span>
+                      <span>·</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        {m.time}
+                      </span>
+                    </p>
+
+                    <p className="text-xs text-slate-600 leading-relaxed mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
                       {m.partsDesc}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-700">
-                      {m.points}
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
+                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      Dynamisch generieren oder Standardtest
                     </span>
-                    <button className="flex items-center gap-1 text-xs font-bold text-slate-900 group-hover:translate-x-0.5 transition-transform">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold group-hover:bg-brand-600 transition-colors">
                       <span>Starten</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -210,267 +238,157 @@ export default function GoetheSectionPicker() {
             })}
           </div>
 
-          {/* Quick Learning Tools Grid */}
-          <div className="w-full">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">
-              Prüfungsvorbereitung &amp; Lernwerkzeuge
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <button
-                onClick={() => pickSection('themen')}
-                className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all text-left flex items-start gap-3 group"
-              >
-                <div className="p-2 rounded-lg bg-purple-50 text-purple-700 group-hover:bg-purple-100 transition-colors">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
-                    Themenkatalog C1–C15
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Alle 15 B1-Prüfungsthemen mit 450+ Kernwörtern, Nomen &amp; Sprechimpulsen.
-                  </p>
-                </div>
-              </button>
+          {/* Additional Goethe Resources Banner */}
+          <div className="grid gap-3 sm:grid-cols-3 pt-4 border-t border-slate-200">
+            <button
+              onClick={() => pickSection('themen')}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-left transition-all hover:shadow-xs flex items-center gap-3"
+            >
+              <div className="p-2.5 rounded-xl bg-purple-50 text-purple-700">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">Themenkatalog C1–C15</h4>
+                <p className="text-[11px] text-slate-500">15 thematische Wortschatzmodule</p>
+              </div>
+            </button>
 
-              <button
-                onClick={() => pickSection('redemittel')}
-                className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all text-left flex items-start gap-3 group"
-              >
-                <div className="p-2 rounded-lg bg-blue-50 text-blue-700 group-hover:bg-blue-100 transition-colors">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
-                    Redemittel &amp; Grammatik
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Satzmuster für Meinung, 5-Folien-Präsentation, E-Mail-Formeln &amp; B1-Konnektoren.
-                  </p>
-                </div>
-              </button>
+            <button
+              onClick={() => pickSection('redemittel')}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-left transition-all hover:shadow-xs flex items-center gap-3"
+            >
+              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">Redemittel &amp; Grammatik</h4>
+                <p className="text-[11px] text-slate-500">Prüfungsformulierungen für Dialoge</p>
+              </div>
+            </button>
 
-              <button
-                onClick={() => pickSection('plan')}
-                className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all text-left flex items-start gap-3 group"
-              >
-                <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100 transition-colors">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                    8-Wochen-Trainingsplan
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Strukturierter Lernplan, Diagnostik-Tracker und offizielle Selbstbewertungsbögen.
-                  </p>
-                </div>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
-      {activeTab === 'leitfaden' && (
-        <div className="w-full bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-xs animate-fade-in text-left">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Info className="w-6 h-6 text-brand-500" />
-            Goethe-Zertifikat B1 — Offizielles Prüfungsformat
-          </h2>
-
-          <div className="grid gap-6 md:grid-cols-2 text-sm text-slate-700">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <h3 className="font-bold text-slate-900 text-base mb-2">Prüfungsteile &amp; Zeiten</h3>
-              <ul className="space-y-2">
-                <li className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="font-medium">Lesen (5 Teile, 30 Items)</span>
-                  <span className="text-slate-600 font-semibold">65 Min.</span>
-                </li>
-                <li className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="font-medium">Hören (4 Teile, 30 Items)</span>
-                  <span className="text-slate-600 font-semibold">ca. 40 Min.</span>
-                </li>
-                <li className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="font-medium">Schreiben (3 Aufgaben)</span>
-                  <span className="text-slate-600 font-semibold">60 Min.</span>
-                </li>
-                <li className="flex justify-between pb-1">
-                  <span className="font-medium">Sprechen (Paarprüfung, 3 Teile)</span>
-                  <span className="text-slate-600 font-semibold">ca. 15 Min.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <h3 className="font-bold text-slate-900 text-base mb-2">Notenstufen (Prädikate)</h3>
-              <ul className="space-y-1.5">
-                <li className="flex justify-between">
-                  <span>100–90 Punkte</span>
-                  <span className="font-bold text-emerald-700">sehr gut</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>89–80 Punkte</span>
-                  <span className="font-bold text-blue-700">gut</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>79–70 Punkte</span>
-                  <span className="font-bold text-amber-700">befriedigend</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>69–60 Punkte</span>
-                  <span className="font-bold text-orange-700">ausreichend (Bestanden)</span>
-                </li>
-                <li className="flex justify-between border-t border-slate-200 pt-1">
-                  <span>59–0 Punkte</span>
-                  <span className="font-bold text-rose-700">nicht bestanden</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-6 p-4 rounded-xl bg-amber-50/60 border border-amber-200 text-xs md:text-sm text-slate-800">
-            <h4 className="font-bold text-amber-900 mb-1">Wichtige Prüfungsregeln:</h4>
-            <p className="mb-2">
-              • <strong>Knock-Out-Regel Schreiben:</strong> Wenn das Kriterium <em>Erfüllung</em> mit Band E (0 Punkte) bewertet wird (z.B. bei unter 50% der geforderten Wortzahl oder Thema verfehlt), erhält die gesamte Aufgabe 0 Punkte!
-            </p>
-            <p className="mb-2">
-              • <strong>Antwortbogen-Übertrag:</strong> Bei Lesen und Hören sind jeweils ca. 5 Minuten zum Übertrag auf den Antwortbogen eingeplant. Nur der Antwortbogen wird gewertet.
-            </p>
-            <p>
-              • <strong>Sprechen Notizen:</strong> In der 15-minütigen Vorbereitungszeit dürfen kurze Stichpunkte notiert werden. Es muss frei gesprochen werden – Ablesen führt zu Punktabzug.
-            </p>
+            <button
+              onClick={() => pickSection('plan')}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-left transition-all hover:shadow-xs flex items-center gap-3"
+            >
+              <div className="p-2.5 rounded-xl bg-rose-50 text-rose-700">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">Trainingsplan</h4>
+                <p className="text-[11px] text-slate-500">Gezielte Vorbereitung auf die Prüfung</p>
+              </div>
+            </button>
           </div>
         </div>
       )}
 
+      {/* TAB 2: Guide / Exam Regulations */}
+      {activeTab === 'leitfaden' && (
+        <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col gap-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+            <ShieldCheck className="w-6 h-6 text-brand-600" />
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Offizielle Goethe-Prüfungsordnung für Niveau {currentLevel}
+              </h2>
+              <p className="text-xs text-slate-500">
+                Gemeinsamer Europäischer Referenzrahmen (GER)
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+              <span className="font-bold text-slate-900 text-sm">Prüfungsdauer</span>
+              <p className="text-slate-600">
+                Lesen: {spec.lesen.timeMinutes} Min · Hören: {spec.hoeren.timeMinutes} Min · Schreiben: {spec.schreiben.timeMinutes} Min · Sprechen: ca. {spec.sprechen.timeMinutes} Min.
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+              <span className="font-bold text-slate-900 text-sm">Bestehensgrenze</span>
+              <p className="text-slate-600">
+                In jedem Modul müssen mindestens 60 Punkte (60%) erreicht werden.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: Score Calculator */}
       {activeTab === 'rechner' && (
-        <div className="w-full bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-xs animate-fade-in text-left">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2">
-            <Calculator className="w-6 h-6 text-brand-500" />
-            Goethe B1 Punkte- &amp; Notenrechner
-          </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Geben Sie Ihre Rohpunkte aus den vier Modulen ein, um Ihre offizielle Goethe-Gesamtnote und das Prädikat zu berechnen.
-          </p>
+        <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col gap-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Goethe Noten- &amp; Prädikatsrechner</h2>
+              <p className="text-xs text-slate-500">Niveau {currentLevel} · Offizielle Umrechnungstabelle</p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${allModulesPassed ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-300'}`}>
+              {allModulesPassed ? 'Gesamtprüfung Bestanden' : 'Nicht bestanden (mind. ein Modul < 60P)'}
+            </span>
+          </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Input sliders */}
-            <div className="space-y-4">
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex justify-between text-sm font-semibold mb-1">
-                  <span>Lesen: {calcLesen} / 30 richtige Items</span>
-                  <span className="text-brand-600 font-bold">{lesenScore.points100} / 100 Pkt</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="30"
-                  value={calcLesen}
-                  onChange={(e) => setCalcLesen(parseInt(e.target.value))}
-                  className="w-full accent-brand-500 cursor-pointer"
-                />
-                <span className={`text-[11px] font-semibold ${lesenScore.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {lesenScore.passed ? '✓ Bestanden (≥18 Items)' : '✗ Nicht bestanden (mind. 18 erforderlich)'}
-                </span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex justify-between text-sm font-semibold mb-1">
-                  <span>Hören: {calcHoeren} / 30 richtige Items</span>
-                  <span className="text-brand-600 font-bold">{hoerenScore.points100} / 100 Pkt</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="30"
-                  value={calcHoeren}
-                  onChange={(e) => setCalcHoeren(parseInt(e.target.value))}
-                  className="w-full accent-brand-500 cursor-pointer"
-                />
-                <span className={`text-[11px] font-semibold ${hoerenScore.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {hoerenScore.passed ? '✓ Bestanden (≥18 Items)' : '✗ Nicht bestanden (mind. 18 erforderlich)'}
-                </span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex justify-between text-sm font-semibold mb-1">
-                  <span>Schreiben: {calcSchreiben} / 100 Punkte</span>
-                  <span className={`font-bold ${schreibenPassed ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {schreibenPassed ? 'Bestanden' : 'Nicht bestanden'}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={calcSchreiben}
-                  onChange={(e) => setCalcSchreiben(parseInt(e.target.value))}
-                  className="w-full accent-brand-500 cursor-pointer"
-                />
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex justify-between text-sm font-semibold mb-1">
-                  <span>Sprechen: {calcSprechen} / 100 Punkte</span>
-                  <span className={`font-bold ${sprechenPassed ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {sprechenPassed ? 'Bestanden' : 'Nicht bestanden'}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={calcSprechen}
-                  onChange={(e) => setCalcSprechen(parseInt(e.target.value))}
-                  className="w-full accent-brand-500 cursor-pointer"
-                />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <label className="font-bold text-slate-700 block mb-1">Lesen (Richtige von {spec.lesen.maxRaw})</label>
+              <input
+                type="number"
+                min="0"
+                max={spec.lesen.maxRaw}
+                value={calcLesen}
+                onChange={(e) => setCalcLesen(Math.max(0, Math.min(spec.lesen.maxRaw, parseInt(e.target.value) || 0)))}
+                className="w-full p-2 rounded-lg border border-slate-300 text-sm font-bold mb-2"
+              />
+              <div className="flex justify-between font-bold">
+                <span>{lesenScore.points100} / 100 Pkt</span>
+                <span className={lesenScore.passed ? 'text-emerald-600' : 'text-rose-600'}>{lesenScore.praedikat.label}</span>
               </div>
             </div>
 
-            {/* Calculated Result Card */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col justify-between shadow-md">
-              <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                  Prüfungsauswertung
-                </span>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-4xl md:text-5xl font-extrabold text-white">
-                    {avgPoints}
-                  </span>
-                  <span className="text-slate-400 text-lg">/ 100 Ø</span>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-slate-700/80 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Lesen (GER B1):</span>
-                    <span className="font-bold text-white">{lesenScore.points100} Pkt ({lesenScore.praedikat.label})</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Hören (GER B1):</span>
-                    <span className="font-bold text-white">{hoerenScore.points100} Pkt ({hoerenScore.praedikat.label})</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Schreiben (GER B1):</span>
-                    <span className="font-bold text-white">{calcSchreiben} Pkt</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Sprechen (GER B1):</span>
-                    <span className="font-bold text-white">{calcSprechen} Pkt</span>
-                  </div>
-                </div>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <label className="font-bold text-slate-700 block mb-1">Hören (Richtige von {spec.hoeren.maxRaw})</label>
+              <input
+                type="number"
+                min="0"
+                max={spec.hoeren.maxRaw}
+                value={calcHoeren}
+                onChange={(e) => setCalcHoeren(Math.max(0, Math.min(spec.hoeren.maxRaw, parseInt(e.target.value) || 0)))}
+                className="w-full p-2 rounded-lg border border-slate-300 text-sm font-bold mb-2"
+              />
+              <div className="flex justify-between font-bold">
+                <span>{hoerenScore.points100} / 100 Pkt</span>
+                <span className={hoerenScore.passed ? 'text-emerald-600' : 'text-rose-600'}>{hoerenScore.praedikat.label}</span>
               </div>
+            </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-700">
-                {allModulesPassed ? (
-                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-base">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                    <span>Gesamtprüfung bestanden (B1-Zertifikat erteilt)!</span>
-                  </div>
-                ) : (
-                  <div className="text-rose-400 text-xs md:text-sm font-semibold">
-                    Mindestens ein Modul liegt unter 60 Punkten. Das Zertifikat wird erst erteilt, wenn alle 4 Module bestanden sind.
-                  </div>
-                )}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <label className="font-bold text-slate-700 block mb-1">Schreiben (Punkte von 100)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={calcSchreiben}
+                onChange={(e) => setCalcSchreiben(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
+                className="w-full p-2 rounded-lg border border-slate-300 text-sm font-bold mb-2"
+              />
+              <div className="flex justify-between font-bold">
+                <span>{calcSchreiben} / 100 Pkt</span>
+                <span className={schreibenPassed ? 'text-emerald-600' : 'text-rose-600'}>{schreibenPassed ? 'Bestanden' : 'Nicht bestanden'}</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <label className="font-bold text-slate-700 block mb-1">Sprechen (Punkte von 100)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={calcSprechen}
+                onChange={(e) => setCalcSprechen(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
+                className="w-full p-2 rounded-lg border border-slate-300 text-sm font-bold mb-2"
+              />
+              <div className="flex justify-between font-bold">
+                <span>{calcSprechen} / 100 Pkt</span>
+                <span className={sprechenPassed ? 'text-emerald-600' : 'text-rose-600'}>{sprechenPassed ? 'Bestanden' : 'Nicht bestanden'}</span>
               </div>
             </div>
           </div>

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { GOETHE_TOPICS } from '../../data/goethe/goetheTopics';
 import { GOETHE_SPEAKING_TASKS } from '../../data/goethe/goetheSpeakingTasks';
 import api from '../../api/client';
 import {
   Mic,
+  MicOff,
   Square,
   Play,
   RotateCcw,
@@ -13,61 +15,249 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  HelpCircle,
-  Presentation,
-  Calendar,
+  Volume2,
+  VolumeX,
   MessageSquare,
   Award,
+  Users,
+  Presentation,
+  ArrowRight,
+  HelpCircle,
 } from 'lucide-react';
 
 export default function GoetheSprechenRoom() {
-  const { studentName, saveEvaluation } = useApp();
+  const { studentName, saveEvaluation, goetheLevel } = useApp();
 
-  const [activePart, setActivePart] = useState(2); // 1: Planen, 2: Präsentieren, 3: Q&A
-  const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
+  // Mode: 'dialogue' (Interactive back-and-forth with partner) vs 'monologue' (5-slide presentation)
+  const [speakingMode, setSpeakingMode] = useState('dialogue');
 
-  // Scratchpad for 15-min preparation
-  const [prepNotes, setPrepNotes] = useState({
-    slide1: '',
-    slide2: '',
-    slide3: '',
-    slide4: '',
-    slide5: '',
-    general: '',
-  });
+  // Generator & task settings
+  const [selectedLevel, setSelectedLevel] = useState(goetheLevel || 'B1');
+  const [selectedTopic, setSelectedTopic] = useState('Freizeit und Hobbys');
+  const [customTopic, setCustomTopic] = useState('');
+  const [selectedTaskType, setSelectedTaskType] = useState('Teil 1: Gemeinsam etwas planen');
 
-  // Recording states
+  // Live Back-and-Forth Dialogue State
+  const [dialogueActive, setDialogueActive] = useState(false);
+  const [history, setHistory] = useState([]); // [ { id, speaker: 'partner'|'candidate', text, audioUrl, redemittelTips } ]
+  const [currentTips, setCurrentTips] = useState([]);
+  const [isPartnerResponding, setIsPartnerResponding] = useState(false);
+  const [isPartnerSpeaking, setIsPartnerSpeaking] = useState(false);
+  const [inputText, setInputText] = useState('');
+
+  // Audio recording state
   const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(null);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [transcript, setTranscript] = useState('');
-  const [inputMode, setInputMode] = useState('audio'); // 'audio' | 'text'
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timerIntervalRef = useRef(null);
+  const activeAudioRef = useRef(null);
 
+  // Evaluation state
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const timerIntervalRef = useRef(null);
+  // Auto-scroll chat to bottom
+  const chatBottomRef = useRef(null);
 
-  const currentTeil2Topics = GOETHE_SPEAKING_TASKS.teil2 || [];
-  const currentTopic = currentTeil2Topics[selectedTopicIndex] || currentTeil2Topics[0];
+  // Sync level with app context
+  useEffect(() => {
+    if (goetheLevel) setSelectedLevel(goetheLevel);
+  }, [goetheLevel]);
 
-  const currentTeil1Tasks = GOETHE_SPEAKING_TASKS.teil1 || [];
-  const currentPlanTask = currentTeil1Tasks[selectedTopicIndex] || currentTeil1Tasks[0];
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history, isPartnerResponding]);
 
-  // Clean up audio on unmount or reset
+  // Clean up audio on unmount
   useEffect(() => {
     return () => {
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
     };
-  }, [audioUrl]);
+  }, []);
 
-  const startRecording = async () => {
+  const playPartnerAudio = (base64Audio, textFallback) => {
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
+    }
+
+    if (base64Audio) {
+      try {
+        const audioUrl = `data:audio/mp3;base64,${base64Audio}`;
+        const audio = new Audio(audioUrl);
+        activeAudioRef.current = audio;
+        setIsPartnerSpeaking(true);
+
+        audio.onended = () => {
+          setIsPartnerSpeaking(false);
+          activeAudioRef.current = null;
+        };
+        audio.onerror = () => {
+          console.warn('Audio playback error, using SpeechSynthesis fallback.');
+          setIsPartnerSpeaking(false);
+          fallbackTTS(textFallback);
+        };
+
+        audio.play().catch((err) => {
+          console.warn('Audio autoplay prevented by browser:', err);
+          setIsPartnerSpeaking(false);
+          fallbackTTS(textFallback);
+        });
+        return;
+      } catch (err) {
+        console.warn('Base64 audio setup failed:', err);
+      }
+    }
+
+    fallbackTTS(textFallback);
+  };
+
+  const fallbackTTS = (text) => {
+    if (!window.speechSynthesis || !text) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE';
+    u.rate = selectedLevel === 'A2' ? 0.9 : 1.0;
+    setIsPartnerSpeaking(true);
+    u.onend = () => setIsPartnerSpeaking(false);
+    u.onerror = () => setIsPartnerSpeaking(false);
+    window.speechSynthesis.speak(u);
+  };
+
+  // Start dialogue with initial greeting from partner
+  const handleStartDialogue = async () => {
+    setDialogueActive(true);
+    setHistory([]);
+    setEvaluation(null);
     setErrorMsg(null);
+    setCurrentTips([]);
+    setIsPartnerResponding(true);
+
+    const topicToUse = customTopic.trim() || selectedTopic;
+    try {
+      const res = await api.post('/goethe/speaking/partner-turn', {
+        level: selectedLevel,
+        topic: topicToUse,
+        taskType: selectedTaskType,
+        history: [],
+        studentText: '',
+      });
+
+      if (res.data?.success && res.data.data) {
+        const data = res.data.data;
+        const initialTurn = {
+          id: 'turn_1',
+          speaker: 'partner',
+          text: data.replyText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setHistory([initialTurn]);
+        setCurrentTips(data.redemittelTips || []);
+        playPartnerAudio(data.audioBase64, data.replyText);
+      } else {
+        setErrorMsg('Der Prüfungspartner konnte nicht gestartet werden.');
+      }
+    } catch (err) {
+      console.error('Start dialogue error:', err);
+      setErrorMsg(err.response?.data?.error || 'Verbindung zum Server fehlgeschlagen.');
+    } finally {
+      setIsPartnerResponding(false);
+    }
+  };
+
+  // Send turn (either from audio blob or manual text)
+  const handleSendTurn = async (audioBlobToSend = null, textToSend = '') => {
+    const topicToUse = customTopic.trim() || selectedTopic;
+    const currentText = (textToSend || inputText).trim();
+
+    if (!audioBlobToSend && !currentText) return;
+
+    setIsPartnerResponding(true);
+    setErrorMsg(null);
+    setInputText('');
+
+    // Optimistically add candidate turn if text is already known
+    if (currentText) {
+      setHistory((prev) => [
+        ...prev,
+        {
+          id: `cand_${Date.now()}`,
+          speaker: 'candidate',
+          text: currentText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+    }
+
+    try {
+      let res;
+      if (audioBlobToSend) {
+        const formData = new FormData();
+        formData.append('audio', audioBlobToSend, 'candidate_turn.webm');
+        formData.append('level', selectedLevel);
+        formData.append('topic', topicToUse);
+        formData.append('taskType', selectedTaskType);
+        formData.append('history', JSON.stringify(history));
+
+        res = await api.post('/goethe/speaking/partner-turn', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        res = await api.post('/goethe/speaking/partner-turn', {
+          level: selectedLevel,
+          topic: topicToUse,
+          taskType: selectedTaskType,
+          history,
+          studentText: currentText,
+        });
+      }
+
+      if (res.data?.success && res.data.data) {
+        const data = res.data.data;
+
+        // If audio was transcribed, update or add the candidate text
+        if (audioBlobToSend && data.studentTranscript) {
+          setHistory((prev) => [
+            ...prev,
+            {
+              id: `cand_${Date.now()}`,
+              speaker: 'candidate',
+              text: data.studentTranscript,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            },
+          ]);
+        }
+
+        // Add partner's response
+        const partnerTurn = {
+          id: `partner_${Date.now()}`,
+          speaker: 'partner',
+          text: data.replyText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setHistory((prev) => [...prev, partnerTurn]);
+        setCurrentTips(data.redemittelTips || []);
+        playPartnerAudio(data.audioBase64, data.replyText);
+      } else {
+        setErrorMsg('Fehler bei der Antwort des Partners.');
+      }
+    } catch (err) {
+      console.error('Turn exchange error:', err);
+      setErrorMsg(err.response?.data?.error || 'Fehler bei der Audio-Übertragung.');
+    } finally {
+      setIsPartnerResponding(false);
+    }
+  };
+
+  // Start recording from microphone
+  const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
@@ -82,10 +272,8 @@ export default function GoetheSprechenRoom() {
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setAudioBlob(blob);
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
         stream.getTracks().forEach((track) => track.stop());
+        handleSendTurn(blob, '');
       };
 
       mediaRecorder.start(250);
@@ -97,10 +285,11 @@ export default function GoetheSprechenRoom() {
       }, 1000);
     } catch (err) {
       console.error('Microphone access error:', err);
-      setErrorMsg('Mikrofonzugriff nicht möglich. Bitte erlauben Sie den Mikrofonzugriff im Browser oder nutzen Sie den Text-Modus.');
+      setErrorMsg('Mikrofonzugriff nicht möglich. Bitte erlauben Sie den Mikrofonzugriff im Browser oder nutzen Sie die Texteingabe.');
     }
   };
 
+  // Stop recording
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
@@ -109,68 +298,41 @@ export default function GoetheSprechenRoom() {
     }
   };
 
-  const resetRecording = () => {
-    setIsRecording(false);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
-    setAudioBlob(null);
-    setAudioUrl(null);
-    setRecordingSeconds(0);
-    setEvaluation(null);
-    setErrorMsg(null);
-  };
-
-  const handleEvaluate = async () => {
-    if (!audioBlob && !transcript.trim()) {
-      setErrorMsg('Bitte nehmen Sie zuerst Ihre Antwort per Mikrofon auf oder geben Sie den Text ein.');
+  // Finish dialogue and request official evaluation
+  const handleFinishDialogue = async () => {
+    if (history.length < 2) {
+      alert('Bitte führen Sie zuerst mindestens 2 Gesprächsrunden mit dem Prüfungspartner.');
       return;
     }
 
+    if (activeAudioRef.current) activeAudioRef.current.pause();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
     setIsEvaluating(true);
     setErrorMsg(null);
 
+    const topicToUse = customTopic.trim() || selectedTopic;
     try {
-      let res;
-      if (audioBlob) {
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'aufnahme.webm');
-        formData.append('part', activePart);
-        formData.append('topic', activePart === 2 ? currentTopic.title : currentPlanTask.title);
-        formData.append('prompt', activePart === 2 ? JSON.stringify(currentTopic.slides) : currentPlanTask.context);
-        formData.append('slideNotes', JSON.stringify(prepNotes));
-        formData.append('studentName', studentName || 'Student');
+      const res = await api.post('/goethe/speaking/finish-dialogue', {
+        level: selectedLevel,
+        topic: topicToUse,
+        taskType: selectedTaskType,
+        history,
+        studentName: studentName || 'Student',
+      });
 
-        res = await api.post('/goethe/evaluate-speaking', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      } else {
-        res = await api.post('/goethe/evaluate-speaking', {
-          part: activePart,
-          topic: activePart === 2 ? currentTopic.title : currentPlanTask.title,
-          prompt: activePart === 2 ? JSON.stringify(currentTopic.slides) : currentPlanTask.context,
-          transcript,
-          slideNotes: prepNotes,
-          studentName: studentName || 'Student',
-        });
-      }
-
-      if (res.data?.success) {
+      if (res.data?.success && res.data.data) {
         setEvaluation(res.data.data);
-        if (res.data.data.transcript) {
-          setTranscript(res.data.data.transcript);
-        }
-        // Save to student history
         saveEvaluation(res.data.data, {
           kind: 'goethe-sprechen',
-          module: 'B1',
-          question: activePart === 2 ? currentTopic.title : currentPlanTask.title,
+          module: selectedLevel,
+          question: `${selectedTaskType} (${topicToUse})`,
         });
       } else {
-        setErrorMsg(res.data?.error || 'Fehler bei der mündlichen Bewertung.');
+        setErrorMsg('Fehler bei der Auswertung des Prüfungsgesprächs.');
       }
     } catch (err) {
-      console.error('Speaking evaluation error:', err);
-      setErrorMsg(err.response?.data?.error || 'Verbindungsfehler zum Server. Bitte versuchen Sie es erneut.');
+      console.error('Finish dialogue error:', err);
+      setErrorMsg(err.response?.data?.error || 'Verbindung zum Server fehlgeschlagen.');
     } finally {
       setIsEvaluating(false);
     }
@@ -188,422 +350,352 @@ export default function GoetheSprechenRoom() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-800 text-xs font-bold mb-1.5 border border-rose-200">
-            <span>🇩🇪 Goethe-Zertifikat B1</span>
+            <span>🇩🇪 Goethe-Zertifikat {selectedLevel}</span>
             <span>·</span>
-            <span>Mündliche Prüfung (ca. 15 Min · 100 Pkt)</span>
+            <span>Mündliche Prüfung (Interaktiv mit KI-Partner)</span>
           </div>
           <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">
-            Sprechen Prüfungstraining
+            Sprechen: {selectedTaskType}
           </h1>
         </div>
 
-        {/* 3 Prüfungsteile Pills */}
-        <div className="inline-flex rounded-xl bg-slate-100 p-1 gap-1 self-start sm:self-auto">
-          <button
-            onClick={() => { setActivePart(1); resetRecording(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activePart === 1
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            Teil 1: Planen (28P)
-          </button>
-          <button
-            onClick={() => { setActivePart(2); resetRecording(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activePart === 2
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            Teil 2: Präsentieren (40P)
-          </button>
-          <button
-            onClick={() => { setActivePart(3); resetRecording(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activePart === 3
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            Teil 3: Feedback (16P)
-          </button>
+        {/* Action Controls */}
+        <div className="flex items-center gap-2.5">
+          {dialogueActive && !evaluation && (
+            <button
+              onClick={handleFinishDialogue}
+              disabled={isEvaluating || isPartnerResponding || isRecording}
+              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs md:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all disabled:opacity-50"
+            >
+              {isEvaluating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Wird bewertet...</span>
+                </>
+              ) : (
+                <>
+                  <Award className="w-4 h-4 text-amber-400" />
+                  <span>Gespräch beenden &amp; bewerten</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {evaluation && (
+            <button
+              onClick={() => {
+                setEvaluation(null);
+                setDialogueActive(false);
+                setHistory([]);
+              }}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs md:text-sm flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Neues Gespräch</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* TEIL 2: Präsentation (The largest block of the oral exam) */}
-      {activePart === 2 && (
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
-          {/* Left Column: Topics and 5 Slides Preview (5 Cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                Präsentationsthema auswählen
-              </label>
-              <div className="flex flex-col gap-2">
-                {currentTeil2Topics.map((t, idx) => (
-                  <button
-                    key={t.id}
-                    onClick={() => { setSelectedTopicIndex(idx); resetRecording(); }}
-                    className={`p-3 rounded-xl text-left border text-xs md:text-sm font-semibold transition-all ${
-                      selectedTopicIndex === idx
-                        ? 'border-rose-500 bg-rose-50/60 text-rose-950 font-bold shadow-xs'
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    {t.title}
-                  </button>
-                ))}
-              </div>
+      {/* Setup & Topic Bar (when dialogue not yet active or configuring) */}
+      {!dialogueActive && (
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <span className="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <Users className="w-5 h-5 text-rose-600" />
+              <span>Prüfungsgespräch einrichten (Goethe Prüfungsformat)</span>
+            </span>
+            <span className="text-xs text-slate-400">Direktes Hin- und Hersprechen</span>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 text-xs">
+            {/* Level selection */}
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Niveaustufe:</label>
+              <select
+                value={selectedLevel}
+                onChange={(e) => setSelectedLevel(e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-800"
+              >
+                <option value="A2">Niveau A2 (Grundkenntnisse)</option>
+                <option value="B1">Niveau B1 (Zertifikat B1)</option>
+                <option value="B2">Niveau B2 (Fortgeschritten)</option>
+                <option value="C1">Niveau C1 (Fachkundig)</option>
+              </select>
             </div>
 
-            {/* The 5 Official Slides breakdown */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                  <Presentation className="w-4 h-4 text-rose-600" />
-                  <span>Die 5 obligatorischen Folien</span>
+            {/* Task selection */}
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Prüfungsteil:</label>
+              <select
+                value={selectedTaskType}
+                onChange={(e) => setSelectedTaskType(e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-800"
+              >
+                <option value="Teil 1: Gemeinsam etwas planen">Teil 1: Gemeinsam etwas planen</option>
+                <option value="Teil 2 & 3: Thema & Feedback / Fragen">Teil 2 &amp; 3: Thema &amp; Fragen / Feedback</option>
+                <option value="Diskussion & Kontroverse Argumentation">Diskussion &amp; Kontroverse Argumentation</option>
+              </select>
+            </div>
+
+            {/* Topic selection */}
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Thema (C1–C15):</label>
+              <select
+                value={selectedTopic}
+                onChange={(e) => {
+                  setSelectedTopic(e.target.value);
+                  setCustomTopic('');
+                }}
+                className="w-full p-2.5 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800 truncate"
+              >
+                {GOETHE_TOPICS.map((t) => (
+                  <option key={t.id} value={t.title}>
+                    {t.code}: {t.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Custom topic prompt */}
+          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+            <span className="font-bold text-slate-500 whitespace-nowrap">Eigenes Wunschthema:</span>
+            <input
+              type="text"
+              placeholder="z.B. Eine Abschiedsfeier für Kollegen organisieren, Ausflug in die Berge planen..."
+              value={customTopic}
+              onChange={(e) => setCustomTopic(e.target.value)}
+              className="flex-1 p-2 px-3 rounded-lg border border-slate-200 text-slate-800 text-xs"
+            />
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={handleStartDialogue}
+              disabled={isPartnerResponding}
+              className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm flex items-center gap-2 shadow-md active:scale-95 transition-all"
+            >
+              {isPartnerResponding ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Partner bereitet sich vor...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>Gespräch mit Partner starten</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error alert */}
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {/* ACTIVE DIALOGUE ROOM */}
+      {dialogueActive && (
+        <div className="grid gap-6 lg:grid-cols-12 items-start">
+          {/* Left Column: Live Chat Timeline & Audio Indicator (8 cols) */}
+          <div className="lg:col-span-8 flex flex-col gap-4">
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col min-h-[460px] max-h-[580px]">
+              {/* Dialogue Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="font-bold text-xs md:text-sm text-slate-900">
+                    Kandidat B (KI-Prüfungspartner)
+                  </span>
+                  {isPartnerSpeaking && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200">
+                      <Volume2 className="w-3 h-3 animate-bounce" />
+                      Partner spricht...
+                    </span>
+                  )}
+                </div>
+
+                <span className="text-xs font-semibold text-slate-400">
+                  {history.length} Wortmeldungen
                 </span>
-                <span className="text-xs text-slate-500 font-semibold">Richtzeit: ~3 Min.</span>
               </div>
 
-              <div className="space-y-3">
-                {currentTopic.slides.map((s) => (
-                  <div key={s.number} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                    <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                      <span>Folie {s.number}: {s.title}</span>
+              {/* Chat Message List */}
+              <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+                {history.map((msg) => {
+                  const isPartner = msg.speaker === 'partner';
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${isPartner ? 'items-start' : 'items-end'}`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 px-1">
+                        <span className="font-bold text-[11px] text-slate-500">
+                          {isPartner ? '🇩🇪 Prüfungspartner' : studentName || 'Sie (Kandidat)'}
+                        </span>
+                        <span className="text-[10px] text-slate-400">{msg.timestamp}</span>
+                      </div>
+
+                      <div
+                        className={`p-4 rounded-2xl max-w-[85%] leading-relaxed text-sm ${
+                          isPartner
+                            ? 'bg-slate-100 text-slate-900 rounded-tl-xs shadow-xs'
+                            : 'bg-slate-900 text-white rounded-tr-xs shadow-md'
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
                     </div>
-                    <p className="text-slate-600 text-[11px] mb-1.5">{s.instruction}</p>
-                    <div className="text-[11px] text-rose-700 italic bg-white p-1.5 rounded border border-slate-200 font-mono">
-                      {s.cue}
+                  );
+                })}
+
+                {/* Partner thinking indicator */}
+                {isPartnerResponding && (
+                  <div className="flex items-center gap-2 text-xs text-slate-400 p-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <span>Prüfungspartner hört zu &amp; antwortet auf Deutsch...</span>
+                  </div>
+                )}
+
+                <div ref={chatBottomRef} />
+              </div>
+
+              {/* Bottom Speaking Controls */}
+              <div className="pt-4 border-t border-slate-100 flex flex-col gap-3 mt-auto">
+                {/* Redemittel suggestion strip */}
+                {currentTips && currentTips.length > 0 && (
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      Passende Redemittel für Ihre Antwort:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {currentTips.map((tip, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setInputText(tip)}
+                          className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-[11px] font-medium border border-amber-200/80 transition-colors text-left"
+                        >
+                          {tip}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                ))}
+                )}
+
+                {/* Recording / Text Input Area */}
+                <div className="flex items-center gap-2">
+                  {/* Microphone Record Button */}
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isPartnerResponding}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-xs md:text-sm text-white shadow-md active:scale-95 transition-all ${
+                      isRecording
+                        ? 'bg-rose-600 hover:bg-rose-700 animate-pulse'
+                        : 'bg-rose-500 hover:bg-rose-600'
+                    } disabled:opacity-50`}
+                  >
+                    {isRecording ? (
+                      <>
+                        <Square className="w-4 h-4 fill-current" />
+                        <span>Fertig ({formatTimer(recordingSeconds)})</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="w-4 h-4" />
+                        <span>Sprechen (Mikrofon)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Text Input backup */}
+                  <input
+                    type="text"
+                    placeholder="Oder Antwort auf Deutsch tippen..."
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSendTurn(null, inputText);
+                    }}
+                    className="flex-1 p-3 rounded-2xl border border-slate-200 text-xs text-slate-800"
+                  />
+
+                  <button
+                    onClick={() => handleSendTurn(null, inputText)}
+                    disabled={!inputText.trim() || isPartnerResponding}
+                    className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white disabled:opacity-40"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Column: 15-Min Prep Scratchpad + Audio Recorder (7 Cols) */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            {/* 15-Min Preparation Scratchpad */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-brand-500" />
-                  <span>Vorbereitung (Stichpunkte für die 5 Folien)</span>
-                </h3>
-                <span className="text-[11px] text-slate-400">Nur Stichpunkte, keine ganzen Sätze!</span>
-              </div>
-
-              <div className="grid gap-2 sm:grid-cols-2 text-xs">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Folie 1 (Thema &amp; Struktur):</label>
-                  <input
-                    type="text"
-                    value={prepNotes.slide1}
-                    onChange={(e) => setPrepNotes({ ...prepNotes, slide1: e.target.value })}
-                    placeholder="z.B. Thema: Online-Shopping, 4 Teile"
-                    className="w-full p-2 rounded-lg border border-slate-200 text-xs text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Folie 2 (Eigene Erfahrung):</label>
-                  <input
-                    type="text"
-                    value={prepNotes.slide2}
-                    onChange={(e) => setPrepNotes({ ...prepNotes, slide2: e.target.value })}
-                    placeholder="z.B. Jacke bestellt, zu klein, Retoure"
-                    className="w-full p-2 rounded-lg border border-slate-200 text-xs text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Folie 3 (Heimatland z.B. Usbekistan):</label>
-                  <input
-                    type="text"
-                    value={prepNotes.slide3}
-                    onChange={(e) => setPrepNotes({ ...prepNotes, slide3: e.target.value })}
-                    placeholder="z.B. Taschkent Apps vs. Basare auf dem Land"
-                    className="w-full p-2 rounded-lg border border-slate-200 text-xs text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Folie 4 (Vor-/Nachteile &amp; Meinung):</label>
-                  <input
-                    type="text"
-                    value={prepNotes.slide4}
-                    onChange={(e) => setPrepNotes({ ...prepNotes, slide4: e.target.value })}
-                    placeholder="z.B. Vorteil: Zeit sparen; Nachteil: Müll"
-                    className="w-full p-2 rounded-lg border border-slate-200 text-xs text-slate-800"
-                  />
-                </div>
+          {/* Right Column: Task Details & Evaluation (4 cols) */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
+            <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-3">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Aufgabenstellung
+              </span>
+              <h3 className="font-bold text-sm text-slate-900">
+                {selectedTaskType}
+              </h3>
+              <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                Thema: <span className="font-semibold text-slate-900">{customTopic || selectedTopic}</span>
+              </p>
+              <div className="text-[11px] text-slate-500 space-y-1">
+                <p>• Gehen Sie auf die Vorschläge des Partners ein.</p>
+                <p>• Machen Sie eigene konkrete Vorschläge.</p>
+                <p>• Finden Sie gemeinsam eine Einigung.</p>
               </div>
             </div>
 
-            {/* Audio Recording & Speech Studio */}
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col items-center text-center gap-4">
-              <div className="flex items-center gap-2 self-end text-xs">
-                <button
-                  onClick={() => setInputMode('audio')}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                    inputMode === 'audio' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  Mikrofon
-                </button>
-                <button
-                  onClick={() => setInputMode('text')}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                    inputMode === 'text' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  Text-Transkript
-                </button>
-              </div>
-
-              {inputMode === 'audio' ? (
-                <>
-                  <div className="flex flex-col items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={isRecording ? stopRecording : startRecording}
-                      className={`w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-95 ${
-                        isRecording
-                          ? 'bg-rose-600 text-white animate-pulse ring-4 ring-rose-200'
-                          : 'bg-slate-900 hover:bg-slate-800 text-white'
-                      }`}
-                    >
-                      {isRecording ? <Square className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
-                    </button>
-
-                    <div className="flex items-center gap-2 mt-1">
-                      <Clock className="w-4 h-4 text-slate-400" />
-                      <span className="font-mono text-base font-bold text-slate-800">
-                        {formatTimer(recordingSeconds)}
-                      </span>
-                      <span className="text-xs text-slate-400 font-normal">/ ca. 03:00 Min</span>
-                    </div>
-
-                    <span className="text-xs text-slate-500">
-                      {isRecording ? 'Aufnahme läuft... Klicken zum Stoppen.' : 'Klicken Sie auf das Mikrofon, um Ihre Präsentation zu starten.'}
-                    </span>
-                  </div>
-
-                  {/* Audio Player playback if recorded */}
-                  {audioUrl && !isRecording && (
-                    <div className="w-full flex items-center justify-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <audio controls src={audioUrl} className="h-8 max-w-xs" />
-                      <button
-                        onClick={resetRecording}
-                        className="btn-ghost p-1.5 text-slate-400 hover:text-rose-600"
-                        title="Aufnahme löschen"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="w-full">
-                  <textarea
-                    rows={8}
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    placeholder="Geben Sie hier das Transkript Ihrer gesprochenen Präsentation auf Deutsch ein..."
-                    className="w-full p-4 rounded-xl border border-slate-200 text-xs md:text-sm text-slate-800 outline-none focus:border-rose-500 leading-relaxed"
-                  />
-                </div>
-              )}
-
-              {errorMsg && (
-                <div className="w-full p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs text-left">
-                  {errorMsg}
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={handleEvaluate}
-                disabled={isEvaluating || (!audioBlob && !transcript.trim())}
-                className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs md:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-              >
-                {isEvaluating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Goethe-Prüfer transkribiert &amp; bewertet Sprache...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    <span>Mündliche Präsentation bewerten lassen</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Evaluation Results Card */}
+            {/* Evaluation Score Card */}
             {evaluation && (
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-md flex flex-col gap-6 animate-fade-in">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-                  <div>
-                    <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                      Goethe B1 Mündliche Bewertung
-                    </span>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-extrabold text-white">
-                        {evaluation.totalPoints} / {evaluation.maxPoints || 56} Pkt
-                      </span>
-                      <span className="text-slate-400 text-sm">
-                        ({evaluation.scaledPoints100} / 100 Pkt)
-                      </span>
-                    </div>
-                  </div>
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-md flex flex-col gap-4 animate-fade-in">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span className="font-bold text-xs uppercase tracking-wider text-slate-400">
+                    Goethe Prüfungsbewertung
+                  </span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                    evaluation.passed ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-300'
+                  }`}>
+                    {evaluation.praedikat}
+                  </span>
+                </div>
 
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Prädikat:</span>
-                    <span
-                      className={`text-sm md:text-base font-extrabold px-3 py-1 rounded-lg border ${
-                        evaluation.passed
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                          : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                      }`}
-                    >
-                      {evaluation.praedikat}
-                    </span>
-                  </div>
+                <div className="text-2xl font-extrabold text-slate-900">
+                  {evaluation.scaledPoints100} / 100 Punkte
                 </div>
 
                 {evaluation.verdict && (
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs md:text-sm text-slate-800 italic">
-                    „{evaluation.verdict}“
-                  </div>
+                  <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed font-medium">
+                    {evaluation.verdict}
+                  </p>
                 )}
 
-                {/* 5-Slide coverage verification */}
-                {evaluation.slideBreakdown && (
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                      Foliencheck (Wurden alle 5 Folien behandelt?)
-                    </h3>
-                    <div className="space-y-2">
-                      {evaluation.slideBreakdown.map((s) => (
-                        <div
-                          key={s.slide}
-                          className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs flex items-start gap-2"
-                        >
-                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${
-                            s.covered ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                          }`}>
-                            {s.covered ? '✓' : '✗'}
-                          </span>
-                          <div>
-                            <span className="font-bold text-slate-900">Folie {s.slide} ({s.title}):</span>
-                            <span className="text-slate-600 ml-1.5">{s.comment}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Pronunciation & articulation tips */}
-                {evaluation.pronunciationTips && evaluation.pronunciationTips.length > 0 && (
-                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-slate-800">
-                    <span className="font-bold text-amber-900 block mb-1">
-                      Aussprache &amp; Intonationstipps:
-                    </span>
-                    <ul className="space-y-1">
-                      {evaluation.pronunciationTips.map((tip, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5">
-                          <span className="text-amber-600 font-bold">•</span>
-                          <span>{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
+                {/* Grammar & vocab corrections */}
+                {evaluation.grammarAndVocabFeedback && evaluation.grammarAndVocabFeedback.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <span className="text-xs font-bold text-slate-900 block">Sprachkorrekturen:</span>
+                    {evaluation.grammarAndVocabFeedback.slice(0, 3).map((f, idx) => (
+                      <div key={idx} className="p-2 rounded-lg bg-rose-50/60 border border-rose-200 text-[11px]">
+                        <span className="line-through text-rose-700">{f.candidateSpoke}</span>
+                        <p className="font-bold text-emerald-700">{f.correction}</p>
+                        <p className="text-slate-500 text-[10px] mt-0.5">{f.explanation}</p>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* TEIL 1: Planen */}
-      {activePart === 1 && (
-        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <span className="text-xs font-bold text-rose-600 uppercase tracking-wider">
-                Teil 1: Gemeinsam etwas planen (~3 Minuten · 28 Punkte)
-              </span>
-              <h2 className="text-lg font-bold text-slate-900 mt-1">{currentPlanTask.title}</h2>
-            </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
-              Partnerprüfung
-            </span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-800">
-            {currentPlanTask.context}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-sm text-slate-900 block mb-2">Die 4 Leitpunkte:</span>
-              <ul className="space-y-2 text-xs text-slate-700">
-                {currentPlanTask.leitpunkte.map((lp, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span>{lp}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-sm text-slate-900 block mb-2">Beispieldialog:</span>
-              <div className="text-xs text-slate-700 whitespace-pre-line leading-relaxed font-sans max-h-56 overflow-y-auto bg-slate-50 p-3 rounded-lg border border-slate-100">
-                {currentPlanTask.sampleDialogue}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TEIL 3: Feedback & Fragen */}
-      {activePart === 3 && (
-        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-6">
-          <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-rose-600 uppercase tracking-wider">
-              Teil 3: Über das Thema sprechen (~1–2 Min pro Teilnehmer · 16 Punkte)
-            </span>
-            <h2 className="text-lg font-bold text-slate-900 mt-1">
-              Feedback geben, Fragen stellen &amp; Prüferfragen beantworten
-            </h2>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs md:text-sm text-slate-800 leading-relaxed">
-            {GOETHE_SPEAKING_TASKS.teil3.instructions}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {GOETHE_SPEAKING_TASKS.teil3.sampleQuestions.map((q, idx) => (
-              <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5 text-xs">
-                <span className="font-bold text-sm text-slate-900 block">Thema: „{q.topic}“</span>
-                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-900">
-                  <span className="font-bold block mb-0.5">Partner-Feedback:</span>
-                  <span>{q.partnerFeedback}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-900">
-                  <span className="font-bold block mb-0.5">Partner-Frage (W-Frage):</span>
-                  <span>{q.partnerQuestion}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-purple-50 border border-purple-100 text-purple-900">
-                  <span className="font-bold block mb-0.5">Prüferfrage:</span>
-                  <span>{q.examinerQuestion}</span>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}

@@ -23,11 +23,26 @@ const SUBTITLE = {
 };
 
 export default function Navbar() {
-  const { section, currentEvaluation, toggleSidebar, examType } = useApp();
+  const { section, currentEvaluation, toggleSidebar, examType, goetheLevel } = useApp();
+
+  const getGoetheSubtitle = (sec) => {
+    const titles = {
+      sprechen: `Goethe ${goetheLevel} · Mündliche Prüfung`,
+      schreiben: `Goethe ${goetheLevel} · Schriftlicher Ausdruck`,
+      lesen: `Goethe ${goetheLevel} · Leseverstehen`,
+      hoeren: `Goethe ${goetheLevel} · Hörverstehen`,
+      themen: `Goethe ${goetheLevel} · Themenkatalog`,
+      redemittel: `Goethe ${goetheLevel} · Redemittel & Grammatik`,
+      plan: `Goethe ${goetheLevel} · Trainingsplan & Rechner`,
+      rechner: `Goethe ${goetheLevel} · Punkte- & Notenrechner`,
+    };
+    return titles[sec] || `Goethe-Zertifikat ${goetheLevel} · Prüfungstraining`;
+  };
+
   const defaultSub = examType === 'goethe'
-    ? 'Goethe-Zertifikat B1 · Prüfungstraining'
+    ? getGoetheSubtitle(section)
     : 'Decode your IELTS. Quantify your progress.';
-  const subtitle = SUBTITLE[section] || defaultSub;
+  const subtitle = examType === 'goethe' ? getGoetheSubtitle(section) : (SUBTITLE[section] || defaultSub);
 
   return (
     <header className="h-14 md:h-16 bg-transparent flex items-center justify-between px-3 md:px-6 flex-shrink-0 z-30 gap-2">
