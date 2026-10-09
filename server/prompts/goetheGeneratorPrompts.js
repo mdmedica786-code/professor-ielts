@@ -10,6 +10,7 @@
 
 const {
   ITEM_TYPES,
+  getLevelFormat,
   getReceptivePart,
   getWritingAufgabe,
   getSpeakingTeil,
@@ -356,6 +357,149 @@ ${isMonologue ? "- Korrigiere den Kandidaten nicht und gib keine Bewertung ab." 
 ${outputBlock}`;
 }
 
+// ─── 5. SPEAKING TASK SHEET (Aufgabenblatt) ───────────────────────────
+
+/** What the candidate's Aufgabenblatt contains for each speaking task type. */
+const TASK_SHEET_SPEC = {
+  fragen_zur_person: {
+    rule: `"cards": GENAU 4 Stichwortkarten zum Thema (je ein Wort mit Fragezeichen, z. B. "Geburtstag?", "Wohnort?"). "leitpunkte" ist [].`,
+    fields: ["cards"],
+  },
+  von_sich_erzaehlen: {
+    rule: `"question": die Frage auf der Karte (z. B. "Was machen Sie gern in Ihrer Freizeit?"). "leitpunkte": GENAU 4 Stichpunkte zur Frage (z. B. "Wo?", "Mit wem?").`,
+    fields: ["question", "leitpunkte"],
+  },
+  gemeinsam_planen: {
+    rule: `"situation": die Planungssituation (2–3 Sätze, z. B. eine Freundin hat Geburtstag, Sie möchten ein Fest organisieren). "leitpunkte": GENAU 4 Planungspunkte als kurze Fragen (z. B. "Wann?", "Wo?", "Wer kauft was ein?", "Wie kommt man hin?"). "partnerNotes": 2–3 Sätze mit eigenen Vorlieben und Einschränkungen des Prüfungspartners (nur für den Partner sichtbar).`,
+    fields: ["situation", "leitpunkte", "partnerNotes"],
+  },
+  gemeinsam_planen_kalender: {
+    rule: `"situation": was gemeinsam unternommen werden soll (1–2 Sätze). "leitpunkte": []. "calendar": { "candidate": [...], "partner": [...] } — zwei Terminkalender für denselben Tag, jeweils 6–8 Einträge { "time": "08:00", "entry": "Arzttermin" } zwischen 08:00 und 20:00 Uhr in vollen Stunden. Es gibt GENAU EINE Stunde, in der beide frei sind.`,
+    fields: ["situation", "calendar"],
+  },
+  praesentation: {
+    rule: `"question": das Präsentationsthema als Frage (z. B. "Sollten Kinder ein eigenes Smartphone haben?"). "slides": GENAU 5 Folien { "title", "prompt" } in dieser Reihenfolge: 1. Thema vorstellen (Inhalt und Struktur), 2. Persönliche Erfahrungen, 3. Situation im Heimatland, 4. Vor- und Nachteile & Meinung, 5. Abschluss & Dank. "prompt" ist die Anweisung auf der Folie, bezogen auf das Thema.`,
+    fields: ["question", "slides"],
+  },
+  feedback_fragen: {
+    rule: `"situation": kurze Beschreibung der Aufgabe. "partnerTopic": das Präsentationsthema des Prüfungspartners (eine Frage). "partnerSummary": 3–4 Sätze, mit denen der Partner seine Präsentation zusammenfasst (Ich-Form).`,
+    fields: ["situation", "partnerTopic", "partnerSummary"],
+  },
+  vortrag: {
+    rule: `"question": das Vortragsthema als Frage oder These. "situation": 1–2 Sätze Kontext. "leitpunkte": GENAU 4 Punkte, die der Vortrag behandeln soll (z. B. Situation beschreiben, Vor- und Nachteile, Beispiele, eigene Meinung).`,
+    fields: ["question", "leitpunkte"],
+  },
+  diskussion: {
+    rule: `"question": die kontroverse Diskussionsfrage. "leitpunkte": GENAU 4 Aspekte, die in der Diskussion vorkommen sollen. "partnerNotes": die Gegenposition des Partners mit 2–3 Argumenten (nur für den Partner sichtbar).`,
+    fields: ["question", "leitpunkte", "partnerNotes"],
+  },
+};
+
+function taskSheetKind(level, t) {
+  return t.type === "gemeinsam_planen" && sanitizeLevel(level) === "A2" ? "gemeinsam_planen_kalender" : t.type;
+}
+
+function buildSpeakingTaskSheetPrompt(level, teil) {
+  const lvl = sanitizeLevel(level);
+  const t = getSpeakingTeil(lvl, teil);
+  const spec = TASK_SHEET_SPEC[taskSheetKind(lvl, t)] || TASK_SHEET_SPEC.vortrag;
+
+  return `Du bist offizieller Prüfungsautor des Goethe-Instituts für das Goethe-Zertifikat ${lvl}, Modul Sprechen.
+Erstelle das Aufgabenblatt für GENAU diesen Prüfungsteil.
+
+═══ PRÜFUNGSTEIL ═══
+Sprechen · Teil ${t.teil}: ${t.title} (${t.mode === "dialogue" ? "Dialog" : "Monolog"}, ca. ${Math.round(t.durationSeconds / 60)} Minuten)
+Offizielle Aufgabenstellung: "${t.instruction}"
+
+═══ INHALT DES AUFGABENBLATTS ═══
+${spec.rule}
+- "title": kurzer Titel des Themas.
+- Sprachniveau: ${LEVEL_LANGUAGE[lvl]}
+- Fehlerfreies Deutsch, realistische Alltags- bzw. Gesellschaftsthemen aus dem D-A-CH-Raum.
+- Felder, die für diesen Teil nicht vorgesehen sind, bleiben leer ("" oder []).
+
+═══ JSON-AUSGABEFORMAT (STRENG, KEIN MARKDOWN) ═══
+{
+  "title": "…",
+  "situation": "",
+  "question": "",
+  "leitpunkte": [],
+  "cards": [],
+  "slides": [],
+  "calendar": null,
+  "partnerTopic": "",
+  "partnerSummary": "",
+  "partnerNotes": ""
+}`;
+}
+
+// ─── 6. DUAL-ROLE SPEAKING EXAM (Prüfer/in + Prüfungspartner/in) ───────
+
+const EXAMINER_NAME = "Frau Weber";
+
+/** What examiner and partner do in each task type of the Paarprüfung. */
+const DUAL_ROLE_FLOW = {
+  fragen_zur_person: `PRÜFERIN: stellt den Teil kurz vor und bittet den Kandidaten, mit der ersten Karte zu beginnen.
+PARTNER: beantwortet die Fragen des Kandidaten kurz und stellt danach selbst Fragen zu eigenen Stichworten (Wohnort, Beruf, Hobby …).`,
+  von_sich_erzaehlen: `PRÜFERIN: stellt den Teil vor, nennt die Frage der Karte und bittet den Kandidaten zu erzählen. Nach dem Monolog stellt sie höchstens EINE kurze Nachfrage.
+PARTNER: schweigt in diesem Teil.`,
+  gemeinsam_planen: `PRÜFERIN: stellt die Aufgabe kurz vor („Sie möchten zusammen …“) und übergibt an die beiden Kandidaten. Danach greift sie nur ein, um den Teil zu beenden.
+PARTNER: plant aktiv mit, macht konkrete Vorschläge, berücksichtigt die eigenen Notizen bzw. den eigenen Terminkalender, lehnt manche Vorschläge höflich mit Begründung ab und arbeitet auf eine Einigung zu.`,
+  praesentation: `PRÜFERIN: bittet den Kandidaten, seine Präsentation zu halten. Nach der Präsentation bedankt sie sich kurz.
+PARTNER: schweigt während der Präsentation.`,
+  feedback_fragen: `PRÜFERIN: leitet den Teil ein. Zuerst fasst der PARTNER seine eigene Präsentation in 3–4 Sätzen zusammen (siehe partnerSummary); der Kandidat soll darauf eine Rückmeldung geben und eine Frage stellen. Danach geben PARTNER und PRÜFERIN eine kurze Rückmeldung zur Präsentation des Kandidaten und stellen je EINE Frage dazu.
+PARTNER: beantwortet die Frage des Kandidaten kurz.`,
+  vortrag: `PRÜFERIN: stellt das Thema vor und bittet den Kandidaten, den Vortrag zu halten. Nach dem Vortrag stellt der PARTNER oder die PRÜFERIN EINE anspruchsvolle Anschlussfrage.
+PARTNER: schweigt während des Vortrags.`,
+  diskussion: `PRÜFERIN: nennt die Diskussionsfrage und eröffnet die Diskussion. Sie greift nur ein, wenn das Gespräch stockt oder die Zeit vorbei ist.
+PARTNER: vertritt die Gegenposition aus partnerNotes, bringt Argumente und Beispiele, widerspricht begründet, fragt nach und ist am Ende zu einem Kompromiss bereit.`,
+};
+
+function buildDualRoleExamPrompt(level, teil, { topic = "", partnerName = "Florian", partnerGender = "male" } = {}) {
+  const lvl = sanitizeLevel(level);
+  const partnerLabel = partnerGender === "female" ? "PRÜFUNGSPARTNERIN" : "PRÜFUNGSPARTNER";
+  const partnerDesc = partnerGender === "female" ? "eine zweite Kandidatin" : "ein zweiter Kandidat";
+  const t = getSpeakingTeil(lvl, teil);
+  const teile = getLevelFormat(lvl).sprechen.teile;
+  const isLast = t.teil === teile[teile.length - 1].teil;
+
+  return `Du simulierst die mündliche Paarprüfung des Goethe-Zertifikats ${lvl} und spielst ZWEI Rollen:
+1. PRÜFERIN „${EXAMINER_NAME}“ (Rolle "pruefer") — moderiert, leitet die Teile ein, achtet auf die Zeit, bewertet NICHT laut.
+2. ${partnerLabel} „${partnerName}“ (Rolle "partner") — ${partnerDesc} auf Niveau ${lvl}, freundlich und kooperativ.
+Das Gegenüber ist der echte Kandidat (der Benutzer).
+
+═══ AKTUELLER PRÜFUNGSTEIL ═══
+Sprechen · Teil ${t.teil} von ${teile.length}: ${t.title} (${t.mode === "dialogue" ? "Dialog" : "Monolog"}, ca. ${Math.round(t.durationSeconds / 60)} Minuten)
+Offizielle Aufgabenstellung: "${t.instruction}"
+Thema: "${topic || t.title}"
+
+═══ ABLAUF IN DIESEM TEIL ═══
+${DUAL_ROLE_FLOW[t.type] || DUAL_ROLE_FLOW.gemeinsam_planen}
+
+═══ EREIGNISSE ═══
+- "start": Die PRÜFERIN eröffnet Teil ${t.teil}. Ist "ersterTeil" wahr, begrüßt sie zuerst kurz (Name, Prüfungsablauf in einem Satz). Ist "nachVorbereitung" wahr, beginnt sie wörtlich mit: „Die Vorbereitungszeit ist beendet. Wir beginnen mit Teil ${t.teil}.“ Danach kann (bei Dialogteilen) der PARTNER den ersten Beitrag machen.
+- "kandidat": Reagiere auf die letzte Äußerung des Kandidaten gemäß dem Ablauf. Meist spricht nur EINE Rolle.
+- "zeit_um": Die Redezeit ist überschritten. Die PRÜFERIN beendet den Teil höflich („Vielen Dank, das reicht.“).
+- "ende": Die PRÜFERIN schließt Teil ${t.teil} ab.${isLast ? " Dies ist der letzte Teil: Sie bedankt sich und beendet die Prüfung." : ` Sie kündigt an: „Wir kommen jetzt zu Teil ${t.teil + 1}.“`}
+
+═══ SPRACHE ═══
+- Ausschließlich Deutsch, fehlerfrei und natürlich gesprochen. Der PARTNER spricht auf Niveau ${lvl} (${LEVEL_LANGUAGE[lvl]}), die PRÜFERIN in klarem Standarddeutsch.
+- Pro Rolle und Antwort ${SPEAKER_LENGTH[lvl]}. Der Kandidat soll den Großteil der Redezeit haben.
+- Niemals korrigieren oder bewerten, keine Regieanweisungen, keine Emojis.
+- Wenn der Kandidat an der Reihe ist, endet die Antwort mit einer Frage oder einer klaren Aufforderung an ihn.
+
+═══ JSON-AUSGABEFORMAT (STRENG, KEIN MARKDOWN) ═══
+{
+  "turns": [
+    { "role": "pruefer", "text": "…" },
+    { "role": "partner", "text": "…" }
+  ],
+  "redemittelTips": ["Hilfreiche Wendung 1 für die nächste Antwort des Kandidaten", "Wendung 2"],
+  "isGoalReached": false
+}
+"turns" enthält 1–2 Beiträge in Sprechreihenfolge. "isGoalReached" ist true, wenn die Aufgabe dieses Teils inhaltlich erfüllt ist.`;
+}
+
 module.exports = {
   LEVEL_LANGUAGE,
   GAP_MARKER,
@@ -364,4 +508,9 @@ module.exports = {
   buildListeningGeneratorPrompt,
   buildWritingGeneratorPrompt,
   buildSpeakingPartnerPrompt,
+  TASK_SHEET_SPEC,
+  taskSheetKind,
+  buildSpeakingTaskSheetPrompt,
+  EXAMINER_NAME,
+  buildDualRoleExamPrompt,
 };

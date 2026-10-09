@@ -13,6 +13,8 @@ const {
   generateGoetheWritingTask,
   interactGoetheSpeakingPartner,
   evaluateGoetheSpeakingDialogue,
+  generateSpeakingTaskSheet,
+  interactGoetheExamTurn,
   resolveSpeakingTeil,
 } = require("../services/goetheGeneratorService");
 const { transcribeAudio } = require("../services/openaiService");
@@ -21,7 +23,14 @@ const { getIsPremium } = require("../services/planService");
 const { evalModel } = require("../utils/models");
 
 const crypto = require("crypto");
-const { sanitizeLevel, getModuleMaxRaw, scaleReceptive } = require("../config/goetheExamFormat");
+const {
+  SUPPORTED_LEVELS,
+  sanitizeLevel,
+  getLevelFormat,
+  getReceptivePart,
+  getModuleMaxRaw,
+  scaleReceptive,
+} = require("../config/goetheExamFormat");
 const { buildSpeakingPartnerPrompt } = require("../prompts/goetheGeneratorPrompts");
 
 const router = express.Router();
@@ -63,6 +72,47 @@ function toPublicQuestion(q) {
     ...(q.segment ? { segment: q.segment } : {}),
     ...(q.textRef ? { textRef: q.textRef } : {}),
   };
+}
+
+/** Parses a JSON field that may arrive as a string (multipart) or object. */
+function parseJsonField(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+// ─── EXAM FORMAT (single source of truth for the client UI) ──────────
+
+/**
+ * GET /api/goethe/format?level=B1
+ * Structure of every module for the level: Teile with item type/count,
+ * continuous numbering (from/to), resolved instructions, playback limits,
+ * writing Aufgaben and speaking Teile with criteria. No answer data.
+ * Mounted in index.js ahead of checkUsage: reading the format is free.
+ */
+function sendFormat(req, res) {
+  const level = sanitizeLevel(req.query.level);
+  const fmt = getLevelFormat(level);
+  const receptive = (module) => ({
+    ...fmt[module],
+    maxRaw: getModuleMaxRaw(level, module),
+    parts: fmt[module].parts.map((p) => getReceptivePart(level, module, p.teil)),
+  });
+  res.json({
+    success: true,
+    data: {
+      level,
+      levels: SUPPORTED_LEVELS,
+      lesen: receptive("lesen"),
+      hoeren: receptive("hoeren"),
+      schreiben: fmt.schreiben,
+      sprechen: fmt.sprechen,
+    },
+  });
 }
 
 // ─── DYNAMIC READING (Leseverstehen) ──────────────────────────────────
@@ -207,16 +257,10 @@ router.post("/speaking/partner-turn", async (req, res, next) => {
       taskType = "",
       studentText = "",
       voice = "nova",
+      mode = "partner",
     } = req.body || {};
 
-    let history = [];
-    if (req.body.history) {
-      try {
-        history = typeof req.body.history === "string" ? JSON.parse(req.body.history) : req.body.history;
-      } catch {
-        history = [];
-      }
-    }
+    const history = parseJsonField(req.body?.history, []);
 
     let audioBuffer = null;
     let mimeType = "audio/webm";
@@ -226,6 +270,27 @@ router.post("/speaking/partner-turn", async (req, res, next) => {
       audioBuffer = req.file.buffer;
       mimeType = getMimeType(req.file.originalname);
       filename = req.file.originalname;
+    }
+
+    // Paarprüfung: AI plays examiner + partner candidate (separate voices).
+    if (mode === "exam") {
+      const examResult = await interactGoetheExamTurn({
+        level,
+        teil: parseInt(teil, 10) || 1,
+        topic,
+        taskSheet: parseJsonField(req.body.taskSheet, null),
+        partnerName: req.body.partnerName,
+        history: Array.isArray(history) ? history : [],
+        event: req.body.event || "candidate",
+        firstTeil: String(req.body.firstTeil) === "true",
+        afterPreparation: String(req.body.afterPreparation) === "true",
+        elapsedSeconds: Number(req.body.elapsedSeconds) || 0,
+        studentText,
+        audioBuffer,
+        mimeType,
+        filename,
+      });
+      return res.json({ success: true, data: examResult });
     }
 
     const result = await interactGoetheSpeakingPartner({
@@ -248,6 +313,21 @@ router.post("/speaking/partner-turn", async (req, res, next) => {
 });
 
 /**
+ * POST /api/goethe/speaking/task
+ * Body: { level, teil, topic } → Aufgabenblatt for one Sprechen Teil
+ * (Leitpunkte, Folien, Karten, Terminkalender …).
+ */
+router.post("/speaking/task", async (req, res, next) => {
+  try {
+    const { level = "B1", teil = 1, topic = "" } = req.body || {};
+    const sheet = await generateSpeakingTaskSheet({ level, teil: parseInt(teil, 10) || 1, topic });
+    res.json({ success: true, data: sheet });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * POST /api/goethe/speaking/finish-dialogue
  * Evaluates the full conversation between candidate and AI partner.
  */
@@ -261,16 +341,9 @@ router.post("/speaking/finish-dialogue", async (req, res, next) => {
       studentName = "Student",
     } = req.body || {};
 
-    let history = [];
-    if (req.body.history) {
-      try {
-        history = typeof req.body.history === "string" ? JSON.parse(req.body.history) : req.body.history;
-      } catch {
-        history = [];
-      }
-    }
+    const history = parseJsonField(req.body?.history, []);
 
-    if (!history.some((h) => (h.speaker === "candidate" || h.role === "user") && String(h.text || "").trim())) {
+    if (!Array.isArray(history) || !history.some((h) => (h.speaker === "candidate" || h.role === "user") && String(h.text || "").trim())) {
       return res.status(400).json({
         success: false,
         error: "Es wurden noch keine Redebeiträge von Ihnen aufgezeichnet.",
@@ -281,6 +354,7 @@ router.post("/speaking/finish-dialogue", async (req, res, next) => {
       level,
       teil,
       topic,
+      taskSheet: parseJsonField(req.body.taskSheet, null),
       taskType,
       history,
       studentName,
@@ -509,3 +583,4 @@ router.use((err, req, res, _next) => {
 });
 
 module.exports = router;
+module.exports.formatHandler = sendFormat;

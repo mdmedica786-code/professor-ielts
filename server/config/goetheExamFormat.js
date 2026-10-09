@@ -170,6 +170,8 @@ const FORMAT = {
     sprechen: {
       timeMinutes: 15,
       ausspracheMax: 16,
+      // Vorbereitungszeit in Minuten vor dem Prüfungsgespräch (0 = Karten werden erst in der Prüfung ausgeteilt).
+      prepMinutes: 0,
       teile: [
         {
           teil: 1,
@@ -379,6 +381,8 @@ const FORMAT = {
     sprechen: {
       timeMinutes: 15,
       ausspracheMax: 16,
+      // Vorbereitungszeit in Minuten vor dem Prüfungsgespräch (0 = Karten werden erst in der Prüfung ausgeteilt).
+      prepMinutes: 15,
       teile: [
         {
           teil: 1,
@@ -567,6 +571,8 @@ const FORMAT = {
     sprechen: {
       timeMinutes: 15,
       ausspracheMax: 16,
+      // Vorbereitungszeit in Minuten vor dem Prüfungsgespräch (0 = Karten werden erst in der Prüfung ausgeteilt).
+      prepMinutes: 15,
       teile: [
         {
           teil: 1,
@@ -705,6 +711,8 @@ const FORMAT = {
     sprechen: {
       timeMinutes: 15,
       ausspracheMax: 16,
+      // Vorbereitungszeit in Minuten vor dem Prüfungsgespräch (0 = Karten werden erst in der Prüfung ausgeteilt).
+      prepMinutes: 15,
       teile: [
         {
           teil: 1,

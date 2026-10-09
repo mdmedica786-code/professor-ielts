@@ -8,6 +8,10 @@ const {
   buildListeningGeneratorPrompt,
   buildWritingGeneratorPrompt,
   buildSpeakingPartnerPrompt,
+  buildSpeakingTaskSheetPrompt,
+  buildDualRoleExamPrompt,
+  taskSheetKind,
+  EXAMINER_NAME,
   zuordnungLabels,
 } = require("../prompts/goetheGeneratorPrompts");
 const {
@@ -739,6 +743,241 @@ async function interactGoetheSpeakingPartner({
   };
 }
 
+// ─── 5. SPEAKING TASK SHEET & DUAL-ROLE PAARPRÜFUNG ─────────────────────
+
+const EXAMINER_VOICE = "shimmer";
+const PARTNERS = {
+  Florian: { gender: "male", voice: "onyx" },
+  Sarah: { gender: "female", voice: "nova" },
+};
+
+const asStringList = (v) => (Array.isArray(v) ? v.map((x) => String(x ?? "").trim()).filter(Boolean) : []);
+
+function validateTaskSheet(parsed, level, teil) {
+  const kind = taskSheetKind(level, teil);
+  const sheet = {
+    title: String(parsed.title || teil.title).trim(),
+    situation: String(parsed.situation || "").trim(),
+    question: String(parsed.question || "").trim(),
+    leitpunkte: asStringList(parsed.leitpunkte),
+    cards: asStringList(parsed.cards),
+    slides: (Array.isArray(parsed.slides) ? parsed.slides : [])
+      .filter((sl) => String(sl?.title || "").trim())
+      .map((sl) => ({ title: String(sl.title).trim(), prompt: String(sl.prompt || "").trim() })),
+    calendar: null,
+    partnerTopic: String(parsed.partnerTopic || "").trim(),
+    partnerSummary: String(parsed.partnerSummary || "").trim(),
+    partnerNotes: String(parsed.partnerNotes || "").trim(),
+  };
+  const need = (cond, msg) => {
+    if (!cond) throw invalid(`Aufgabenblatt Teil ${teil.teil}: ${msg}`);
+  };
+
+  switch (kind) {
+    case "fragen_zur_person":
+      need(sheet.cards.length >= 4, "4 Karten erwartet");
+      sheet.cards = sheet.cards.slice(0, 4);
+      break;
+    case "von_sich_erzaehlen":
+      need(sheet.question && sheet.leitpunkte.length >= 4, "Frage und 4 Stichpunkte erwartet");
+      break;
+    case "gemeinsam_planen":
+      need(sheet.situation && sheet.leitpunkte.length >= 3, "Situation und Planungspunkte erwartet");
+      break;
+    case "gemeinsam_planen_kalender": {
+      const cal = parsed.calendar || {};
+      const clean = (list) =>
+        (Array.isArray(list) ? list : [])
+          .filter((e) => /^\d{1,2}:\d{2}$/.test(String(e?.time || "").trim()) && String(e?.entry || "").trim())
+          .map((e) => ({ time: String(e.time).trim().padStart(5, "0"), entry: String(e.entry).trim() }));
+      sheet.calendar = { candidate: clean(cal.candidate), partner: clean(cal.partner) };
+      need(sheet.calendar.candidate.length >= 4 && sheet.calendar.partner.length >= 4, "zwei Terminkalender erwartet");
+      break;
+    }
+    case "praesentation":
+      need(sheet.question && sheet.slides.length >= 5, "Thema und 5 Folien erwartet");
+      sheet.slides = sheet.slides.slice(0, 5);
+      break;
+    case "feedback_fragen":
+      need(sheet.partnerTopic && sheet.partnerSummary, "Thema und Zusammenfassung des Partners erwartet");
+      break;
+    default:
+      need(sheet.question && sheet.leitpunkte.length >= 3, "Thema und Leitpunkte erwartet");
+  }
+  return sheet;
+}
+
+/** Generates the candidate's Aufgabenblatt for one Sprechen Teil. */
+async function generateSpeakingTaskSheet({ level = "B1", teil = 1, topic = "" }) {
+  const lvl = sanitizeLevel(level);
+  const speakingTeil = getSpeakingTeil(lvl, teil);
+
+  const sheet = await chatJson({
+    system: buildSpeakingTaskSheetPrompt(lvl, speakingTeil.teil),
+    user: `${topic ? `THEMA: ${topic}` : "THEMA: frei wählbar, passend zum Niveau"}\n\nErstelle jetzt das Aufgabenblatt. Gib NUR valides JSON zurück.`,
+    temperature: 0.7,
+    label: `Goethe Sprechen ${lvl} Teil ${speakingTeil.teil} Aufgabenblatt`,
+    validate: (parsed) => validateTaskSheet(parsed, lvl, speakingTeil),
+  });
+
+  return {
+    level: lvl,
+    teil: speakingTeil.teil,
+    type: speakingTeil.type,
+    mode: speakingTeil.mode,
+    title: speakingTeil.title,
+    instruction: speakingTeil.instruction,
+    durationSeconds: speakingTeil.durationSeconds,
+    topic,
+    ...sheet,
+  };
+}
+
+const EXAM_EVENTS = { start: "start", candidate: "kandidat", time_up: "zeit_um", end: "ende" };
+
+function formatExamHistory(history, partnerName) {
+  return (history || [])
+    .map((h) => {
+      const label =
+        h.speaker === "candidate" || h.role === "user"
+          ? "KANDIDAT"
+          : h.speaker === "examiner"
+          ? `PRÜFERIN ${EXAMINER_NAME}`
+          : `PARTNER ${partnerName}`;
+      return `[${label}]: ${h.text}`;
+    })
+    .join("\n");
+}
+
+/**
+ * One step of the dual-role Paarprüfung: the AI plays the examiner and the
+ * partner candidate and answers with 1–2 spoken turns (each with its own voice).
+ * event: 'start' | 'candidate' | 'time_up' | 'end'
+ */
+async function interactGoetheExamTurn({
+  level = "B1",
+  teil = 1,
+  topic = "",
+  taskSheet = null,
+  partnerName = "Florian",
+  history = [],
+  event = "candidate",
+  firstTeil = false,
+  afterPreparation = false,
+  elapsedSeconds = 0,
+  studentText = "",
+  audioBuffer = null,
+  mimeType = "audio/webm",
+  filename = "candidate_speech.webm",
+}) {
+  const lvl = sanitizeLevel(level);
+  const speakingTeil = getSpeakingTeil(lvl, teil);
+  const partner = PARTNERS[partnerName] ? partnerName : "Florian";
+
+  let recognizedText = (studentText || "").trim();
+  if (audioBuffer && audioBuffer.length > 0) {
+    try {
+      const transcription = await transcribeAudio(audioBuffer, mimeType, filename, "de");
+      recognizedText = (transcription.text || "").trim();
+    } catch (err) {
+      console.error("Whisper German transcription error:", err);
+      if (!recognizedText) {
+        throw Object.assign(new Error("Fehler bei der Audio-Transkription. Bitte sprechen Sie noch einmal."), {
+          status: 502,
+          expose: true,
+        });
+      }
+    }
+  }
+  if (event === "candidate" && !recognizedText) {
+    throw Object.assign(new Error("Es wurde keine Äußerung erkannt. Bitte sprechen Sie noch einmal."), {
+      status: 400,
+      expose: true,
+    });
+  }
+
+  const userMessage = `EREIGNIS: ${EXAM_EVENTS[event] || "kandidat"}
+ersterTeil: ${Boolean(firstTeil)} · nachVorbereitung: ${Boolean(afterPreparation)}
+VERSTRICHENE ZEIT IN DIESEM TEIL: ${Math.round(elapsedSeconds)} von ca. ${speakingTeil.durationSeconds} Sekunden
+
+AUFGABENBLATT (Felder "partner…" und calendar.partner kennt nur der Partner):
+${JSON.stringify(taskSheet || {}, null, 2)}
+
+BISHERIGER VERLAUF IN TEIL ${speakingTeil.teil}:
+${formatExamHistory(history, partner) || "(noch nichts gesagt)"}
+${recognizedText ? `\nNEUE ÄUSSERUNG DES KANDIDATEN:\n"${recognizedText}"` : ""}
+
+Antworte jetzt als PRÜFERIN und/oder PARTNER. Gib NUR valides JSON zurück.`;
+
+  const parsed = await chatJson({
+    system: buildDualRoleExamPrompt(lvl, speakingTeil.teil, {
+      topic,
+      partnerName: partner,
+      partnerGender: PARTNERS[partner].gender,
+    }),
+    user: userMessage,
+    temperature: 0.7,
+    label: `Goethe Paarprüfung ${lvl} Teil ${speakingTeil.teil}`,
+    validate: (json) => {
+      const turns = (Array.isArray(json.turns) ? json.turns : [])
+        .filter((t) => ["pruefer", "partner"].includes(t?.role) && String(t?.text || "").trim())
+        .slice(0, 2)
+        .map((t) => ({ role: t.role, text: String(t.text).trim() }));
+      if (!turns.length) throw invalid("Keine Redebeiträge");
+      return { ...json, turns };
+    },
+  });
+
+  const turns = await Promise.all(
+    parsed.turns.map(async (t) => {
+      const isExaminer = t.role === "pruefer";
+      let audioBase64 = null;
+      try {
+        const res = await openai.audio.speech.create({
+          model: TTS_MODEL,
+          voice: isExaminer ? EXAMINER_VOICE : PARTNERS[partner].voice,
+          input: t.text.slice(0, 4000),
+          response_format: "mp3",
+          speed: TTS_SPEED[lvl] || 1.0,
+        });
+        audioBase64 = Buffer.from(await res.arrayBuffer()).toString("base64");
+      } catch (ttsErr) {
+        console.warn("Goethe exam TTS failed (client falls back to browser speech):", ttsErr.message);
+      }
+      return {
+        role: isExaminer ? "examiner" : "partner",
+        name: isExaminer ? EXAMINER_NAME : partner,
+        text: t.text,
+        audioBase64,
+      };
+    })
+  );
+
+  return {
+    studentTranscript: recognizedText,
+    turns,
+    replyText: turns.map((t) => t.text).join(" "),
+    redemittelTips: asStringList(parsed.redemittelTips).slice(0, 4),
+    isGoalReached: Boolean(parsed.isGoalReached),
+    teil: speakingTeil.teil,
+  };
+}
+
+/** Candidate-visible part of a task sheet, as text for the examiner rubric. */
+function describeTaskSheet(sheet) {
+  if (!sheet) return "";
+  const lines = [];
+  if (sheet.title) lines.push(`Thema: ${sheet.title}`);
+  if (sheet.situation) lines.push(`Situation: ${sheet.situation}`);
+  if (sheet.question) lines.push(`Frage: ${sheet.question}`);
+  if (sheet.leitpunkte?.length) lines.push(`Leitpunkte: ${sheet.leitpunkte.join(" · ")}`);
+  if (sheet.cards?.length) lines.push(`Karten: ${sheet.cards.join(" · ")}`);
+  if (sheet.slides?.length) lines.push(`Folien: ${sheet.slides.map((sl, i) => `${i + 1}. ${sl.title}`).join(" · ")}`);
+  if (sheet.calendar?.candidate?.length) lines.push(`Terminkalender des Kandidaten: ${sheet.calendar.candidate.map((e) => `${e.time} ${e.entry}`).join(", ")}`);
+  if (sheet.partnerTopic) lines.push(`Präsentationsthema des Partners: ${sheet.partnerTopic}`);
+  return lines.join("\n");
+}
+
 /**
  * Evaluation of the entire spoken dialogue with the level/Teil rubric.
  */
@@ -747,6 +986,7 @@ async function evaluateGoetheSpeakingDialogue({
   teil = null,
   topic = "",
   taskType = "",
+  taskSheet = null,
   history = [],
   studentName = "Student",
   model = "gpt-4o",
@@ -757,6 +997,7 @@ async function evaluateGoetheSpeakingDialogue({
     level: lvl,
     part: speakingTeil.teil,
     topic,
+    prompt: describeTaskSheet(taskSheet),
     history,
     studentName,
     model,
@@ -776,6 +1017,8 @@ module.exports = {
   generateGoetheWritingTask,
   interactGoetheSpeakingPartner,
   evaluateGoetheSpeakingDialogue,
+  generateSpeakingTaskSheet,
+  interactGoetheExamTurn,
   resolveSpeakingTeil,
   sanitizeLevel,
 };

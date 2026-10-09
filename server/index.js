@@ -192,6 +192,8 @@ app.use("/api/cron", cronRouter);
 app.use("/api/account", accountRouter);
 
 // Goethe German Exam Prep (Speaking, Writing, Scoring)
+// The exam format is static metadata and must not count against usage limits.
+app.get("/api/goethe/format", verifyAuth, goetheRouter.formatHandler);
 app.use(
   "/api/goethe",
   verifyAuth,

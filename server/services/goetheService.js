@@ -181,7 +181,15 @@ async function evaluateGoetheSpeaking({
 
   const spoken = isDialogue
     ? history
-        .map((turn, i) => `${i + 1}. [${turn.speaker === "candidate" || turn.role === "user" ? "KANDIDAT" : "PARTNER"}]: ${turn.text}`)
+        .map((turn, i) => {
+          const label =
+            turn.speaker === "candidate" || turn.role === "user"
+              ? "KANDIDAT"
+              : turn.speaker === "examiner"
+              ? "PRÜFER"
+              : "PARTNER";
+          return `${i + 1}. [${label}]: ${turn.text}`;
+        })
         .join("\n\n")
     : transcript;
 
