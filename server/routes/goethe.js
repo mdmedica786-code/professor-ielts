@@ -13,6 +13,7 @@ const {
   generateGoetheWritingTask,
   interactGoetheSpeakingPartner,
   evaluateGoetheSpeakingDialogue,
+  resolveSpeakingTeil,
 } = require("../services/goetheGeneratorService");
 const { transcribeAudio } = require("../services/openaiService");
 const { getMimeType } = require("../utils/audioUtils");
@@ -21,6 +22,7 @@ const { evalModel } = require("../utils/models");
 
 const crypto = require("crypto");
 const { sanitizeLevel, getModuleMaxRaw, scaleReceptive } = require("../config/goetheExamFormat");
+const { buildSpeakingPartnerPrompt } = require("../prompts/goetheGeneratorPrompts");
 
 const router = express.Router();
 
@@ -46,6 +48,7 @@ function decodeToken(token) {
   } catch {
     const err = new Error("Ungültiges oder abgelaufenes Prüfungs-Token. Bitte erstellen Sie die Aufgabe neu.");
     err.status = 400;
+    err.expose = true;
     throw err;
   }
 }
@@ -57,6 +60,8 @@ function toPublicQuestion(q) {
     type: q.type,
     prompt: q.prompt,
     options: q.options || [],
+    ...(q.segment ? { segment: q.segment } : {}),
+    ...(q.textRef ? { textRef: q.textRef } : {}),
   };
 }
 
@@ -71,32 +76,18 @@ router.post("/reading/generate", async (req, res, next) => {
     const { level = "B1", topic = "", partNumber = 1 } = req.body || {};
     const generated = await generateGoetheReading({ level, topic, partNumber });
 
-    if (!generated.passage?.text || !generated.questions?.length) {
-      return res.status(502).json({
-        success: false,
-        error: "Fehler bei der Generierung des Lesetextes. Bitte versuchen Sie es erneut.",
-      });
-    }
-
     const token = encodeToken({
+      module: "lesen",
       level: generated.level,
       title: generated.title,
       partNumber: generated.partNumber,
       questions: generated.questions,
     });
 
+    const { questions, ...publicData } = generated;
     res.json({
       success: true,
-      data: {
-        title: generated.title,
-        level: generated.level,
-        partNumber: generated.partNumber,
-        partName: generated.partName,
-        recommendedTimeMinutes: generated.recommendedTimeMinutes,
-        passage: generated.passage,
-        questions: generated.questions.map(toPublicQuestion),
-        token,
-      },
+      data: { ...publicData, questions: questions.map(toPublicQuestion), token },
     });
   } catch (err) {
     next(err);
@@ -132,41 +123,28 @@ router.post("/reading/evaluate", async (req, res, next) => {
 /**
  * POST /api/goethe/listening/generate
  * Body: { level: 'A2'|'B1'|'B2'|'C1', topic, partNumber }
+ * Response adds audioData (base64 mp3) + audioMimeType for server-rendered audio.
  */
 router.post("/listening/generate", async (req, res, next) => {
   try {
     const { level = "B1", topic = "", partNumber = 1 } = req.body || {};
     const generated = await generateGoetheListening({ level, topic, partNumber });
 
-    if (!generated.utterances?.length || !generated.questions?.length) {
-      return res.status(502).json({
-        success: false,
-        error: "Fehler bei der Generierung des Hörtextes. Bitte erneut versuchen.",
-      });
-    }
-
     const token = encodeToken({
+      module: "hoeren",
       level: generated.level,
       title: generated.title,
       partNumber: generated.partNumber,
       questions: generated.questions,
-      utterances: generated.utterances,
     });
 
+    // audioData: the whole Teil (instructions + script, with pauses) as one
+    // base64 mp3 rendered with tts-1-hd; null if synthesis failed, in which
+    // case the client falls back to reading `utterances` with browser TTS.
+    const { questions, ...publicData } = generated;
     res.json({
       success: true,
-      data: {
-        title: generated.title,
-        level: generated.level,
-        partNumber: generated.partNumber,
-        partName: generated.partName,
-        instructions: generated.instructions,
-        maxPlays: generated.maxPlays,
-        speakers: generated.speakers,
-        utterances: generated.utterances,
-        questions: generated.questions.map(toPublicQuestion),
-        token,
-      },
+      data: { ...publicData, questions: questions.map(toPublicQuestion), token },
     });
   } catch (err) {
     next(err);
@@ -224,8 +202,9 @@ router.post("/speaking/partner-turn", async (req, res, next) => {
   try {
     const {
       level = "B1",
-      topic = "Planung",
-      taskType = "Teil 1: Gemeinsam etwas planen",
+      teil = null,
+      topic = "",
+      taskType = "",
       studentText = "",
       voice = "nova",
     } = req.body || {};
@@ -251,6 +230,7 @@ router.post("/speaking/partner-turn", async (req, res, next) => {
 
     const result = await interactGoetheSpeakingPartner({
       level,
+      teil,
       topic,
       taskType,
       history,
@@ -275,8 +255,9 @@ router.post("/speaking/finish-dialogue", async (req, res, next) => {
   try {
     const {
       level = "B1",
-      topic = "Planung",
-      taskType = "Teil 1: Planen",
+      teil = null,
+      topic = "",
+      taskType = "",
       studentName = "Student",
     } = req.body || {};
 
@@ -289,8 +270,16 @@ router.post("/speaking/finish-dialogue", async (req, res, next) => {
       }
     }
 
+    if (!history.some((h) => (h.speaker === "candidate" || h.role === "user") && String(h.text || "").trim())) {
+      return res.status(400).json({
+        success: false,
+        error: "Es wurden noch keine Redebeiträge von Ihnen aufgezeichnet.",
+      });
+    }
+
     const result = await evaluateGoetheSpeakingDialogue({
       level,
+      teil,
       topic,
       taskType,
       history,
@@ -309,16 +298,12 @@ router.post("/speaking/finish-dialogue", async (req, res, next) => {
  */
 router.post("/realtime-token", async (req, res, next) => {
   try {
-    const { level = "B1", topic = "Gemeinsam etwas planen", taskType = "Teil 1: Planen" } = req.body || {};
+    const { level = "B1", teil = null, topic = "", taskType = "" } = req.body || {};
+    const lvl = sanitizeLevel(level);
+    const speakingTeil = resolveSpeakingTeil(lvl, teil, taskType);
 
-    const instructions = `Du bist "Kandidat B", ein sympathischer, kooperativer deutscher Prüfungspartner in der mündlichen Goethe-Prüfung (Sprechen) auf Niveau ${level}.
-Thema: "${topic}".
-Aufgabe: "${taskType}".
-Regeln:
-1. Sprich AUSSCHLIESSLICH Deutsch, angepasst an das CEFR-Niveau ${level}.
-2. Antworte immer kurz und dialogisch (2–3 Sätze), damit der Kandidat aktiv sprechen kann.
-3. Gehe auf die Vorschläge des Kandidaten ein, bringe eigene Ideen ein und stelle offene Fragen.
-4. Begrüße den Kandidaten kurz und eröffne das Gespräch mit einer themenbezogenen Frage oder einem Vorschlag.`;
+    const instructions = `${buildSpeakingPartnerPrompt(lvl, speakingTeil.teil, topic, { output: "speech" })}
+Begrüße den Kandidaten kurz und eröffne die Aufgabe so, wie es in der Prüfung üblich ist.`;
 
     const response = await axios.post(
       "https://api.openai.com/v1/realtime/client_secrets",
@@ -354,29 +339,30 @@ Regeln:
 
 /**
  * POST /api/goethe/evaluate-writing
- * Body: { taskNumber: 1 | 2 | 3, prompt, response, studentName }
+ * Body: { level, taskNumber, prompt, response, studentName }
  */
 router.post("/evaluate-writing", async (req, res, next) => {
   try {
-    const { taskNumber = 1, prompt = "", response = "", studentName = "Student" } = req.body;
+    const { level = "B1", taskNumber = 1, prompt = "", response = "", studentName = "Student" } = req.body || {};
 
-    if (!response.trim()) {
+    if (!String(response).trim()) {
       return res.status(400).json({
         success: false,
-        error: "Bitte geben Sie zuerst Ihren Text ein (No written text provided).",
+        error: "Bitte geben Sie zuerst Ihren Text ein.",
       });
     }
 
-    if (!prompt.trim()) {
+    if (!String(prompt).trim()) {
       return res.status(400).json({
         success: false,
-        error: "Keine Aufgabenstellung vorhanden (No task prompt provided).",
+        error: "Es ist keine Aufgabenstellung vorhanden.",
       });
     }
 
     const evalModelName = evalModel(await getIsPremium(req.uid));
 
     const result = await evaluateGoetheWriting({
+      level,
       taskNumber: parseInt(taskNumber, 10) || 1,
       prompt,
       response,
@@ -396,6 +382,7 @@ router.post("/evaluate-writing", async (req, res, next) => {
 router.post("/evaluate-speaking", async (req, res, next) => {
   try {
     let transcript = req.body.transcript || "";
+    const level = req.body.level || "B1";
     const part = parseInt(req.body.part, 10) || 2;
     const prompt = req.body.prompt || "";
     const topic = req.body.topic || "";
@@ -424,13 +411,14 @@ router.post("/evaluate-speaking", async (req, res, next) => {
     if (!transcript.trim()) {
       return res.status(400).json({
         success: false,
-        error: "Kein gesprochener Text oder Audio vorhanden (No speech or audio detected).",
+        error: "Es wurde kein gesprochener Text erkannt. Bitte nehmen Sie Ihre Antwort erneut auf.",
       });
     }
 
     const evalModelName = evalModel(await getIsPremium(req.uid));
 
     const result = await evaluateGoetheSpeaking({
+      level,
       part,
       prompt,
       topic,
@@ -481,6 +469,42 @@ router.post("/score-calculator", (req, res) => {
   res.json({
     success: true,
     data: { level, modules, allPassed, averagePoints, overallPraedikat: getGoethePraedikat(averagePoints) },
+  });
+});
+
+// ─── ERROR HANDLING (German messages for the exam UI) ─────────────────
+
+// eslint-disable-next-line no-unused-vars
+router.use((err, req, res, _next) => {
+  console.error("Goethe route error:", err.message);
+
+  if (err.expose && err.status) {
+    return res.status(err.status).json({ success: false, error: err.message });
+  }
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ success: false, error: "Die Audiodatei ist zu groß (maximal 25 MB)." });
+  }
+  if (err.isValidation || err instanceof SyntaxError) {
+    return res.status(502).json({
+      success: false,
+      error: "Die KI hat keine gültige Antwort geliefert. Bitte versuchen Sie es erneut.",
+    });
+  }
+  if (err.status === 429) {
+    return res.status(429).json({
+      success: false,
+      error: "Der KI-Dienst ist gerade ausgelastet. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+    });
+  }
+  if (typeof err.status === "number") {
+    return res.status(502).json({
+      success: false,
+      error: "Der KI-Dienst ist momentan nicht erreichbar. Bitte versuchen Sie es erneut.",
+    });
+  }
+  res.status(500).json({
+    success: false,
+    error: "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
   });
 });
 

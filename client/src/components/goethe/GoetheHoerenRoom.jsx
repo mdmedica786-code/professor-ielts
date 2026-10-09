@@ -48,8 +48,18 @@ export default function GoetheHoerenRoom() {
   const [showTranscripts, setShowTranscripts] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Speech synthesis reference
+  // Speech synthesis reference (fallback when the server sent no audio)
   const currentUtteranceRef = useRef(null);
+  // Server-rendered tts-1-hd audio for the whole Teil
+  const serverAudioRef = useRef(null);
+
+  const stopAllAudio = () => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (serverAudioRef.current) {
+      serverAudioRef.current.pause();
+      serverAudioRef.current = null;
+    }
+  };
 
   // Sync level with app context
   useEffect(() => {
@@ -58,11 +68,7 @@ export default function GoetheHoerenRoom() {
 
   // Clean up audio on unmount
   useEffect(() => {
-    return () => {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
+    return () => stopAllAudio();
   }, []);
 
   // Auto-generate initial test if none loaded
@@ -73,7 +79,7 @@ export default function GoetheHoerenRoom() {
   }, []);
 
   const handleGenerateDynamicTest = async () => {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopAllAudio();
     setIsPlayingAudio(false);
     setActiveUtteranceIndex(-1);
     setIsGenerating(true);
@@ -154,9 +160,27 @@ export default function GoetheHoerenRoom() {
     }
 
     if (isPlayingAudio) {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      stopAllAudio();
       setIsPlayingAudio(false);
       setActiveUtteranceIndex(-1);
+    } else if (dynamicTest.audioData) {
+      const audio = new Audio(`data:${dynamicTest.audioMimeType || 'audio/mpeg'};base64,${dynamicTest.audioData}`);
+      serverAudioRef.current = audio;
+      audio.onended = () => {
+        serverAudioRef.current = null;
+        setIsPlayingAudio(false);
+        setPlayCount((prev) => prev + 1);
+      };
+      audio.onerror = () => {
+        serverAudioRef.current = null;
+        setIsPlayingAudio(false);
+      };
+      setIsPlayingAudio(true);
+      audio.play().catch((err) => {
+        console.warn('Server audio playback failed, falling back to browser speech:', err);
+        serverAudioRef.current = null;
+        playUtteranceSequence(dynamicTest.utterances, 0);
+      });
     } else {
       playUtteranceSequence(dynamicTest.utterances, 0);
     }
@@ -169,7 +193,7 @@ export default function GoetheHoerenRoom() {
 
   const handleSubmitDynamic = async () => {
     if (!dynamicTest?.token) return;
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopAllAudio();
     setIsPlayingAudio(false);
     setIsEvaluatingDynamic(true);
 
@@ -212,7 +236,7 @@ export default function GoetheHoerenRoom() {
   };
 
   const handleReset = () => {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopAllAudio();
     setIsPlayingAudio(false);
     setActiveUtteranceIndex(-1);
     setAnswers({});

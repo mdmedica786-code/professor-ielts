@@ -1,13 +1,22 @@
 const { OpenAI } = require("openai");
 const {
-  GOETHE_WRITING_EXAMINER_PROMPT,
-  GOETHE_SPEAKING_EXAMINER_PROMPT,
+  buildWritingExaminerPrompt,
+  buildSpeakingExaminerPrompt,
 } = require("../prompts/goetheExaminer");
+const {
+  BAND_FACTORS,
+  sanitizeLevel,
+  getLevelFormat,
+  getWritingAufgabe,
+  getSpeakingTeil,
+  bandToPoints,
+} = require("../config/goetheExamFormat");
+const { callWithRetry, parseJsonContent, LlmValidationError } = require("../utils/llmRetry");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
- * Determine Prädikat according to Goethe-Zertifikat B1 official rules:
+ * Determine Prädikat according to the official Goethe-Zertifikat rules:
  * 100–90: sehr gut
  * 89–80: gut
  * 79–70: befriedigend
@@ -30,23 +39,56 @@ function countGermanWords(text) {
   return clean.split(/\s+/).filter(Boolean).length;
 }
 
+const round2 = (n) => Math.round(n * 100) / 100;
+
 /**
- * Evaluates a Goethe Writing task (Aufgabe 1, 2, or 3)
+ * Read one band per criterion from the model output (top-level "bands" or
+ * criteriaAnalysis[key].band). Throws a retryable error if any is missing.
+ */
+function extractBands(parsed, criteria) {
+  const bands = {};
+  for (const c of criteria) {
+    const raw = parsed?.bands?.[c.key] ?? parsed?.criteriaAnalysis?.[c.key]?.band;
+    const band = String(raw || "").trim().toUpperCase();
+    if (!(band in BAND_FACTORS)) {
+      throw new LlmValidationError(`Kein gültiges Band für Kriterium "${c.key}"`);
+    }
+    bands[c.key] = band;
+  }
+  return bands;
+}
+
+/** Points per criterion from bands; Erfüllung = E zeroes the whole task. */
+function scoreFromBands(criteria, bands) {
+  const knockOut = bands.erfuellung === "E";
+  const scores = {};
+  for (const c of criteria) scores[c.key] = knockOut ? 0 : bandToPoints(bands[c.key], c.max);
+  const totalPoints = round2(Object.values(scores).reduce((s, v) => s + v, 0));
+  return { scores, totalPoints, knockOut };
+}
+
+/**
+ * Evaluates a Goethe Schreiben Aufgabe for any supported level.
+ * Rubric, criteria and max points come from the FORMAT config.
  */
 async function evaluateGoetheWriting({
+  level = "B1",
   taskNumber = 1,
   prompt,
   response,
   studentName = "Student",
   model = "gpt-4o",
 }) {
+  const lvl = sanitizeLevel(level);
+  const aufgabe = getWritingAufgabe(lvl, taskNumber);
   const wordCount = countGermanWords(response);
-  const targetWords = taskNumber === 3 ? 40 : 80;
-  const maxPoints = taskNumber === 3 ? 20 : 40;
+  const [minW, maxW] = aufgabe.words;
+  const knockoutWords = Math.floor(minW * 0.5);
+  const tooShort = wordCount < knockoutWords;
 
-  const userMessage = `AUFGABE: Aufgabe ${taskNumber} (${taskNumber === 1 ? "Persönliche E-Mail/Brief" : taskNumber === 2 ? "Diskussionsforum / Meinung" : "Formelle E-Mail"})
-RICHTWERT WORTE: ca. ${targetWords} Wörter
-TATSÄCHLICHE WORTZAHL (bereits exakt gezählt): ${wordCount} Wörter
+  const userMessage = `AUFGABE: Goethe-Zertifikat ${lvl}, Schreiben Aufgabe ${aufgabe.nr} (${aufgabe.label})
+RICHTWERT: ${minW === maxW ? `circa ${minW}` : `${minW}–${maxW}`} Wörter
+TATSÄCHLICHE WORTZAHL (bereits exakt gezählt): ${wordCount} Wörter${tooShort ? ` — UNTER 50 % DER VORGABE: Erfüllung muss Band E sein.` : ""}
 
 AUFGABENSTELLUNG:
 """
@@ -58,30 +100,50 @@ TEXT DES TEILNEHMERS:
 ${response}
 """
 
-Bewerte diesen Text nun streng nach den Goethe B1 Richtlinien (Erfüllung, Kohärenz, Wortschatz, Strukturen). Beachte die Knock-Out-Regel (< 50% Wortzahl oder Thema verfehlt = Erfüllung E = 0 Punkte für die gesamte Aufgabe). Gib NUR valides JSON zurück.`;
+Bewerte diesen Text jetzt streng nach den Kriterien für Aufgabe ${aufgabe.nr}. Gib NUR valides JSON zurück.`;
 
-  const completion = await openai.chat.completions.create({
-    model,
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: GOETHE_WRITING_EXAMINER_PROMPT },
-      { role: "user", content: userMessage },
-    ],
-  });
+  const { parsed, bands } = await callWithRetry(async () => {
+    const completion = await openai.chat.completions.create({
+      model,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: buildWritingExaminerPrompt(lvl, aufgabe.nr) },
+        { role: "user", content: userMessage },
+      ],
+    });
+    const json = parseJsonContent(completion);
+    return { parsed: json, bands: extractBands(json, aufgabe.criteria) };
+  }, 2, "Goethe Schreiben-Bewertung");
 
-  const parsed = JSON.parse(completion.choices[0].message.content || "{}");
+  // The word-count knock-out is deterministic; never leave it to the model.
+  if (tooShort) bands.erfuellung = "E";
 
-  // Ensure scaled score and praedikat are accurate
-  const totalPoints = typeof parsed.totalPoints === "number" ? parsed.totalPoints : 0;
-  const scaledPoints100 = Math.round((totalPoints / maxPoints) * 100);
+  const { scores, totalPoints, knockOut } = scoreFromBands(aufgabe.criteria, bands);
+  const scaledPoints100 = Math.round((totalPoints / aufgabe.maxPoints) * 100);
   const praedikatInfo = getGoethePraedikat(scaledPoints100);
+
+  const criteriaAnalysis = { ...(parsed.criteriaAnalysis || {}) };
+  for (const c of aufgabe.criteria) {
+    criteriaAnalysis[c.key] = { ...(criteriaAnalysis[c.key] || {}), band: bands[c.key], points: scores[c.key] };
+  }
 
   return {
     ...parsed,
+    level: lvl,
+    taskNumber: aufgabe.nr,
+    taskLabel: aufgabe.label,
     wordCount,
-    taskNumber,
-    maxPoints,
+    targetWords: aufgabe.words,
+    bands,
+    scores,
+    maxScores: Object.fromEntries(aufgabe.criteria.map((c) => [c.key, c.max])),
+    criteriaAnalysis,
+    knockOut,
+    totalPoints,
+    maxPoints: aufgabe.maxPoints,
+    // Aufgaben max points add up to 100 per level, so these are module points.
+    modulePoints: totalPoints,
     scaledPoints100,
     praedikat: praedikatInfo.label,
     passed: praedikatInfo.passed,
@@ -94,59 +156,82 @@ Bewerte diesen Text nun streng nach den Goethe B1 Richtlinien (Erfüllung, Kohä
 }
 
 /**
- * Evaluates a Goethe Speaking task (Teil 1, 2, or 3)
+ * Evaluates a Goethe Sprechen Teil for any supported level.
+ * Pass `transcript` for a monologue, or `history` ([{speaker, text}]) for a
+ * dialogue with the AI partner — only the candidate's turns are graded.
  */
 async function evaluateGoetheSpeaking({
-  part = 2,
-  prompt,
-  topic,
-  transcript,
+  level = "B1",
+  part = 1,
+  prompt = "",
+  topic = "",
+  transcript = "",
+  history = null,
   slideNotes = null,
   studentName = "Student",
   model = "gpt-4o",
 }) {
-  const partTitle =
-    part === 1
-      ? "Teil 1: Gemeinsam etwas planen"
-      : part === 2
-      ? "Teil 2: Ein Thema präsentieren"
-      : "Teil 3: Über das Thema sprechen";
+  const lvl = sanitizeLevel(level);
+  const fmt = getLevelFormat(lvl);
+  const teil = getSpeakingTeil(lvl, part);
+  const aussprache = { key: "aussprache", label: "Aussprache", max: fmt.sprechen.ausspracheMax };
+  const allCriteria = [...teil.criteria, aussprache];
+  const teilMax = teil.criteria.reduce((s, c) => s + c.max, 0);
+  const isDialogue = Array.isArray(history) && history.length > 0;
 
-  const userMessage = `PRÜFUNGSTEIL: ${partTitle} (Teil ${part})
+  const spoken = isDialogue
+    ? history
+        .map((turn, i) => `${i + 1}. [${turn.speaker === "candidate" || turn.role === "user" ? "KANDIDAT" : "PARTNER"}]: ${turn.text}`)
+        .join("\n\n")
+    : transcript;
+
+  const userMessage = `PRÜFUNGSTEIL: Goethe-Zertifikat ${lvl}, Sprechen Teil ${teil.teil} (${teil.title})
 THEMA: ${topic || "Allgemeines Prüfungsthema"}
-
-AUFGABENSTELLUNG / VORGABEN:
+${prompt ? `\nAUFGABENSTELLUNG / VORGABEN:\n"""\n${prompt}\n"""\n` : ""}${slideNotes ? `\nNOTIZEN DES KANDIDATEN:\n${JSON.stringify(slideNotes, null, 2)}\n` : ""}
+${isDialogue ? "VOLLSTÄNDIGER DIALOGABLAUF" : "GESPROCHENER TEXT (TRANSKRIPT)"}:
 """
-${prompt || ""}
-"""
-
-${slideNotes ? `NOTIZEN ZU DEN 5 FOLIEN:\n${JSON.stringify(slideNotes, null, 2)}\n` : ""}
-
-GESPROCHENER TEXT (TRANSKRIPT):
-"""
-${transcript}
+${spoken || "Keine Äußerung erfasst."}
 """
 
-Bewerte diese mündliche Leistung streng nach den Bewertungskriterien des Goethe-Instituts. Beachte die 5-Folien-Struktur in Teil 2, die Interaktionsdynamik in Teil 1 und die Frage-/Feedbackkultur in Teil 3 sowie die Aussprache. Gib NUR valides JSON zurück.`;
+Bewerte diese mündliche Leistung jetzt streng nach den Kriterien für Teil ${teil.teil}. Gib NUR valides JSON zurück.`;
 
-  const completion = await openai.chat.completions.create({
-    model,
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: GOETHE_SPEAKING_EXAMINER_PROMPT },
-      { role: "user", content: userMessage },
-    ],
-  });
+  const { parsed, bands } = await callWithRetry(async () => {
+    const completion = await openai.chat.completions.create({
+      model,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: buildSpeakingExaminerPrompt(lvl, teil.teil, { dialogue: isDialogue }) },
+        { role: "user", content: userMessage },
+      ],
+    });
+    const json = parseJsonContent(completion);
+    return { parsed: json, bands: extractBands(json, allCriteria) };
+  }, 2, "Goethe Sprechen-Bewertung");
 
-  const parsed = JSON.parse(completion.choices[0].message.content || "{}");
-  const maxPartPoints = part === 1 ? 28 : part === 2 ? 40 : 16;
-  const scaledPoints100 = parsed.scaledPoints100 || Math.round((parsed.totalPoints / (parsed.maxPoints || maxPartPoints)) * 100);
+  // Knock-out applies to the Teil criteria; Aussprache is rated for the whole exam.
+  const teilResult = scoreFromBands(teil.criteria, bands);
+  const ausspracheScore = bandToPoints(bands.aussprache, aussprache.max);
+  const scores = { ...teilResult.scores, aussprache: ausspracheScore };
+  const maxPoints = teilMax + aussprache.max;
+  const totalPoints = round2(teilResult.totalPoints + ausspracheScore);
+  const scaledPoints100 = Math.round((totalPoints / maxPoints) * 100);
   const praedikatInfo = getGoethePraedikat(scaledPoints100);
 
   return {
     ...parsed,
-    part,
+    level: lvl,
+    part: teil.teil,
+    partTitle: teil.title,
+    bands,
+    scores,
+    maxScores: Object.fromEntries(allCriteria.map((c) => [c.key, c.max])),
+    knockOut: teilResult.knockOut,
+    teilPoints: teilResult.totalPoints,
+    teilMaxPoints: teilMax,
+    ausspracheBand: bands.aussprache,
+    totalPoints,
+    maxPoints,
     scaledPoints100,
     praedikat: praedikatInfo.label,
     passed: praedikatInfo.passed,
