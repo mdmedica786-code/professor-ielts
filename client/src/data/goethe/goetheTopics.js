@@ -3,6 +3,10 @@
  * Derived from the official Goethe Modellsatz, Übungssatz, and Wortliste.
  */
 
+import { GOETHE_TOPICS_A2 } from './goetheTopicsA2';
+import { GOETHE_TOPICS_B2 } from './goetheTopicsB2';
+import { GOETHE_TOPICS_C1 } from './goetheTopicsC1';
+
 export const GOETHE_TOPICS = [
   {
     id: 'c1',
@@ -558,3 +562,12 @@ export const GOETHE_TOPICS = [
     ],
   },
 ];
+
+export { GOETHE_TOPICS_A2, GOETHE_TOPICS_B2, GOETHE_TOPICS_C1 };
+
+const TOPICS_BY_LEVEL = { A2: GOETHE_TOPICS_A2, B1: GOETHE_TOPICS, B2: GOETHE_TOPICS_B2, C1: GOETHE_TOPICS_C1 };
+
+/** Topic catalog for a level (A2, B1, B2, C1); unknown levels fall back to B1. */
+export function getTopicsForLevel(level) {
+  return TOPICS_BY_LEVEL[level] || GOETHE_TOPICS;
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GOETHE_TOPICS } from '../../../data/goethe/goetheTopics';
+import { getTopicsForLevel } from '../../../data/goethe/goetheTopics';
 
 const LEVELS = [
   { key: 'A2', label: 'A2 · Grundkenntnisse' },
@@ -13,7 +13,8 @@ const LEVELS = [
  * (as in the real exam, each Teil gets its own theme).
  */
 export default function ExamSetupBar({ level, onLevelChange, topic, onTopicChange, disabled = false }) {
-  const isPreset = topic === '' || GOETHE_TOPICS.some((t) => t.title === topic);
+  const topics = getTopicsForLevel(level);
+  const isPreset = topic === '' || topics.some((t) => t.title === topic);
   const [custom, setCustom] = useState(isPreset ? '' : topic);
 
   return (
@@ -45,7 +46,7 @@ export default function ExamSetupBar({ level, onLevelChange, topic, onTopicChang
           className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-800"
         >
           <option value="">Zufällig (wie in der Prüfung)</option>
-          {GOETHE_TOPICS.map((t) => (
+          {topics.map((t) => (
             <option key={t.id} value={t.title}>
               {t.title}
             </option>
