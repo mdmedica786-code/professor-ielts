@@ -1,556 +1,351 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { GOETHE_READING_TESTS } from '../../data/goethe/goetheReadingTests';
-import { calculateGoetheReadingListeningScore, GOETHE_LEVEL_SPECS } from '../../data/goethe/goetheGradingRules';
-import { GOETHE_TOPICS } from '../../data/goethe/goetheTopics';
-import api from '../../api/client';
-import {
-  BookOpenText,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  HelpCircle,
-  RotateCcw,
-  Send,
-  Award,
-  ChevronRight,
-  AlertCircle,
-  Sparkles,
-  Loader2,
-  BookOpen,
-  Filter,
-} from 'lucide-react';
+import { getPraedikat } from '../../data/goethe/goetheGradingRules';
+import { BookOpenText, Send, RotateCcw, Loader2, AlertCircle, ChevronRight, FileSpreadsheet, CheckCheck } from 'lucide-react';
+import ExamModeToggle from './shared/ExamModeToggle';
+import ExamTimer from './shared/ExamTimer';
+import { useCountdown } from './shared/useCountdown';
+import ExamSetupBar from './shared/ExamSetupBar';
+import ExamInstructionScreen from './shared/ExamInstructionScreen';
+import BilingualInstructionBanner from './shared/BilingualInstructionBanner';
+import TeilTabs from './shared/TeilTabs';
+import QuestionPalette from './shared/QuestionPalette';
+import QuestionRenderer from './shared/QuestionRenderer';
+import AnswerSheet from './shared/AnswerSheet';
+import ModuleResultCard from './shared/ModuleResultCard';
+import { HighlighterToolbar } from './shared/TextHighlighter';
+import { useExamMode } from './shared/useExamMode';
+import { useGoetheFormat } from './shared/useGoetheFormat';
+import { useReceptiveExam, summarizeModule } from './shared/useReceptiveExam';
+import ReadingDocument from './ReadingDocument';
 
-export default function GoetheLesenRoom() {
-  const { studentName, saveEvaluation, goetheLevel } = useApp();
+const SHOWN_IN_DOCUMENT = new Set(['lueckentext_woerter', 'lueckentext_saetze']);
 
-  // Mode: 'dynamic' (AI Generated) or 'official' (Standard Modellsatz)
-  const [testSource, setTestSource] = useState('dynamic');
+function LesenExam({ level, onLevelChange }) {
+  const { saveEvaluation } = useApp();
+  const { isExam, isLearn } = useExamMode();
+  const { format, error: formatError } = useGoetheFormat(level);
+  const lesen = format?.lesen;
+  const exam = useReceptiveExam('lesen', level);
 
-  // Generator parameters
-  const [selectedLevel, setSelectedLevel] = useState(goetheLevel || 'B1');
-  const [selectedTopic, setSelectedTopic] = useState('Freizeit und Hobbys');
-  const [customTopic, setCustomTopic] = useState('');
-  const [selectedPartNum, setSelectedPartNum] = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [genError, setGenError] = useState(null);
+  const [topic, setTopic] = useState('');
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [activeTeil, setActiveTeil] = useState(1);
+  const [showSheet, setShowSheet] = useState(false);
+  const [highlights, setHighlights] = useState({});
+  const [tool, setTool] = useState('yellow');
 
-  // Dynamic test state
-  const [dynamicTest, setDynamicTest] = useState(null);
-  const [dynamicEvalResult, setDynamicEvalResult] = useState(null);
-  const [isEvaluatingDynamic, setIsEvaluatingDynamic] = useState(false);
+  const part = lesen?.parts.find((p) => p.teil === activeTeil);
+  const test = exam.tests[activeTeil];
+  const teilAnswers = exam.answers[activeTeil] || {};
+  const teilResult = exam.results[activeTeil];
+  const summary = useMemo(() => summarizeModule(lesen, exam.results, { final: finished }), [lesen, exam.results, finished]);
 
-  // Official static test state (legacy B1 Modellsatz)
-  const [activeOfficialIndex, setActiveOfficialIndex] = useState(0);
-  const [activeOfficialPart, setActiveOfficialPart] = useState(1);
-  const officialTest = GOETHE_READING_TESTS[activeOfficialIndex] || GOETHE_READING_TESTS[0];
-
-  // Common interactive state
-  const [answers, setAnswers] = useState({}); // { [itemNumber | id]: value }
-  const [timeLeft, setTimeLeft] = useState(65 * 60);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  // Sync level with app context
-  useEffect(() => {
-    if (goetheLevel) setSelectedLevel(goetheLevel);
-  }, [goetheLevel]);
-
-  // Countdown timer
-  useEffect(() => {
-    let interval = null;
-    if (timerRunning && timeLeft > 0 && !isSubmitted) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [timerRunning, timeLeft, isSubmitted]);
-
-  // Auto-generate initial dynamic test on mount if none loaded
-  useEffect(() => {
-    if (testSource === 'dynamic' && !dynamicTest && !isGenerating) {
-      handleGenerateDynamicTest();
-    }
-  }, []);
-
-  const handleGenerateDynamicTest = async () => {
-    setIsGenerating(true);
-    setGenError(null);
-    setDynamicEvalResult(null);
-    setAnswers({});
-    setIsSubmitted(false);
-
-    const topicToUse = customTopic.trim() || selectedTopic;
+  const handleSubmitAll = async () => {
+    if (!lesen || finished) return;
+    const teile = lesen.parts.map((p) => p.teil);
     try {
-      const res = await api.post('/goethe/reading/generate', {
-        level: selectedLevel,
-        topic: topicToUse,
-        partNumber: selectedPartNum,
-      });
-
-      if (res.data?.success && res.data.data) {
-        setDynamicTest(res.data.data);
-        const mins = res.data.data.recommendedTimeMinutes || 15;
-        setTimeLeft(mins * 60);
-        setTimerRunning(true);
-      } else {
-        setGenError(res.data?.error || 'Fehler beim Erstellen der Leseaufgabe.');
-      }
+      await exam.submit(teile);
     } catch (err) {
-      console.error('Error generating reading test:', err);
-      setGenError(err.response?.data?.error || 'Verbindung zum Server fehlgeschlagen.');
-    } finally {
-      setIsGenerating(false);
+      alert(err.response?.data?.error || err.message || 'Fehler bei der Auswertung.');
+      return;
     }
+    setFinished(true);
+    setShowSheet(false);
   };
 
-  const handleSelectAnswer = (itemKey, val) => {
-    if (isSubmitted) return;
-    setAnswers((prev) => ({ ...prev, [itemKey]: val }));
-  };
+  const timer = useCountdown((lesen?.timeMinutes || 60) * 60, {
+    running: started && !finished && !(isLearn && paused),
+    onExpire: () => {
+      if (isExam) handleSubmitAll();
+    },
+  });
 
-  // Submit dynamic test
-  const handleSubmitDynamic = async () => {
-    if (!dynamicTest?.token) return;
-    setIsEvaluatingDynamic(true);
-    setTimerRunning(false);
-    try {
-      const res = await api.post('/goethe/reading/evaluate', {
-        token: dynamicTest.token,
-        answers,
-        level: selectedLevel,
-      });
-
-      if (res.data?.success && res.data.data) {
-        setDynamicEvalResult(res.data.data);
-        setIsSubmitted(true);
-
-        saveEvaluation(
-          {
-            kind: 'goethe-lesen',
-            level: selectedLevel,
-            rawScore: res.data.data.correctCount,
-            maxRaw: res.data.data.totalQuestions,
-            scaledPoints100: res.data.data.points100,
-            praedikat: res.data.data.praedikat,
-            passed: res.data.data.passed,
-            answers,
-          },
-          {
-            kind: 'goethe-lesen',
-            module: selectedLevel,
-            question: dynamicTest.title,
-          }
-        );
-      }
-    } catch (err) {
-      console.error('Error evaluating reading answers:', err);
-      alert('Fehler bei der Auswertung. Bitte versuchen Sie es erneut.');
-    } finally {
-      setIsEvaluatingDynamic(false);
-    }
-  };
-
-  // Submit official test (legacy)
-  const handleSubmitOfficial = () => {
-    let correctCount = 0;
-    officialTest.parts.forEach((p) => {
-      if (p.partNumber === 1 || p.partNumber === 5) {
-        p.questions?.forEach((q) => {
-          if (answers[q.number] && answers[q.number].toString().toLowerCase() === q.correct.toString().toLowerCase()) {
-            correctCount++;
-          }
-        });
-      } else if (p.partNumber === 2) {
-        [...(p.questionsA || []), ...(p.questionsB || [])].forEach((q) => {
-          if (answers[q.number] && answers[q.number].toString().toLowerCase() === q.correct.toString().toLowerCase()) {
-            correctCount++;
-          }
-        });
-      } else if (p.partNumber === 3) {
-        p.situations?.forEach((s) => {
-          if (answers[s.number] && answers[s.number].toString().toUpperCase() === s.correct.toString().toUpperCase()) {
-            correctCount++;
-          }
-        });
-      } else if (p.partNumber === 4) {
-        p.items?.forEach((item) => {
-          if (answers[item.number] && answers[item.number].toString().toLowerCase() === item.correct.toString().toLowerCase()) {
-            correctCount++;
-          }
-        });
-      }
-    });
-
-    const scoreResult = calculateGoetheReadingListeningScore(correctCount, 'B1');
-    setIsSubmitted(true);
-    setTimerRunning(false);
-
+  // Persist the module result once all Teile are evaluated.
+  useEffect(() => {
+    if (!finished || !summary) return;
     saveEvaluation(
       {
         kind: 'goethe-lesen',
-        rawScore: correctCount,
-        maxRaw: 30,
-        scaledPoints100: scoreResult.points100,
-        praedikat: scoreResult.praedikat.label,
-        passed: scoreResult.passed,
-        answers,
+        level,
+        rawScore: summary.raw,
+        maxRaw: summary.maxRaw,
+        scaledPoints100: summary.points100,
+        praedikat: summary.passed ? getPraedikat(summary.points100).label : 'Nicht bestanden',
+        passed: summary.passed,
       },
-      {
-        kind: 'goethe-lesen',
-        module: 'B1',
-        question: officialTest.title,
-      }
+      { kind: 'goethe-lesen', module: level, question: `Goethe Lesen ${level}` }
     );
+    // Save once per finished exam.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
+  // Generate the active Teil on demand and prefetch the next one.
+  useEffect(() => {
+    if (!started || !lesen) return;
+    const { tests, loading, errors, generate } = exam;
+    if (!tests[activeTeil] && !loading[activeTeil] && !errors[activeTeil]) generate(activeTeil, topic);
+    const next = lesen.parts.find((p) => p.teil === activeTeil + 1);
+    if (tests[activeTeil] && next && !tests[next.teil] && !loading[next.teil] && !errors[next.teil] && !finished) {
+      generate(next.teil, topic);
+    }
+  }, [started, activeTeil, lesen, exam, topic, finished]);
+
+  const start = () => {
+    timer.reset((lesen?.timeMinutes || 60) * 60);
+    setStarted(true);
+    setFinished(false);
+    setActiveTeil(1);
   };
 
-  const handleReset = () => {
-    setAnswers({});
-    setIsSubmitted(false);
-    setDynamicEvalResult(null);
-    setTimeLeft(15 * 60);
-    setTimerRunning(true);
+  const restart = () => {
+    exam.reset();
+    setHighlights({});
+    setStarted(false);
+    setFinished(false);
+    setShowSheet(false);
   };
 
-  const formatTimer = (sec) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const jumpTo = (n) => document.getElementById(`goethe-q-${n}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const confirmSubmit = () => {
+    const open = lesen.parts.reduce((sum, p) => sum + (p.count - Object.values(exam.answers[p.teil] || {}).filter((v) => String(v).trim()).length), 0);
+    if (open > 0 && !window.confirm(`Sie haben noch ${open} Aufgaben ohne Antwort. Wirklich abgeben?`)) return;
+    handleSubmitAll();
   };
+
+  if (formatError) {
+    return (
+      <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2">
+        <AlertCircle className="w-4 h-4" /> {formatError}
+      </div>
+    );
+  }
+  if (!lesen) {
+    return (
+      <div className="flex items-center gap-2 text-slate-500 text-sm p-6">
+        <Loader2 className="w-4 h-4 animate-spin" /> Prüfungsformat wird geladen …
+      </div>
+    );
+  }
+
+  const tabs = lesen.parts.map((p) => ({
+    key: p.teil,
+    label: `Teil ${p.teil}`,
+    title: p.title,
+    status: exam.results[p.teil] ? 'done' : exam.loading[p.teil] ? 'loading' : 'idle',
+    answered: Object.values(exam.answers[p.teil] || {}).filter((v) => String(v).trim()).length,
+    total: p.count,
+  }));
 
   return (
-    <div className="min-h-full px-3 md:px-6 py-6 max-w-6xl mx-auto flex flex-col gap-6 animate-fade-in text-left">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div className="flex flex-col gap-5">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-xs font-bold mb-1.5 border border-emerald-200">
-            <span>🇩🇪 Goethe-Zertifikat {selectedLevel}</span>
-            <span>·</span>
-            <span>Leseverstehen ({testSource === 'dynamic' ? 'KI-Aufgabe' : 'Modellsatz'})</span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">
-            {testSource === 'dynamic'
-              ? dynamicTest?.title || `Goethe Lesen ${selectedLevel}`
-              : officialTest.title}
-          </h1>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+            <BookOpenText className="w-3.5 h-3.5" /> Goethe-Zertifikat {level} · Lesen
+          </span>
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1">Leseverstehen</h1>
         </div>
-
-        {/* Timer & Controls */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 text-white font-mono text-sm font-bold shadow-xs">
-            <Clock className="w-4 h-4 text-emerald-400" />
-            <span>{formatTimer(timeLeft)}</span>
-          </div>
-
-          {!isSubmitted ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <ExamModeToggle locked={started && !finished} />
+          {started && (
+            <ExamTimer secondsLeft={timer.secondsLeft} running={!paused && !finished} canPause={isLearn && !finished} onToggle={() => setPaused((p) => !p)} />
+          )}
+          {started && !finished && (
             <button
-              onClick={testSource === 'dynamic' ? handleSubmitDynamic : handleSubmitOfficial}
-              disabled={isEvaluatingDynamic || isGenerating}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs md:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-all disabled:opacity-50"
+              type="button"
+              onClick={confirmSubmit}
+              disabled={exam.submitting}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center gap-1.5 shadow-md disabled:opacity-50"
             >
-              {isEvaluatingDynamic ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Wird ausgewertet...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  <span>Abgeben</span>
-                </>
-              )}
+              {exam.submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Abgeben
             </button>
-          ) : (
-            <button
-              onClick={handleReset}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs md:text-sm flex items-center gap-1.5"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Neu starten</span>
+          )}
+          {started && (
+            <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
+              <RotateCcw className="w-4 h-4" /> Neu
             </button>
           )}
         </div>
       </div>
 
-      {/* Mode & Topic Generator Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Source Switcher */}
-          <div className="inline-flex rounded-xl bg-slate-100 p-1">
-            <button
-              onClick={() => setTestSource('dynamic')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                testSource === 'dynamic'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Dynamisch generieren (KI)</span>
-            </button>
-            <button
-              onClick={() => setTestSource('official')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                testSource === 'official'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <span>Standard Modellsatz B1</span>
-            </button>
-          </div>
-
-          {/* Dynamic Generator Parameters */}
-          {testSource === 'dynamic' && (
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              {/* Level Selector */}
-              <select
-                value={selectedLevel}
-                onChange={(e) => setSelectedLevel(e.target.value)}
-                className="p-2 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-800"
-              >
-                <option value="A2">Niveau A2</option>
-                <option value="B1">Niveau B1</option>
-                <option value="B2">Niveau B2</option>
-                <option value="C1">Niveau C1</option>
-              </select>
-
-              {/* Topic Selector */}
-              <select
-                value={selectedTopic}
-                onChange={(e) => {
-                  setSelectedTopic(e.target.value);
-                  setCustomTopic('');
-                }}
-                className="p-2 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800 max-w-[200px] truncate"
-              >
-                {GOETHE_TOPICS.map((t) => (
-                  <option key={t.id} value={t.title}>
-                    {t.code}: {t.title}
-                  </option>
-                ))}
-              </select>
-
-              {/* Teil Selector */}
-              <select
-                value={selectedPartNum}
-                onChange={(e) => setSelectedPartNum(Number(e.target.value))}
-                className="p-2 rounded-xl border border-slate-200 font-semibold bg-slate-50 text-slate-800"
-              >
-                <option value="1">Teil 1</option>
-                <option value="2">Teil 2</option>
-                <option value="3">Teil 3</option>
-                <option value="4">Teil 4</option>
-                <option value="5">Teil 5</option>
-              </select>
-
-              <button
-                onClick={handleGenerateDynamicTest}
-                disabled={isGenerating}
-                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center gap-1.5 shadow-xs disabled:opacity-50"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Generiere...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Neue Aufgabe</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Custom topic prompt input */}
-        {testSource === 'dynamic' && (
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-            <span className="font-bold text-slate-500 whitespace-nowrap">Oder eigenes Wunschthema:</span>
-            <input
-              type="text"
-              placeholder="z.B. Digitalisierung an Schulen, Künstliche Intelligenz im Alltag, Vegane Ernährung..."
-              value={customTopic}
-              onChange={(e) => setCustomTopic(e.target.value)}
-              className="flex-1 p-1.5 px-3 rounded-lg border border-slate-200 text-slate-800 text-xs"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Error alert */}
-      {genError && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{genError}</span>
-        </div>
-      )}
-
-      {/* DYNAMIC TEST EVALUATION BANNER */}
-      {dynamicEvalResult && (
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md animate-fade-in">
-          <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-              Ergebnis · Goethe Lesen {dynamicEvalResult.level}
-            </span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-extrabold text-white">
-                {dynamicEvalResult.points100} / 100 Punkte
-              </span>
-              <span className="text-slate-400 text-sm">
-                ({dynamicEvalResult.correctCount} von {dynamicEvalResult.totalQuestions} richtig)
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className={`px-4 py-2 rounded-xl text-xs font-bold border ${
-              dynamicEvalResult.passed
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-            }`}>
-              Prädikat: {dynamicEvalResult.praedikat} ({dynamicEvalResult.passed ? 'Bestanden' : 'Nicht bestanden'})
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* DYNAMIC MODE VIEW */}
-      {testSource === 'dynamic' && dynamicTest && (
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
-          {/* Passage Column (7 cols) */}
-          <div className="lg:col-span-7 p-6 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-4">
-            <div className="border-b border-slate-100 pb-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                {dynamicTest.partName || `Teil ${dynamicTest.partNumber}`} · Lesetext
-              </span>
-              <h2 className="text-lg md:text-xl font-extrabold text-slate-900">
-                {dynamicTest.passage?.title || dynamicTest.title}
-              </h2>
-              {dynamicTest.passage?.source && (
-                <span className="text-[11px] text-slate-400 italic">
-                  Quelle: {dynamicTest.passage.source}
-                </span>
-              )}
-            </div>
-
-            <div className="text-slate-800 text-sm leading-relaxed whitespace-pre-line space-y-4 font-normal">
-              {dynamicTest.passage?.text}
-            </div>
-          </div>
-
-          {/* Questions Column (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <span className="font-bold text-sm text-slate-900">
-                  Aufgaben ({dynamicTest.questions?.length || 0})
-                </span>
-                <span className="text-xs text-slate-500">
-                  {Object.keys(answers).length} / {dynamicTest.questions?.length || 0} beantwortet
-                </span>
+      {!started ? (
+        <>
+          <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />
+          <ExamInstructionScreen
+            level={level}
+            moduleName="Lesen"
+            timeMinutes={lesen.timeMinutes}
+            parts={lesen.parts.map((p) => ({ key: p.teil, label: `Teil ${p.teil}`, title: p.title, detail: `Aufgaben ${p.from}–${p.to}` }))}
+            rules={[
+              `${lesen.maxRaw} Aufgaben in ${lesen.parts.length} Teilen, ${lesen.timeMinutes} Minuten.`,
+              `Bestanden ab 60 Punkten und mindestens ${lesen.passRaw} richtigen Aufgaben.`,
+              'Sie können zwischen den Teilen frei wechseln und Textstellen markieren.',
+              isExam ? 'Prüfungsmodus: Der Timer läuft ohne Pause; bei 0:00 wird automatisch abgegeben.' : 'Lernmodus: Übersetzungen, Pause und sofortige Kontrolle pro Teil.',
+            ]}
+            onStart={start}
+          />
+        </>
+      ) : (
+        <>
+          {finished && (
+            <ModuleResultCard moduleLabel="Lesen" level={level} summary={summary}>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSheet((v) => !v)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-bold"
+                >
+                  <FileSpreadsheet className="w-4 h-4" /> {showSheet ? 'Aufgaben anzeigen' : 'Antwortbogen anzeigen'}
+                </button>
               </div>
+            </ModuleResultCard>
+          )}
 
-              <div className="space-y-4">
-                {dynamicTest.questions?.map((q, idx) => {
-                  const userAns = answers[q.number] || answers[q.id] || '';
-                  const evalItem = dynamicEvalResult?.breakdown?.find(
-                    (b) => b.number === q.number || b.id === q.id
-                  );
+          <TeilTabs items={tabs} activeKey={activeTeil} onChange={(k) => { setActiveTeil(k); setShowSheet(false); }} />
 
-                  return (
-                    <div
-                      key={q.id || idx}
-                      className={`p-4 rounded-2xl border transition-all ${
-                        evalItem
-                          ? evalItem.isCorrect
-                            ? 'bg-emerald-50/70 border-emerald-300'
-                            : 'bg-rose-50/70 border-rose-300'
-                          : 'bg-slate-50 border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2 font-bold text-xs md:text-sm text-slate-900">
-                        <span>{q.number}. {q.prompt}</span>
-                        {evalItem && (
-                          evalItem.isCorrect ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          ) : (
-                            <XCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                          )
-                        )}
-                      </div>
+          {showSheet ? (
+            <AnswerSheet moduleLabel={`Lesen ${level}`} parts={lesen.parts} tests={exam.tests} answers={exam.answers} results={exam.results} />
+          ) : (
+            <>
+              {!finished && (
+                <button
+                  type="button"
+                  onClick={() => setShowSheet(true)}
+                  className="self-start inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
+                >
+                  <FileSpreadsheet className="w-4 h-4" /> Antwortbogen-Vorschau
+                </button>
+              )}
 
-                      {/* Options */}
-                      <div className="space-y-1.5 mt-2">
-                        {q.options?.map((opt, oIdx) => {
-                          const isSelected = userAns === opt;
-                          return (
-                            <button
-                              key={oIdx}
-                              disabled={isSubmitted}
-                              onClick={() => handleSelectAnswer(q.number || q.id, opt)}
-                              className={`w-full p-2.5 rounded-xl text-left text-xs font-semibold border transition-all ${
-                                isSelected
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
-                              }`}
-                            >
-                              <span>{opt}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
+              {exam.errors[activeTeil] && (
+                <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex flex-wrap items-center gap-3">
+                  <AlertCircle className="w-4 h-4" /> {exam.errors[activeTeil]}
+                  <button type="button" onClick={() => exam.generate(activeTeil, topic)} className="px-3 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold">
+                    Erneut versuchen
+                  </button>
+                </div>
+              )}
 
-                      {/* Explanation when submitted */}
-                      {evalItem && (
-                        <div className="mt-3 pt-2.5 border-t border-slate-200/80 text-[11px] text-slate-700">
-                          <p className="font-bold text-slate-900 mb-0.5">
-                            Richtige Lösung: <span className="text-emerald-700">{evalItem.correctAnswer}</span>
-                          </p>
-                          <p className="text-slate-600">{evalItem.explanation}</p>
-                        </div>
+              {!test && !exam.errors[activeTeil] && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-10 flex flex-col items-center gap-3 text-slate-500">
+                  <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                  <p className="text-sm font-semibold">Teil {activeTeil} ({part?.title}) wird erstellt … das dauert etwa 20–40 Sekunden.</p>
+                </div>
+              )}
+
+              {test && part && (
+                <div className="grid gap-5 lg:grid-cols-[55fr_45fr] items-start">
+                  {/* Left: document */}
+                  <section className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto rounded-2xl bg-slate-100 border border-slate-200 p-3 md:p-4">
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Lesetext · Teil {part.teil}</span>
+                      <HighlighterToolbar tool={tool} onToolChange={setTool} onClear={() => setHighlights({})} />
+                    </div>
+                    <ReadingDocument
+                      part={part}
+                      test={test}
+                      answers={teilAnswers}
+                      onAnswer={(n, v) => exam.setAnswer(activeTeil, n, v)}
+                      disabled={Boolean(teilResult)}
+                      results={teilResult}
+                      highlights={highlights}
+                      onHighlightsChange={setHighlights}
+                      tool={tool}
+                    />
+                  </section>
+
+                  {/* Right: tasks */}
+                  <section className="flex flex-col gap-4">
+                    <BilingualInstructionBanner
+                      level={level}
+                      module="lesen"
+                      teil={part.teil}
+                      title={part.title}
+                      instruction={part.instruction}
+                      from={part.from}
+                      to={part.to}
+                    />
+                    <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                      <QuestionPalette
+                        questions={test.questions}
+                        answers={teilAnswers}
+                        flags={exam.flags[activeTeil]}
+                        results={teilResult?.breakdown}
+                        onJump={jumpTo}
+                      />
+                    </div>
+                    {teilResult && (
+                      <p className="text-sm font-bold text-slate-700">
+                        Teil {part.teil}: {teilResult.correctCount} von {teilResult.totalQuestions} richtig
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-3">
+                      {test.questions.map((q) => (
+                        <QuestionRenderer
+                          key={q.number}
+                          question={q}
+                          value={teilAnswers[q.number]}
+                          onChange={(v) => exam.setAnswer(activeTeil, q.number, v)}
+                          disabled={Boolean(teilResult)}
+                          result={teilResult?.breakdown?.find((r) => r.number === q.number)}
+                          isLearn={isLearn}
+                          sentences={test.sentences}
+                          flagged={Boolean(exam.flags[activeTeil]?.[q.number])}
+                          onToggleFlag={() => exam.toggleFlag(activeTeil, q.number)}
+                        />
+                      ))}
+                      {SHOWN_IN_DOCUMENT.has(part.qType) && !teilResult && (
+                        <p className="text-xs text-slate-500">Tipp: Sie können die Lücken auch direkt im Text links ausfüllen.</p>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* OFFICIAL MODELLSATZ VIEW (Legacy Fallback) */}
-      {testSource === 'official' && (
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col gap-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <span className="font-bold text-sm text-slate-900">
-              Goethe B1 Modellsatz Hören &amp; Lesen
-            </span>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((pNum) => (
-                <button
-                  key={pNum}
-                  onClick={() => setActiveOfficialPart(pNum)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                    activeOfficialPart === pNum
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  Teil {pNum}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-600">
-            Wählen Sie oben einen Prüfungsteil aus oder wechseln Sie auf „Dynamisch generieren (KI)“, um maßgeschneiderte Leseaufgaben für jedes GER-Niveau (A2–C1) und Thema zu trainieren.
-          </p>
-        </div>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {isLearn && !teilResult && (
+                        <button
+                          type="button"
+                          onClick={() => exam.submit([activeTeil]).catch((err) => alert(err.response?.data?.error || 'Fehler bei der Auswertung.'))}
+                          disabled={exam.submitting}
+                          className="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold flex items-center gap-1.5"
+                        >
+                          <CheckCheck className="w-4 h-4" /> Teil {part.teil} prüfen
+                        </button>
+                      )}
+                      {lesen.parts.some((p) => p.teil === activeTeil + 1) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTeil(activeTeil + 1);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold flex items-center gap-1.5"
+                        >
+                          Weiter zu Teil {activeTeil + 1} <ChevronRight className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+export default function GoetheLesenRoom() {
+  const { goetheLevel, setGoetheLevel } = useApp();
+  const level = ['A2', 'B1', 'B2', 'C1'].includes(goetheLevel) ? goetheLevel : 'B1';
+  return (
+    <div className="min-h-full px-3 md:px-6 py-6 max-w-7xl mx-auto text-left animate-float-in">
+      <LesenExam key={level} level={level} onLevelChange={setGoetheLevel} />
     </div>
   );
 }
