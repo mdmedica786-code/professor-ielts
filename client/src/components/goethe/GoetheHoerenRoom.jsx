@@ -17,6 +17,7 @@ import AudioPlayerWithLimits from './shared/AudioPlayerWithLimits';
 import { useExamMode } from './shared/useExamMode';
 import { useGoetheFormat } from './shared/useGoetheFormat';
 import { useReceptiveExam, summarizeModule } from './shared/useReceptiveExam';
+import { usePersistentState } from './shared/usePersistentState';
 
 /** Groups questions by Hörtext (segment) for multi-text parts. */
 function groupBySegment(questions, segments) {
@@ -64,20 +65,26 @@ function Transcript({ test }) {
   );
 }
 
-function HoerenExam({ level, onLevelChange }) {
+/**
+ * mock: { persistKey, onComplete(result) } when the room runs inside the full
+ * Modellprüfung — progress is kept in sessionStorage and setup controls hide.
+ */
+export function HoerenExam({ level, onLevelChange, mock = null }) {
   const { saveEvaluation } = useApp();
   const { isExam, isLearn } = useExamMode();
   const { format, error: formatError } = useGoetheFormat(level);
   const hoeren = format?.hoeren;
-  const exam = useReceptiveExam('hoeren', level);
+  const pk = mock?.persistKey || null;
+  const keyOf = (name) => (pk ? `${pk}:${name}` : null);
+  const exam = useReceptiveExam('hoeren', level, { persistKey: keyOf('exam') });
 
   const [topic, setTopic] = useState('');
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [started, setStarted] = usePersistentState(keyOf('started'), false);
+  const [finished, setFinished] = usePersistentState(keyOf('finished'), false);
   const [paused, setPaused] = useState(false);
-  const [activeTeil, setActiveTeil] = useState(1);
+  const [activeTeil, setActiveTeil] = usePersistentState(keyOf('activeTeil'), 1);
   const [showSheet, setShowSheet] = useState(false);
-  const [playsUsed, setPlaysUsed] = useState({});
+  const [playsUsed, setPlaysUsed] = usePersistentState(keyOf('plays'), {});
   const [audioPlaying, setAudioPlaying] = useState(false);
 
   const part = hoeren?.parts.find((p) => p.teil === activeTeil);
@@ -103,10 +110,15 @@ function HoerenExam({ level, onLevelChange }) {
     onExpire: () => {
       if (isExam) handleSubmitAll();
     },
+    persistKey: keyOf('timer'),
   });
 
   useEffect(() => {
     if (!finished || !summary) return;
+    if (mock) {
+      mock.onComplete({ points100: summary.points100, passed: summary.passed, raw: summary.raw, maxRaw: summary.maxRaw });
+      return;
+    }
     saveEvaluation(
       {
         kind: 'goethe-hoeren',
@@ -198,7 +210,7 @@ function HoerenExam({ level, onLevelChange }) {
           <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1">Hörverstehen</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <ExamModeToggle locked={started && !finished} />
+          <ExamModeToggle locked={Boolean(mock) || (started && !finished)} />
           {started && (
             <ExamTimer secondsLeft={timer.secondsLeft} running={!paused && !finished} canPause={isLearn && !finished} onToggle={() => setPaused((p) => !p)} />
           )}
@@ -213,7 +225,7 @@ function HoerenExam({ level, onLevelChange }) {
               Abgeben
             </button>
           )}
-          {started && (
+          {started && !mock && (
             <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
               <RotateCcw className="w-4 h-4" /> Neu
             </button>
@@ -223,7 +235,7 @@ function HoerenExam({ level, onLevelChange }) {
 
       {!started ? (
         <>
-          <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />
+          {!mock && <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />}
           <ExamInstructionScreen
             level={level}
             moduleName="Hören"

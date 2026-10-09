@@ -4,15 +4,7 @@ import {
   SCHREIBEN_CHECKLIST,
   SPRECHEN_CHECKLIST,
 } from '../../data/goethe/goetheGradingRules';
-import {
-  Calendar,
-  CheckCircle2,
-  Circle,
-  Award,
-  BookOpen,
-  HelpCircle,
-  FileCheck,
-} from 'lucide-react';
+import { CheckCircle2, Circle, FileCheck } from 'lucide-react';
 
 export default function GoetheStudyPlan() {
   const [completedWeeks, setCompletedWeeks] = useState({});

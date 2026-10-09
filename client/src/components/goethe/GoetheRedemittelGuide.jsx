@@ -1,15 +1,6 @@
 import { useState } from 'react';
 import { REDEMITTEL_CATEGORIES } from '../../data/goethe/goetheRedemittel';
-import {
-  Sparkles,
-  Volume2,
-  Copy,
-  Check,
-  Search,
-  BookOpen,
-  Layers,
-  ArrowRight,
-} from 'lucide-react';
+import { Volume2, Copy, Check } from 'lucide-react';
 
 const GRAMMAR_RULES = [
   {
@@ -42,7 +33,6 @@ const GRAMMAR_RULES = [
 export default function GoetheRedemittelGuide() {
   const [activeCategory, setActiveCategory] = useState(REDEMITTEL_CATEGORIES[0].id);
   const [copiedIndex, setCopiedIndex] = useState(null);
-  const [search, setSearch] = useState('');
   const [showGrammar, setShowGrammar] = useState(false);
 
   const activeGroup = REDEMITTEL_CATEGORIES.find((c) => c.id === activeCategory) || REDEMITTEL_CATEGORIES[0];
@@ -50,7 +40,7 @@ export default function GoetheRedemittelGuide() {
   const speakText = (text) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const cleanText = text.replace(/[\(\)…]/g, '').trim();
+    const cleanText = text.replace(/[()…]/g, '').trim();
     const utt = new SpeechSynthesisUtterance(cleanText);
     utt.lang = 'de-DE';
     utt.rate = 0.9;

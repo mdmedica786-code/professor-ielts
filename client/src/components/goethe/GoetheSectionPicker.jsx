@@ -10,24 +10,10 @@ import {
   Calendar,
   Calculator,
   ArrowRight,
-  CheckCircle2,
   Clock,
-  Award,
-  Info,
-  ChevronRight,
   ShieldCheck,
-  GraduationCap,
 } from 'lucide-react';
 import { calculateGoetheReadingListeningScore, GOETHE_LEVEL_SPECS } from '../../data/goethe/goetheGradingRules';
-import { GOETHE_TOPICS } from '../../data/goethe/goetheTopics';
-
-const LEVEL_COLORS = {
-  A1: { border: 'border-emerald-300', bg: 'bg-emerald-50 text-emerald-800' },
-  A2: { border: 'border-teal-300', bg: 'bg-teal-50 text-teal-800' },
-  B1: { border: 'border-amber-300', bg: 'bg-amber-50 text-amber-800' },
-  B2: { border: 'border-blue-300', bg: 'bg-blue-50 text-blue-800' },
-  C1: { border: 'border-purple-300', bg: 'bg-purple-50 text-purple-800' },
-};
 
 export default function GoetheSectionPicker() {
   const { setSection, setCurrentView, setCurrentEvaluation, goetheLevel, setGoetheLevel } = useApp();
@@ -47,7 +33,6 @@ export default function GoetheSectionPicker() {
   const schreibenPassed = calcSchreiben >= 60;
   const sprechenPassed = calcSprechen >= 60;
   const allModulesPassed = lesenScore.passed && hoerenScore.passed && schreibenPassed && sprechenPassed;
-  const avgPoints = Math.round((lesenScore.points100 + hoerenScore.points100 + Number(calcSchreiben) + Number(calcSprechen)) / 4);
 
   const pickSection = (secId) => {
     setCurrentEvaluation(null);
@@ -187,6 +172,22 @@ export default function GoetheSectionPicker() {
       {/* TAB 1: 4 Modules Grid */}
       {activeTab === 'pruefung' && (
         <div className="w-full flex flex-col gap-6">
+          <button
+            type="button"
+            onClick={() => pickSection('mock')}
+            className="w-full text-left rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 shadow-lg hover:shadow-xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-300">Neu · Unter Prüfungsbedingungen</span>
+              <span className="block text-xl md:text-2xl font-extrabold mt-1">Vollständige Modellprüfung {currentLevel}</span>
+              <span className="block text-sm text-slate-300 mt-1">
+                Lesen → Hören → Pause → Schreiben → Sprechen, mit Ergebnisbericht über alle vier Module (0–400 Punkte).
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2 self-start md:self-center px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-900 text-sm font-extrabold">
+              <ShieldCheck className="w-4 h-4" /> Starten
+            </span>
+          </button>
           <div className="grid gap-6 md:grid-cols-2">
             {dynamicModules.map((m) => {
               const Icon = m.icon;

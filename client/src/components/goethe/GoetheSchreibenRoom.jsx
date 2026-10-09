@@ -13,6 +13,7 @@ import BilingualInstructionBanner from './shared/BilingualInstructionBanner';
 import TeilTabs from './shared/TeilTabs';
 import { useExamMode } from './shared/useExamMode';
 import { useGoetheFormat } from './shared/useGoetheFormat';
+import { usePersistentState } from './shared/usePersistentState';
 import WritingChart from './WritingChart';
 import WritingEvaluation from './WritingEvaluation';
 
@@ -83,22 +84,28 @@ function RedemittelDrawer({ register, level, onInsert, onClose }) {
   );
 }
 
-function SchreibenExam({ level, onLevelChange }) {
+/**
+ * mock: { persistKey, onComplete(result) } when the room runs inside the full
+ * Modellprüfung — tasks, texts and evaluations are kept in sessionStorage.
+ */
+export function SchreibenExam({ level, onLevelChange, mock = null }) {
   const { saveEvaluation, studentName } = useApp();
   const { isExam, isLearn } = useExamMode();
   const { format, error: formatError } = useGoetheFormat(level);
   const schreiben = format?.schreiben;
+  const pk = mock?.persistKey || null;
+  const keyOf = (name) => (pk ? `${pk}:${name}` : null);
 
   const [topic, setTopic] = useState('');
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [started, setStarted] = usePersistentState(keyOf('started'), false);
+  const [finished, setFinished] = usePersistentState(keyOf('finished'), false);
   const [paused, setPaused] = useState(false);
-  const [activeNr, setActiveNr] = useState(1);
-  const [tasks, setTasks] = useState({});
+  const [activeNr, setActiveNr] = usePersistentState(keyOf('activeNr'), 1);
+  const [tasks, setTasks] = usePersistentState(keyOf('tasks'), {});
   const [loading, setLoading] = useState({});
   const [errors, setErrors] = useState({});
-  const [essays, setEssays] = useState({});
-  const [evaluations, setEvaluations] = useState({});
+  const [essays, setEssays] = usePersistentState(keyOf('essays'), {});
+  const [evaluations, setEvaluations] = usePersistentState(keyOf('evaluations'), {});
   const [evaluating, setEvaluating] = useState({});
   const [evalErrors, setEvalErrors] = useState({});
   const [showRedemittel, setShowRedemittel] = useState(false);
@@ -163,7 +170,7 @@ function SchreibenExam({ level, onLevelChange }) {
       });
       if (!res.data?.success) throw new Error(res.data?.error);
       setEvaluations((s) => ({ ...s, [nr]: res.data.data }));
-      saveEvaluation(res.data.data, { kind: 'goethe-schreiben', module: level, question: t.title });
+      if (!mock) saveEvaluation(res.data.data, { kind: 'goethe-schreiben', module: level, question: t.title });
       return res.data.data;
     } catch (err) {
       setEvalErrors((s) => ({ ...s, [nr]: err.response?.data?.error || err.message || 'Fehler bei der Textauswertung.' }));
@@ -185,7 +192,16 @@ function SchreibenExam({ level, onLevelChange }) {
     onExpire: () => {
       if (isExam) submitAll();
     },
+    persistKey: keyOf('timer'),
   });
+
+  // Inside the Modellprüfung: hand the module result to the exam shell.
+  useEffect(() => {
+    if (!mock || !finished) return;
+    mock.onComplete(moduleTotal ? { points100: moduleTotal.points100, passed: moduleTotal.passed, points: moduleTotal.points } : { points100: 0, passed: false, points: 0 });
+    // Report once per finished module.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
 
   const start = () => {
     timer.reset((schreiben?.timeMinutes || 60) * 60);
@@ -255,7 +271,7 @@ function SchreibenExam({ level, onLevelChange }) {
           <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1">Schriftlicher Ausdruck</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <ExamModeToggle locked={started && !finished} />
+          <ExamModeToggle locked={Boolean(mock) || (started && !finished)} />
           {started && (
             <ExamTimer secondsLeft={timer.secondsLeft} running={!paused && !finished} canPause={isLearn && !finished} onToggle={() => setPaused((p) => !p)} />
           )}
@@ -272,7 +288,7 @@ function SchreibenExam({ level, onLevelChange }) {
               Abgeben
             </button>
           )}
-          {started && (
+          {started && !mock && (
             <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
               <RotateCcw className="w-4 h-4" /> Neu
             </button>
@@ -282,7 +298,7 @@ function SchreibenExam({ level, onLevelChange }) {
 
       {!started ? (
         <>
-          <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />
+          {!mock && <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />}
           <ExamInstructionScreen
             level={level}
             moduleName="Schreiben"

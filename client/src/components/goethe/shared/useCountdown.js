@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { usePersistentState } from './usePersistentState';
 
 /**
  * Countdown state. `running` drives the tick; onExpire fires once at 0.
- * reset(seconds) restarts from a new value.
+ * reset(seconds) restarts from a new value. With `persistKey` the remaining
+ * time survives a page refresh (it does not run while the page is closed).
  */
-export function useCountdown(initialSeconds, { running = false, onExpire } = {}) {
-  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
+export function useCountdown(initialSeconds, { running = false, onExpire, persistKey = null } = {}) {
+  const [secondsLeft, setSecondsLeft] = usePersistentState(persistKey, initialSeconds);
   const expireRef = useRef(onExpire);
   const firedRef = useRef(false);
 
@@ -19,7 +21,7 @@ export function useCountdown(initialSeconds, { running = false, onExpire } = {})
       setSecondsLeft((s) => Math.max(0, s - 1));
     }, 1000);
     return () => clearInterval(id);
-  }, [running]);
+  }, [running, setSecondsLeft]);
 
   useEffect(() => {
     if (secondsLeft === 0 && running && !firedRef.current) {

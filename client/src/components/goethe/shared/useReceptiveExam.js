@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import api from '../../../api/client';
+import { usePersistentState } from './usePersistentState';
 
 const ENDPOINTS = {
   lesen: { generate: '/goethe/reading/generate', evaluate: '/goethe/reading/evaluate' },
@@ -9,14 +10,21 @@ const ENDPOINTS = {
 /**
  * Per-Teil state for a receptive module (Lesen / Hören): on-demand
  * generation, answers, flags, per-Teil evaluation and module totals.
+ * With `persistKey` (mock exam) tests, answers, flags and results survive a
+ * refresh; Hörtext audio is not stored (too large), so a restored Hören Teil
+ * falls back to browser speech.
  */
-export function useReceptiveExam(module, level) {
-  const [tests, setTests] = useState({});
+const withoutAudio = (tests) =>
+  Object.fromEntries(Object.entries(tests).map(([k, t]) => [k, t ? { ...t, audioData: null } : t]));
+
+export function useReceptiveExam(module, level, { persistKey = null } = {}) {
+  const key = (name) => (persistKey ? `${persistKey}:${name}` : null);
+  const [tests, setTests] = usePersistentState(key('tests'), {}, { serialize: withoutAudio });
   const [loading, setLoading] = useState({});
   const [errors, setErrors] = useState({});
-  const [answers, setAnswers] = useState({});
-  const [flags, setFlags] = useState({});
-  const [results, setResults] = useState({});
+  const [answers, setAnswers] = usePersistentState(key('answers'), {});
+  const [flags, setFlags] = usePersistentState(key('flags'), {});
+  const [results, setResults] = usePersistentState(key('results'), {});
   const [submitting, setSubmitting] = useState(false);
   const inflight = useRef({});
   const generation = useRef(0);
@@ -48,16 +56,22 @@ export function useReceptiveExam(module, level) {
       inflight.current[teil] = request;
       return request;
     },
-    [module, level]
+    [module, level, setTests]
   );
 
-  const setAnswer = useCallback((teil, number, value) => {
-    setAnswers((s) => ({ ...s, [teil]: { ...(s[teil] || {}), [number]: value } }));
-  }, []);
+  const setAnswer = useCallback(
+    (teil, number, value) => {
+      setAnswers((s) => ({ ...s, [teil]: { ...(s[teil] || {}), [number]: value } }));
+    },
+    [setAnswers]
+  );
 
-  const toggleFlag = useCallback((teil, number) => {
-    setFlags((s) => ({ ...s, [teil]: { ...(s[teil] || {}), [number]: !s[teil]?.[number] } }));
-  }, []);
+  const toggleFlag = useCallback(
+    (teil, number) => {
+      setFlags((s) => ({ ...s, [teil]: { ...(s[teil] || {}), [number]: !s[teil]?.[number] } }));
+    },
+    [setFlags]
+  );
 
   const evaluateTeil = useCallback(
     async (teil, test, teilAnswers) => {
@@ -66,7 +80,7 @@ export function useReceptiveExam(module, level) {
       setResults((s) => ({ ...s, [teil]: res.data.data }));
       return res.data.data;
     },
-    [module, level]
+    [module, level, setResults]
   );
 
   /** Evaluates the given Teile that are loaded and not yet evaluated. */
@@ -93,7 +107,7 @@ export function useReceptiveExam(module, level) {
     setAnswers({});
     setFlags({});
     setResults({});
-  }, []);
+  }, [setTests, setAnswers, setFlags, setResults]);
 
   return { tests, loading, errors, answers, flags, results, submitting, generate, setAnswer, toggleFlag, submit, reset };
 }

@@ -17,22 +17,29 @@ import { HighlighterToolbar } from './shared/TextHighlighter';
 import { useExamMode } from './shared/useExamMode';
 import { useGoetheFormat } from './shared/useGoetheFormat';
 import { useReceptiveExam, summarizeModule } from './shared/useReceptiveExam';
+import { usePersistentState } from './shared/usePersistentState';
 import ReadingDocument from './ReadingDocument';
 
 const SHOWN_IN_DOCUMENT = new Set(['lueckentext_woerter', 'lueckentext_saetze']);
 
-function LesenExam({ level, onLevelChange }) {
+/**
+ * mock: { persistKey, onComplete(result) } when the room runs inside the full
+ * Modellprüfung — progress is kept in sessionStorage and setup controls hide.
+ */
+export function LesenExam({ level, onLevelChange, mock = null }) {
   const { saveEvaluation } = useApp();
   const { isExam, isLearn } = useExamMode();
   const { format, error: formatError } = useGoetheFormat(level);
   const lesen = format?.lesen;
-  const exam = useReceptiveExam('lesen', level);
+  const pk = mock?.persistKey || null;
+  const keyOf = (name) => (pk ? `${pk}:${name}` : null);
+  const exam = useReceptiveExam('lesen', level, { persistKey: keyOf('exam') });
 
   const [topic, setTopic] = useState('');
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [started, setStarted] = usePersistentState(keyOf('started'), false);
+  const [finished, setFinished] = usePersistentState(keyOf('finished'), false);
   const [paused, setPaused] = useState(false);
-  const [activeTeil, setActiveTeil] = useState(1);
+  const [activeTeil, setActiveTeil] = usePersistentState(keyOf('activeTeil'), 1);
   const [showSheet, setShowSheet] = useState(false);
   const [highlights, setHighlights] = useState({});
   const [tool, setTool] = useState('yellow');
@@ -61,11 +68,16 @@ function LesenExam({ level, onLevelChange }) {
     onExpire: () => {
       if (isExam) handleSubmitAll();
     },
+    persistKey: keyOf('timer'),
   });
 
   // Persist the module result once all Teile are evaluated.
   useEffect(() => {
     if (!finished || !summary) return;
+    if (mock) {
+      mock.onComplete({ points100: summary.points100, passed: summary.passed, raw: summary.raw, maxRaw: summary.maxRaw });
+      return;
+    }
     saveEvaluation(
       {
         kind: 'goethe-lesen',
@@ -151,7 +163,7 @@ function LesenExam({ level, onLevelChange }) {
           <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1">Leseverstehen</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <ExamModeToggle locked={started && !finished} />
+          <ExamModeToggle locked={Boolean(mock) || (started && !finished)} />
           {started && (
             <ExamTimer secondsLeft={timer.secondsLeft} running={!paused && !finished} canPause={isLearn && !finished} onToggle={() => setPaused((p) => !p)} />
           )}
@@ -166,7 +178,7 @@ function LesenExam({ level, onLevelChange }) {
               Abgeben
             </button>
           )}
-          {started && (
+          {started && !mock && (
             <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
               <RotateCcw className="w-4 h-4" /> Neu
             </button>
@@ -176,7 +188,7 @@ function LesenExam({ level, onLevelChange }) {
 
       {!started ? (
         <>
-          <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />
+          {!mock && <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} />}
           <ExamInstructionScreen
             level={level}
             moduleName="Lesen"

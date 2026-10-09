@@ -32,6 +32,7 @@ const GoetheHoerenRoom = lazy(() => import('./components/goethe/GoetheHoerenRoom
 const GoetheThemenCatalog = lazy(() => import('./components/goethe/GoetheThemenCatalog'));
 const GoetheRedemittelGuide = lazy(() => import('./components/goethe/GoetheRedemittelGuide'));
 const GoetheStudyPlan = lazy(() => import('./components/goethe/GoetheStudyPlan'));
+const GoetheFullMockExam = lazy(() => import('./components/goethe/GoetheFullMockExam'));
 
 import logoImg from './assets/bandlogic-logo-transparent.png';
 
@@ -88,6 +89,7 @@ export default function App() {
                     {section === 'themen' && <GoetheThemenCatalog />}
                     {section === 'redemittel' && <GoetheRedemittelGuide />}
                     {section === 'plan' && <GoetheStudyPlan />}
+                    {section === 'mock' && <GoetheFullMockExam />}
                   </>
                 ) : (
                   <>

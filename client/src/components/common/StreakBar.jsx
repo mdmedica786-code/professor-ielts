@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/client';
-import { Flame, Star, Trophy } from 'lucide-react';
+import { Flame, Star } from 'lucide-react';
 
 export default function StreakBar() {
   const { user } = useAuth();

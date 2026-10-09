@@ -16,6 +16,7 @@ import SpeakingTaskSheet, { SlideDeck } from './SpeakingTaskSheet';
 import SpeakingReport from './SpeakingReport';
 import { summarizeSpeaking } from './speakingScore';
 import { useSpeechRecorder } from './useSpeechRecorder';
+import { usePersistentState } from './shared/usePersistentState';
 
 const PARTNERS = [
   { name: 'Florian', desc: 'Prüfungspartner · ruhig und sachlich' },
@@ -70,40 +71,52 @@ function SpeakerCard({ icon: Icon, name, role, active, status }) {
   );
 }
 
-function SprechenExam({ level, onLevelChange }) {
+const RESTORED_PHASE = { sheets: 'setup', evaluating: 'exam' };
+const withoutRecordings = (histories) =>
+  Object.fromEntries(Object.entries(histories).map(([teil, turns]) => [teil, turns.map((turn) => ({ ...turn, audioUrl: null }))]));
+
+/**
+ * mock: { persistKey, onComplete(result) } when the room runs inside the full
+ * Modellprüfung — the whole exam (sheets, notes, transcript) survives a refresh.
+ */
+export function SprechenExam({ level, onLevelChange, mock = null }) {
+  const pk = mock?.persistKey || null;
+  const keyOf = (name) => (pk ? `${pk}:${name}` : null);
   const { saveEvaluation, studentName } = useApp();
   const { isExam, isLearn } = useExamMode();
   const { format, error: formatError } = useGoetheFormat(level);
   const sprechen = format?.sprechen;
 
-  const [phase, setPhase] = useState('setup'); // setup | sheets | prep | exam | evaluating | report
+  // setup | sheets | prep | exam | evaluating | report
+  const [phase, setPhase] = usePersistentState(keyOf('phase'), 'setup', { revive: (p) => RESTORED_PHASE[p] || p });
   const [topic, setTopic] = useState('');
-  const [partnerName, setPartnerName] = useState('Florian');
+  const [partnerName, setPartnerName] = usePersistentState(keyOf('partner'), 'Florian');
   const [scope, setScope] = useState('all');
-  const [sheets, setSheets] = useState({});
-  const [notes, setNotes] = useState({});
+  const [sheets, setSheets] = usePersistentState(keyOf('sheets'), {});
+  const [notes, setNotes] = usePersistentState(keyOf('notes'), {});
   const [prepTeil, setPrepTeil] = useState(1);
   const [prepPaused, setPrepPaused] = useState(false);
-  const [examTeile, setExamTeile] = useState([]);
-  const [teilIdx, setTeilIdx] = useState(0);
-  const [histories, setHistories] = useState({});
+  const [examTeile, setExamTeile] = usePersistentState(keyOf('teile'), []);
+  const [teilIdx, setTeilIdx] = usePersistentState(keyOf('teilIdx'), 0);
+  const [histories, setHistories] = usePersistentState(keyOf('histories'), {}, { serialize: withoutRecordings });
   const [aiBusy, setAiBusy] = useState(false);
   const [speaking, setSpeaking] = useState(null); // 'examiner' | 'partner' | null
-  const [yourTurn, setYourTurn] = useState(false);
+  // After a refresh mid-exam the candidate continues where the transcript stopped.
+  const [yourTurn, setYourTurn] = useState(() => phase === 'exam');
   const [tips, setTips] = useState([]);
-  const [teilStart, setTeilStart] = useState(0);
-  const [now, setNow] = useState(0);
+  const [teilStart, setTeilStart] = useState(() => (phase === 'exam' ? clock() : 0));
+  const [now, setNow] = useState(teilStart);
   const [typed, setTyped] = useState('');
   const [showTyping, setShowTyping] = useState(false);
-  const [evaluations, setEvaluations] = useState({});
+  const [evaluations, setEvaluations] = usePersistentState(keyOf('evaluations'), {});
   const [error, setError] = useState(null);
 
   const recorder = useSpeechRecorder();
-  const historiesRef = useRef({});
+  const historiesRef = useRef(histories);
   const audioRef = useRef(null);
   const timeUpSentRef = useRef({});
   const savedRef = useRef(false);
-  const teilStartRef = useRef(0);
+  const teilStartRef = useRef(teilStart);
 
   const currentTeilNr = examTeile[teilIdx];
   const currentTeil = sprechen?.teile.find((t) => t.teil === currentTeilNr);
@@ -143,6 +156,10 @@ function SprechenExam({ level, onLevelChange }) {
     setError(null);
     const withSpeech = teile.filter((t) => (historiesRef.current[t] || []).some((h) => h.speaker === 'candidate'));
     if (!withSpeech.length) {
+      if (mock) {
+        mock.onComplete({ points100: 0, passed: false });
+        return;
+      }
       setError('Es wurden keine Redebeiträge aufgezeichnet. Die Prüfung kann nicht bewertet werden.');
       setPhase('exam');
       return;
@@ -267,6 +284,7 @@ function SprechenExam({ level, onLevelChange }) {
   const prepTimer = useCountdown((sprechen?.prepMinutes || 0) * 60, {
     running: phase === 'prep' && (sprechen?.prepMinutes || 0) > 0 && !(isLearn && prepPaused),
     onExpire: () => beginExam(examTeile),
+    persistKey: keyOf('prepTimer'),
   });
 
   // Persist the module result once.
@@ -275,6 +293,10 @@ function SprechenExam({ level, onLevelChange }) {
     const summary = summarizeSpeaking(sprechen, evaluations);
     if (!summary) return;
     savedRef.current = true;
+    if (mock) {
+      mock.onComplete({ points100: summary.points100, passed: summary.passed });
+      return;
+    }
     saveEvaluation(
       {
         kind: 'goethe-sprechen',
@@ -286,7 +308,7 @@ function SprechenExam({ level, onLevelChange }) {
       },
       { kind: 'goethe-sprechen', module: level, question: `Goethe Sprechen ${level}${topic ? ` (${topic})` : ''}` }
     );
-  }, [phase, evaluations, sprechen, level, topic, saveEvaluation]);
+  }, [phase, evaluations, sprechen, level, topic, saveEvaluation, mock]);
 
   const requestSheets = async () => {
     const teile = scope === 'all' ? sprechen.teile.map((t) => t.teil) : [Number(scope)];
@@ -365,11 +387,11 @@ function SprechenExam({ level, onLevelChange }) {
         </h1>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <ExamModeToggle locked={phase === 'exam' || phase === 'prep'} />
+        <ExamModeToggle locked={Boolean(mock) || phase === 'exam' || phase === 'prep'} />
         {phase === 'prep' && sprechen.prepMinutes > 0 && (
           <ExamTimer label="Vorbereitung" secondsLeft={prepTimer.secondsLeft} running={!prepPaused} canPause={isLearn} onToggle={() => setPrepPaused((p) => !p)} />
         )}
-        {phase !== 'setup' && phase !== 'sheets' && (
+        {phase !== 'setup' && phase !== 'sheets' && !mock && (
           <button type="button" onClick={restart} className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center gap-1.5">
             <RotateCcw className="w-4 h-4" /> Neu
           </button>
@@ -383,7 +405,7 @@ function SprechenExam({ level, onLevelChange }) {
     return (
       <div className="flex flex-col gap-5">
         {header}
-        <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} disabled={phase === 'sheets'} />
+        {!mock && <ExamSetupBar level={level} onLevelChange={onLevelChange} topic={topic} onTopicChange={setTopic} disabled={phase === 'sheets'} />}
         <div className="rounded-3xl border border-slate-200 bg-white shadow-card p-6 grid gap-6 lg:grid-cols-2">
           <div>
             <h2 className="text-sm font-extrabold text-slate-900 mb-3">Ihr Prüfungspartner / Ihre Prüfungspartnerin</h2>
@@ -404,7 +426,7 @@ function SprechenExam({ level, onLevelChange }) {
             </div>
             <p className="mt-4 text-xs text-slate-500">Die Prüferin Frau Weber moderiert die Prüfung und leitet jeden Teil ein.</p>
           </div>
-          <div>
+          {!mock && <div>
             <h2 className="text-sm font-extrabold text-slate-900 mb-3">Umfang</h2>
             <div className="flex flex-col gap-2">
               {[{ key: 'all', label: `Gesamte Prüfung (${sprechen.teile.length} Teile, ca. ${sprechen.timeMinutes} Min.)` }, ...sprechen.teile.map((t) => ({ key: String(t.teil), label: `Nur Teil ${t.teil}: ${t.title}` }))].map((o) => (
@@ -419,7 +441,7 @@ function SprechenExam({ level, onLevelChange }) {
                 ? `Vor der Prüfung haben Sie ${sprechen.prepMinutes} Minuten Vorbereitungszeit mit Notizblock.`
                 : 'Auf Niveau A2 gibt es keine Vorbereitungszeit — Sie sehen die Karten erst in der Prüfung.'}
             </p>
-          </div>
+          </div>}
         </div>
         {error && (
           <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2">
