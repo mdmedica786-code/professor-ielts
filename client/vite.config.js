@@ -30,6 +30,9 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    assetsDir: '', // Output assets to root so Hostinger extraction doesn't break the app
+  },
   server: {
     port: 5173,
     proxy: {
